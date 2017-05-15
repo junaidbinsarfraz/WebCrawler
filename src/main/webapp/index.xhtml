@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<title>Home</title>
+	
+	<style>
+    	
+    </style>
+    
+    <h:outputStylesheet name="css/style.css" />
+</h:head>
+
+<h:body>
+	<div class="center-all">	
+		<h:form>
+			<p:outputLabel value="#{homeBean.error}" ></p:outputLabel>
+		    <label>Target URL</label>
+		    <p:inputText value="#{homeBean.targetUrl}" required="true" requiredMessage="Target Url is required"></p:inputText>
+		    <br />
+		    <label>Iterations Per Page Transition</label>
+		    <p:inputText value="#{homeBean.iterationPerPage}" required="true" requiredMessage="Iterations Per Page Transition is required"></p:inputText>
+		    <br />
+		    <label>Run Name</label>
+		    <p:inputText value="#{homeBean.runName}" required="true" requiredMessage="Run Name is required"></p:inputText>
+		    <br />
+		    <label>Download Images?</label>
+		    <p:selectBooleanCheckbox value="#{homeBean.downloadImages}" />
+		    <br />
+		    <h:panelGrid columns="2">
+		    	<p:commandButton actionListener="#{homeBean.start()}" disabled="#{homeBean.hasStarted}" value="Start" process="@form" update="@form">
+		    	</p:commandButton>
+		    	<p:commandButton actionListener="#{homeBean.stop()}" value="Stop" process="@form" update="@form">
+		    	</p:commandButton>
+		    </h:panelGrid>
+		    
+		    <h:panelGroup id="updates">
+		    	<h:panelGrid columns="2">
+		    		<label>Run Time: </label>
+		    		<p:outputLabel value="#{homeBean.runTime}"></p:outputLabel>
+		    		<label>Pages Mapped: </label>
+		    		<p:outputLabel value="#{homeBean.pagesMapped}"></p:outputLabel>
+		    	</h:panelGrid>
+		    </h:panelGroup>
+		    
+		    <p:poll interval="1" listener="#{homeBean.fetchUpdates()}" update="updates" />
+		</h:form>
+	</div>
+</h:body>
+</html>

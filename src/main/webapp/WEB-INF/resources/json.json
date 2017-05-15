@@ -1,0 +1,429 @@
+{
+	
+	"DECISION_ADMISSION_REJECT" : ["Incident admis", "Incident rejetés: irrélevant, saisie abandonnée, création accidentelle", "Incident rejetés: saisie dupliquée", "Incident rejeté: informations supplémentaires nécessaires pour admission"],
+	
+	"STATUS_DE_INCIDENT" : ["Ouvert", "Soumis pour clôture", "Clôturé - avec perte", "Clôturé  - pas de perte", "Ré-ouvert"],
+	
+	"TYPE_DE_REFERENCE_EXTERNE" : ["ID Prêt", "ID Client", "No. Dossier Justice", "Référence comptable", "Autre"],
+	
+	"COMITE_DE_BALE" : 
+	[
+		{
+			"Fraude interne" : [
+				{
+					"Activité non autorisée" : [
+						{
+							"Délits informatiques (Computer crime)" : [
+								
+							]
+						},
+						
+						{
+							"Client ou produit non-autorisé" : [
+							
+							]
+						},
+						
+						{
+							"Blanchiment d'argent" : [
+							
+							]
+						},
+						
+						{
+							"Non-respect d'une limite d'exposition" : [
+								"Validation du Chef d'Agence selon les habilités non respectée","Autres cas de non-respect des niveaux d'autorisation / validation des dossiers de crédit."
+							]
+						},
+						
+						{
+							"Autres activités non-autorisées" : [
+							
+							]
+						}
+					]
+				},
+				
+				{
+					"Vol et fraude (par l'employé)" : [
+						{
+							"Vol" : [
+								
+							]
+						},
+						
+						{
+							"Fraude" : [
+							
+							]
+						},
+						
+						{
+							"Acte de malveillance" : [
+							
+							]
+						}
+					]
+				}
+			]
+	
+		},
+		
+		{
+			"Fraude externe": [
+				{
+					"Vol et fraude (par partie externe)" : [
+						{
+							"Vol" : [
+								
+							]
+						},
+						
+						{
+							"Fraude" : [
+							
+							]
+						},
+						
+						{
+							"Acte de malveillance" : [
+							
+							]
+						}
+					]
+				},
+				
+				{
+					"Sécurité des systèmes" : [
+						{
+							"Défaillance de la sécurité des locaux et de la caisse" : [
+								"Contrats de prêts non sécurisés dans un placard fermé à clé","Dossiers de prêts non sécurisés dans un placard fermant à clés","Coffre fort permettant son déplacement","Règles de sécurité de déplacement des fonds à la banque non respectées","Règles de sécurité des cachets professionnels non respectées","Antivols non utilisés","Clefs du Point de Vente à la disposition de personnel non autorisé","Extincteur périmé ou inexistant","Accès aux locaux non sécurisé par double serrures","Autre cas relatif à la sécurité des locaux et de la caisse"
+							]
+						},
+						
+						{
+							"Attaque de virus / brèche de sécurité informatique" : [
+								"Confidentialité des mots de passe non respectée","Autres violations de sécurité informatique"
+							]
+						}
+					]
+				}
+			]
+		},
+		
+		{
+			"Pratiques en matière d’emploi et sécurité au travail": [
+				{
+					"Relations de travail" : [
+						{
+							"Actions syndicales" : [
+								
+							]
+						},
+						
+						{
+							"Perte de personnel clé" : [
+							
+							]
+						},
+						
+						{
+							"Responsabilité de l'employeur" : [
+							
+							]
+						},
+						
+						{
+							"Responsabilité de l'employeur" : [
+							
+							]
+						}
+					]
+				},
+				
+				{
+					"Sécurité du lieu de travail" : [
+						{
+							"Violation des règlements de santé et de sécurité" : [
+								
+							]
+						},
+						
+						{
+							"Accident dans les locaux" : [
+								
+							]
+						}
+					]
+				},
+				
+				{
+					"Égalité des droits et discrimination" : [
+						{
+							"Discrimination ou harcèlement" : [
+								
+							]
+						}
+					]
+				}
+			]
+		},
+		
+		{
+			"Clients, produits et pratiques commerciales": [
+				{
+					"Conformité, devoir d’information et devoir fiduciaire" : [
+						{
+							"Pertinence du produit" : [
+								
+							]
+						},
+						
+						{
+							"Divulgation (Disclosure)" : [
+							
+							]
+						},
+						
+						{
+							"Obligations fiduciaires" : [
+							
+							]
+						}
+					]
+				},
+				
+				{
+					"Pratiques commerciales/de marché incorrectes" : [
+						{
+							"Faute professionnelle commerciale / marchés" : [
+								
+							]
+						},
+						
+						{
+							"Blanchiment d'argent" : [
+								
+							]
+						},
+						
+						{
+							"Activité non-autorisée" : [
+								
+							]
+						}
+					]
+				},
+				
+				{
+					"Défauts d’un produit" : [
+						{
+							"Contrat inadéquat" : [
+								
+							]
+						}
+					]
+				},
+				
+				{
+					"Sélection, promotion et exposition au risque" : [
+						{
+							"Manquement de diligence" : [
+								
+							]
+						}
+					]
+				},
+				
+				{
+					"Services de conseil" : [
+						{
+							"Dispute liée à la performance" : [
+								
+							]
+						},
+						
+						{
+							"Vente d'un produit inadéquat à une clientèle inappropriée (Misselling)" : [
+								"Formation client: Formation de base (éducation financière) non assurée","Autres cas d'un produit inadéquat vendu à une clientèle inappropriée"
+							]
+						}
+					]
+				}
+			]
+		},
+		
+		{
+			"Dommages aux actifs corporels": [
+				{
+					"Catastrophes et autres sinistres" : [
+						{
+							"Sinistre naturel" : [
+								
+							]
+						},
+						
+						{
+							"Menace externe" : [
+							
+							]
+						},
+						
+						{
+							"Accident / Panne d'équipement" : [
+							
+							]
+						}
+					]
+				}
+			]
+		},
+		
+		{
+			"Interruptions d’activité et dysfonctionnements des systèmes": [
+				{
+					"Systèmes" : [
+						{
+							"Défaillance de l'infrastructure des systèmes" : [
+								"Photocopieur, Fax , Imprimante, Téléphone","E-mail & messagerie","Fonctionnalité EVOLAN","Administration Accès et Sécurité","Logiciel standard productivité","Connexion réseau","Matériel poste utilisateur","Site internet & intranet","Infrastructure informatique centralisée"
+							]
+						},
+						
+						{
+							"Interruption de service ou refus de service" : [
+							
+							]
+						},
+						
+						{
+							"Perturbation politique" : [
+							
+							]
+						}
+					]
+				}
+			]
+		},
+		
+		{
+			"Exécution, livraison et gestion des processus": [
+				{
+					"Saisie, exécution et suivi des transactions" : [
+						{
+							"Règlement de paiement" : [
+								
+							]
+						},
+						
+						{
+							"Réconciliation" : [
+							
+							]
+						},
+						
+						{
+							"Valorisation / détermination des prix" : [
+							
+							]
+						},
+						
+						{
+							"Erreur de saisie" : [
+							
+							]
+						},
+						
+						{
+							"Manque de ressources humaines, manque de connaissance" : [
+							
+							]
+						}
+					]
+				},
+				
+				{
+					"Surveillance et information financière" : [
+						{
+							"Conformité interne & reporting" : [
+								
+							]
+						},
+						
+						{
+							"Conformité externe & reporting" : [
+								
+							]
+						}
+					]
+				},
+				
+				{
+					"Acceptation et documentation clientèle" : [
+						{
+							"Documentation générale" : [
+								
+							]
+						},
+						
+						{
+							"Documentation de crédit" : [
+								"Activité non conforme à la réalité constatée","Adresse client ou garant erronée","Age du client non conforme"," Age du garant non conforme","Capacité de remboursement insuffisante","Client associé","Client hors zone","Client sans activité","Utilisation du prêt financé non autorisée","Garantie minimale exigée non respectée"," Historique client entaché de retard","Historique garant entaché de retard","Ratios financiers non respectés","Manque de documents à établir ou à renseigner","Règles de timbres de quittances non respectées","Report erroné des données ","Manque de visa et approbation des personnes habilités","CIN non valide","CIN non valide","Fiche de remboursement par un tiers non établi","PV de rupture de relation avec clients non établi","Inscription systématique des clients non réalisée","Autre cas relatif à la documentation de crédit"
+							]
+						},
+						
+						{
+							"Documentation de la garantie" : [
+								
+							]
+						}
+					]
+				},
+				
+				{
+					"Gestion des comptes clients" : [
+						{
+							"Négligence relatif au compte client" : [
+								"Délai de traitement des demandes clients non respecté","Suivi clients après déblocage non assuré","Détournement de prêts constaté mais non formalisé dans un PV","Traitement retards: Encaissement partiel non autorisé","Traitement retards: Lettre de mise en demeure non envoyée au client","Traitement retards: Visite de l'agent initiateur non réalisée","Traitement retards: Visite du coéquipier non réalisée","Traitement retards: Visite du comité du retard non réalisée","Traitement retards: Fiche de suivi des retards non établie ou non actualisée","Autre cas de négligence relatif au compte client"
+							]
+						}
+					]
+				},
+				
+				{
+					"Contreparties commerciales" : [
+						{
+							"Dispute avec non-client" : [
+								
+							]
+						}
+					]
+				},
+				
+				{
+					"Fournisseurs" : [
+						{
+							"Sous-traitance et fournisseurs" : [
+								
+							]
+						}
+					]
+				}
+			]
+		}
+	],
+	
+	"CODE_ETAT_ACTUAEL_DU_PERT_SUR" : ["Actif", "Reprogrammé", "Recouvrement Contentieux", "Confié à une Société de Recouvrement", "Radié - actuellement non-poursuivi", "Réglé"],
+	
+	"ETATE_DE_LA_PERTE" : ["Estimation initiale",	"Perte partiellement matérialisée", "Perte matérialisée finale"	],
+	
+	"CLASSIFICATION_DE_LA_PERTE" : [ "Radiation ou provisionnement de créance", "Actif volé", "Actif endommagé", "Fonds irrécouvrables", "Compensation ou restitution payée", "Revenus perdus", "Amende ou pénalité octroyée par autorités", "Frais légaux et indemnités payés", "Rajustement comptable", "Dépenses non-budgétées", "Autres" ],
+	
+	"NOTATION_DE_LA_PERTE_EN_REPUTATION" : ["Aucun impact externe",	"Pas de couverture media, mais quelques plaintes de la client�le", "Couverture media limit�e, augmentation des plaintes de la client�le, pertes de client�le possibles", "Couverture nationale media limit�e, plaintes de la client�le � grande �chelle, pertes de clients certaine, int�r�t informel du r�gulateur, r�action du management n�cessaire", "Couverture prolong�e des medias nationales et par les forums de la microfinance, pertes de client�le s�rieuse, investigation formelle par le r�gulateur, intervention du management et du Conseil d'Administration n�cessaire", "Couverture n�gative permanente dans les medias nationaux et les forums de la microfinance, pertes de client�le � grande �chelle,  intervention formelle par le r�gulateur avec p�nalit�s, implication directe du management et du Conseil d'Administration" ],
+	
+	"AGENCES" : ["00001-Victoire, Kin", "00002-N'djili, Kin", "00003-Kinsuka, Kin", "00004-Kintambo, Kin", "00005-Matete, Kin", "00006-Bon March�", "00007-Bayaka", "01001-ISC", "01002-Kin A�ro", "01003-CEEC", "01004-Hasson &amp; Fr�res", "01005-Food Market", "01005-Kimbanguiste", "01006-Ndolo A�ro", "01008-GUCE", "01009-Premier Mall", "01025-MINAFFET", "01045-Monishop", "01075-Unikin", "01085-Shoprite", "01125-Fleuve Congo H�tel", "01175-ISTM", "05101-30 Juin, Kin", "05120-Boma", "05121-Matadi", "05124-Moanda", "05126-Kimpese", "05130-Sendwe, Lub", "05132-Likasi", "05134-Kolwezi", "05136-Kasumbalesa", "05137-Fungurume", "05150-Kisangani", "05152-Bunia", "05153-Buta", "05160-Mbuji Mayi", "05162-Lodja", "05163-Lusambo", "05170-Bukavu", "05171-Beni", "05172-Goma", "05173-Kindu", "05174-Butembo", "05175-Kasindi", "10052-Doko", "15101-Limete", "15120-Boma Port", "15121-Matadi Port", "15124-Yema", "15130-Unilu", "15132-Kakanda", "15134-UAC Kolwezi", "15136-Sakania", "15150-Unikis", "15152-Watsa", "21001-ICTSI Matadi", "25101-Couronne, Kin", "25121-Kinkanda Matadi", "25130-DGI", "26001-Lufu", "26002-Kwilu Ngongo", "30001-Consulat", "30002-Luano A�ro", "35101-Utex", "35121-AIDEL TICOM", "35121-Kisanga", "45101-St. Luc, Kin", "45121-Inga", "45130-Bel Air", "55101-UPC, Kin", "55130-Golf, Lub", "65101-UPN", "75101-Ngaba", "85101-Si�ge", "95101-HDV", "99901-Bureau Bruxelles", "99902-Bureau Chine" ],
+	
+	"UNITE_ORGANISATIONNELLE_CONCERNEE" : ["CAISSE","OPERATIONS" ,"CORRESPONDANT BANKING","COMPTABILITE","ORGANISATION","LOGISTIQUE" ,"GESTION DOCUMENTAIRE","RETAIL BANKING","COMPLIANCE","STRATEGIE ET DEVELOPPEMENT","COMMERCIAL BANKING","PRIVATE BANKING","MARKETING","RECOUVREMENT","CAPITAL HUMAIN" ,"EXPERIENCE CLIENTS","CREDIT","TRESORERIE"],
+	
+	"PROCESSUS_CONCERNE" : ["0 - Aucun impact externe.", "1 - Pas de couverture media, mais quelques plaintes de la clientèle.", "2 - Couverture media limitée, augmentation des plaintes de la clientèle, pertes de clientèle possibles.", "3 - Couverture nationale media limitée, plaintes de la clientèle à grande échelle, pertes de clients certaine, intérêt informel du régulateur, réaction du management nécessaire.", "4 - Couverture prolongée des medias nationales et par les forums de la microfinance, pertes de clientèle sérieuse, investigation formelle par le régulateur, intervention du management et du Conseil d'Administration nécessaire.", "5 - Couverture négative permanente dans les medias nationaux et les forums de la microfinance, pertes de clientèle à grande échelle,  intervention formelle par le régulateur avec pénalités, implication directe du management et du Conseil d'Administration."]
+	
+}

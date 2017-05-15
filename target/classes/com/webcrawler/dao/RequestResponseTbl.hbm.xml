@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated May 11, 2017 2:36:17 PM by Hibernate Tools 5.1.0.Alpha1 -->
+<hibernate-mapping>
+    <class name="com.webcrawler.dao.RequestResponseTbl" table="request_response_tbl" catalog="webcrawler" optimistic-lock="version">
+        <id name="id" type="java.lang.Integer">
+            <column name="Id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="runIdentTbl" class="com.webcrawler.dao.RunIdentTbl" fetch="select">
+            <column name="RunId" />
+        </many-to-one>
+        <property name="responseBody" type="string">
+            <column name="ResponseBody" length="16777215" />
+        </property>
+        <property name="fromPageTitle" type="string">
+            <column name="FromPageTitle" length="65535" />
+        </property>
+        <property name="fromPageUrl" type="string">
+            <column name="FromPageURL" length="65535" />
+        </property>
+        <property name="toPageTitle" type="string">
+            <column name="ToPageTitle" length="65535" />
+        </property>
+        <property name="toPageUrl" type="string">
+            <column name="ToPageURL" length="65535" />
+        </property>
+        <property name="pageTransitionIterationNumber" type="java.lang.Integer">
+            <column name="PageTransitionIterationNumber" />
+        </property>
+        <property name="requestHeader" type="string">
+            <column name="RequestHeader" length="65535" />
+        </property>
+        <property name="responseHeader" type="string">
+            <column name="ResponseHeader" length="65535" />
+        </property>
+    </class>
+</hibernate-mapping>
