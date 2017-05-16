@@ -2,12 +2,14 @@ package com.webcrawler.model;
 
 import org.jsoup.Connection.Request;
 import org.jsoup.Connection.Response;
+import org.jsoup.nodes.Document;
 
 public class UrlProperty {
 
 	private String name;
 	private Request request;
 	private Response reponse;
+	private Document htmlDocument;
 
 	public String getName() {
 		return name;
@@ -31,6 +33,14 @@ public class UrlProperty {
 
 	public void setReponse(Response reponse) {
 		this.reponse = reponse;
+	}
+
+	public Document getHtmlDocument() {
+		return htmlDocument;
+	}
+
+	public void setHtmlDocument(Document htmlDocument) {
+		this.htmlDocument = htmlDocument;
 	}
 
 }

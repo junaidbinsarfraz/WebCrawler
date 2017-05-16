@@ -2,6 +2,7 @@ package com.webcrawler.controller;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URISyntaxException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
@@ -10,12 +11,18 @@ import java.util.Map;
 import java.util.Queue;
 
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
 import javax.faces.bean.ViewScoped;
 
 import org.jsoup.Connection;
-import org.jsoup.Jsoup;
+import org.jsoup.Connection.Request;
+import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
+import com.webcrawler.dao.RequestResponseTbl;
+import com.webcrawler.dao.RequestResponseTblHome;
 import com.webcrawler.dao.RunIdentTbl;
 import com.webcrawler.dao.RunIdentTblHome;
 import com.webcrawler.model.UrlProperty;
@@ -28,7 +35,8 @@ import com.webcrawler.util.Util;
 import crawlercommons.robots.BaseRobotRules;
 
 @ManagedBean(name = "homeBean")
-@ViewScoped
+//@ViewScoped
+@SessionScoped
 public class HomeBean implements Serializable {
 
 	private String error;
@@ -42,6 +50,7 @@ public class HomeBean implements Serializable {
 	private Date startTime;
 
 	private RunIdentTblHome runIdentTblHome = new RunIdentTblHome();
+	private RequestResponseTblHome requestResponseTblHome = new RequestResponseTblHome();
 
 	public String getError() {
 		return error;
@@ -150,6 +159,15 @@ public class HomeBean implements Serializable {
 
 		this.runIdentTblHome.attachClean(runIdentTbl);
 
+		runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
+
+		if (runIdentTbls == null && runIdentTbls.isEmpty()) {
+			this.error += "Run Name Not saved in database<br/>";
+			return;
+		}
+
+		runIdentTbl = runIdentTbls.get(0);
+
 		BaseRobotRules rules = null;
 
 		try {
@@ -175,45 +193,123 @@ public class HomeBean implements Serializable {
 
 		urlProperties.add(baseUrlProperty);
 
+		String baseDomain = null;
+		try {
+			baseDomain = CrawlUtil.getDomainName(this.targetUrl);
+		} catch (URISyntaxException e1) {
+			e1.printStackTrace();
+			this.error += "Unable to fetch domain of the website<br/>";
+			return;
+		}
+
 		while (Boolean.TRUE.equals(urlProperties.isEmpty())) {
 
 			try {
-				
-				UrlProperty urlProperty = urlProperties.poll();
 
-//				Connection connection = Jsoup.connect(this.targetUrl).userAgent(Constants.USER_AGENT).timeout(20 * 1000);
+				UrlProperty urlProperty = urlProperties.poll();
 
 				// TODO: Make valuable request
 				Connection connection = RequestResponseUtil.makeRequest(urlProperty);
 
 				Document htmlDocument = connection.get();
+				
+				Document lastHtmlDocument = urlProperty.getHtmlDocument();
+				Response lastResponse = urlProperty.getReponse();
+				Request lastRequest = urlProperty.getRequest();
+
+				Response response = connection.response();
+				Request request = connection.request();
 
 				// 200 is the HTTP OK status code
-				if (connection.response().statusCode() == 200) {
-					UrlProperty newUrlProperty = new UrlProperty();
+				if (response.statusCode() == 200) {
 
-					// TODO: fetch all links and put them in the queue
+					if (Boolean.FALSE.equals(response.contentType().contains("text/html"))) {
+						continue;
+					}
+
+					RequestResponseTbl requestResponseTbl = new RequestResponseTbl();
+
+					if(lastHtmlDocument != null) {
+						String title = "";
+						
+						Elements elems = lastHtmlDocument.head().getElementsByTag("title");
+						
+						for(Element elem : elems) {
+							title += elem.data();
+						}
+						
+						requestResponseTbl.setFromPageTitle(title);
+					}
 					
+					if (lastResponse != null) {
+						requestResponseTbl.setFromPageUrl(lastResponse.url().toString());
+					}
+
+					if (lastRequest != null) {
+
+					}
+					
+					// TODO: Make logic to set transition number
+//					requestResponseTbl.setPageTransitionIterationNumber(pageTransitionIterationNumber);
+					requestResponseTbl.setRequestHeader(request.headers().toString());
+					requestResponseTbl.setResponseBody(response.body());
+					requestResponseTbl.setResponseHeader(response.headers().toString());
+					requestResponseTbl.setRunIdentTbl(runIdentTbl);
+					if(htmlDocument != null) {
+						String title = "";
+						
+						Elements elems = htmlDocument.head().getElementsByTag("title");
+						
+						for(Element elem : elems) {
+							title += elem.data();
+						}
+						
+						// TODO: Make things fancy for title with numbers
+						requestResponseTbl.setToPageTitle(title);
+					}
+					requestResponseTbl.setToPageUrl(urlProperty.getName());
+
+					this.requestResponseTblHome.attachClean(requestResponseTbl);
+
+					Elements links = htmlDocument.select("a[href]");
+
+					for (Element link : links) {
+
+						String refectoredUrl = RequestResponseUtil.refectorUrl(link.attr("href"), baseDomain);
+
+						Boolean isWithinDomain = CrawlUtil.isWithinDomain(this.targetUrl, RequestResponseUtil.refectorUrl(refectoredUrl, baseDomain));
+
+						Boolean isAllowed = CrawlUtil.isAllowed(rules, this.targetUrl, refectoredUrl);
+
+						if (Boolean.TRUE.equals(isWithinDomain) && Boolean.TRUE.equals(isAllowed)) {
+
+							UrlProperty newUrlProperty = new UrlProperty();
+
+							newUrlProperty.setName(refectoredUrl);
+							newUrlProperty.setReponse(response);
+							newUrlProperty.setRequest(connection.request());
+							newUrlProperty.setHtmlDocument(htmlDocument);
+
+							urlProperties.poll();
+						}
+					}
+
 					// logger.info("**Visiting** Received web page at " + url);
 				} else {
+					System.err.println("Connection Error - status code : " + response.statusCode());
 					// logger.error("**Failure** Web page not recieved at " +
 					// url);
-				}
-				if (Boolean.FALSE.equals(connection.response().contentType().contains("text/html"))) {
-					// logger.error("**Failure** Retrieved something other than
-					// HTML");
 				}
 
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
 		}
 
 	}
 
 	public void stop() {
-
+		this.hasStarted = Boolean.FALSE;
 	}
 
 	public void fetchUpdates() {
