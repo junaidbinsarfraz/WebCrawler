@@ -22,17 +22,17 @@
 			<p:outputLabel value="#{homeBean.error}"></p:outputLabel>
 			<label>Target URL</label>
 			<br />
-			<p:inputText value="#{homeBean.targetUrl}" required="true"
+			<p:inputText value="#{homeBean.targetUrl}"
 				requiredMessage="Target Url is required"></p:inputText>
 			<br />
 			<label>Iterations Per Page Transition</label>
 			<br />
-			<p:inputText value="#{homeBean.iterationPerPage}" required="true"
+			<p:inputText value="#{homeBean.iterationPerPage}"
 				requiredMessage="Iterations Per Page Transition is required"></p:inputText>
 			<br />
 			<label>Run Name</label>
 			<br />
-			<p:inputText value="#{homeBean.runName}" required="true"
+			<p:inputText value="#{homeBean.runName}"
 				requiredMessage="Run Name is required"></p:inputText>
 			<br />
 			<label>Download Images?</label>
@@ -40,12 +40,12 @@
 			<p:selectBooleanCheckbox value="#{homeBean.downloadImages}" />
 			<br />
 			<h:panelGrid columns="2">
-				<p:commandButton actionListener="#{homeBean.start()}"
+				<p:commandButton actionListener="#{homeBean.start()}" onclick=""
 					disabled="#{homeBean.hasStarted}" value="Start" process="@form"
 					update="@form">
 				</p:commandButton>
-				<p:commandButton actionListener="#{homeBean.stop()}" value="Stop" async="true"
-					process="@form" update="@form">
+				<p:commandButton actionListener="#{homeBean.stop()}" value="Stop"
+					async="true" process="@form" update="@form">
 				</p:commandButton>
 			</h:panelGrid>
 

@@ -59,7 +59,7 @@ public class CrawlUtil {
 	public static Boolean isWithinDomain(String baseUrl, String toUrl) {
 
 		try {
-			if (baseUrl != null && !baseUrl.isEmpty() && toUrl != null && !toUrl.isEmpty()
+			if (Util.isNotNullAndEmpty(baseUrl) && Util.isNotNullAndEmpty(toUrl)
 					&& (getDomainName(baseUrl).equals(getDomainName(toUrl)) || getDomainName(toUrl).contains(getDomainName(baseUrl)))) {
 				return Boolean.TRUE;
 			}

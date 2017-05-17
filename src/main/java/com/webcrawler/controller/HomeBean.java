@@ -12,11 +12,11 @@ import java.util.Queue;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
-import javax.faces.bean.ViewScoped;
 
 import org.jsoup.Connection;
 import org.jsoup.Connection.Request;
 import org.jsoup.Connection.Response;
+import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -115,31 +115,50 @@ public class HomeBean implements Serializable {
 	public void setHasStarted(Boolean hasStarted) {
 		this.hasStarted = hasStarted;
 	}
+	
+	private void validate() {
+		
+		if(Util.isNullOrEmpty(this.runName)) {
+			this.error += "Run name cannot be empty<br/>";
+		}
+		
+		if(Util.isNullOrEmpty(this.targetUrl)) {
+			this.error += "Target url cannot be empty<br/>";
+		}
+		
+		if(Util.isNullOrEmpty(this.iterationPerPage)) {
+			this.error += "Iteration per page cannot be empty<br/>";
+		} else if(!Util.isNumber(this.iterationPerPage)) {
+			this.error += "Iteration per page must be a number<br/>";
+		} else { 
+			try {
+				Integer iterations = Integer.parseInt(this.iterationPerPage);
+				
+				if(iterations < 1) {
+					this.error += "Iteration per page must be greater then 0<br/>";
+				} else if(iterations > 100) {
+					this.error += "Iteration per page must not be greater then 100<br/>";
+				}
+			} catch(Exception e) {
+				this.error += "Iteration per page must be an integer<br/>";
+			}
+		}
+		
+	}
 
 	public void start() {
 
 		this.error = "";
 		this.pagesMapped = 0;
 		this.runTime = "00:00:00";
-
-		Integer iterations = null;
-
-		// Validate inputs
-		try {
-			iterations = Integer.parseInt(this.iterationPerPage);
-		} catch (Exception e) {
-			this.error += "Iterations Per Page Transition must be a number\n";
+		
+		this.validate();
+		
+		if(Util.isNullOrEmpty(this.error)) {
+			return;
 		}
 
-		if (iterations != null) {
-
-			if (iterations > 100) {
-				this.error += "Iterations Per Page Transition must be less then 100\n";
-			} else if (iterations < 1) {
-				this.error += "Iterations Per Page Transition must be greater then 0\n";
-			}
-
-		}
+		Integer iterations = Integer.parseInt(this.iterationPerPage);
 
 		// Get Run Name entry
 		RunIdentTbl runIdentTbl = new RunIdentTbl();
@@ -307,7 +326,9 @@ public class HomeBean implements Serializable {
 					// url);
 				}
 
-			} catch (IOException e) {
+			} catch(UnsupportedMimeTypeException e) {
+				// No need to log
+			}catch (IOException e) {
 				e.printStackTrace();
 			}
 			
