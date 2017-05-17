@@ -17,7 +17,7 @@
 	</error-page>
 	<error-page>
 	    <error-code>500</error-code>
-	    <location>/WEB-INF/errorpages/general.xhtml</location>
+	    <location>/WEB-INF/errorpages/expired.xhtml</location>
 	</error-page>
 	<session-config>
 		<session-timeout>-1</session-timeout>

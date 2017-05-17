@@ -22,7 +22,7 @@ import crawlercommons.robots.SimpleRobotRulesParser;
 public class CrawlUtil {
 
 	public static BaseRobotRules getWebsiteRules(String userAgent, String url) throws Exception {
-		
+
 		URL urlObj = new URL(url);
 		String hostId = urlObj.getProtocol() + "://" + urlObj.getHost() + (urlObj.getPort() > -1 ? ":" + urlObj.getPort() : "");
 		BaseRobotRules rules = null;
@@ -30,7 +30,7 @@ public class CrawlUtil {
 		HttpContext context = new BasicHttpContext();
 		HttpClient httpclient = HttpClientBuilder.create().build();
 		HttpResponse response = httpclient.execute(httpget, context);
-		
+
 		if (response.getStatusLine() != null && response.getStatusLine().getStatusCode() == 404) {
 			rules = new SimpleRobotRules(RobotRulesMode.ALLOW_ALL);
 			// consume entity to deallocate connection
@@ -40,39 +40,40 @@ public class CrawlUtil {
 			SimpleRobotRulesParser robotParser = new SimpleRobotRulesParser();
 			rules = robotParser.parseContent(hostId, IOUtils.toByteArray(entity.getContent()), "text/plain", userAgent);
 		}
-		
+
 		return rules;
 	}
-	
+
 	public static Boolean isAllowed(BaseRobotRules rules, String baseUrl, String toUrl) {
-		
-		if(Boolean.TRUE.equals(isWithinDomain(baseUrl, toUrl))) {
-			
-			if(rules == null || rules.isAllowAll() || rules.isAllowed(toUrl)) {
+
+		if (Boolean.TRUE.equals(isWithinDomain(baseUrl, toUrl))) {
+
+			if (rules == null || rules.isAllowAll() || rules.isAllowed(toUrl)) {
 				return Boolean.TRUE;
 			}
 		}
-		
+
 		return Boolean.FALSE;
 	}
-	
+
 	public static Boolean isWithinDomain(String baseUrl, String toUrl) {
-		
+
 		try {
-			if(getDomainName(baseUrl).equals(toUrl)) {
+			if (baseUrl != null && !baseUrl.isEmpty() && toUrl != null && !toUrl.isEmpty()
+					&& (getDomainName(baseUrl).equals(getDomainName(toUrl)) || getDomainName(toUrl).contains(getDomainName(baseUrl)))) {
 				return Boolean.TRUE;
 			}
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
-		
+
 		return Boolean.FALSE;
 	}
-	
+
 	public static String getDomainName(String url) throws URISyntaxException {
-	    URI uri = new URI(url);
-	    String domain = uri.getHost();
-	    return domain.startsWith("www.") ? domain.substring(4) : domain;
+		URI uri = new URI(url);
+		String domain = uri.getHost();
+		return domain.startsWith("www.") ? domain.substring(4) : domain;
 	}
 
 }

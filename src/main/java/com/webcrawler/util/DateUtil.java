@@ -1810,7 +1810,7 @@ public final class DateUtil {
 		long seconds = TimeUnit.MILLISECONDS.toSeconds(uptime);
 		
 		hoursMinutesSecs.put("hours", hours);
-		hoursMinutesSecs.put("munites", minutes);
+		hoursMinutesSecs.put("minutes", minutes);
 		hoursMinutesSecs.put("seconds", seconds);
 		
 		return hoursMinutesSecs;

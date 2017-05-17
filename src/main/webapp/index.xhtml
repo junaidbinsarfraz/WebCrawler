@@ -44,7 +44,7 @@
 					disabled="#{homeBean.hasStarted}" value="Start" process="@form"
 					update="@form">
 				</p:commandButton>
-				<p:commandButton actionListener="#{homeBean.stop()}" value="Stop"
+				<p:commandButton actionListener="#{homeBean.stop()}" value="Stop" async="true"
 					process="@form" update="@form">
 				</p:commandButton>
 			</h:panelGrid>
@@ -58,8 +58,6 @@
 				</h:panelGrid>
 			</h:panelGroup>
 
-			<!-- <p:poll interval="1" partialSubmit="true" autoStart="false" listener="#{homeBean.fetchUpdates()}"
-				update="updates" /> -->
 		</h:form>
 	</div>
 </h:body>

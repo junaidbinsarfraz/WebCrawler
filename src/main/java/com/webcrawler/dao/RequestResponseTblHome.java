@@ -45,7 +45,9 @@ public class RequestResponseTblHome {
 	public void persist(RequestResponseTbl transientInstance) {
 		log.debug("persisting RequestResponseTbl instance");
 		try {
+			sessionFactory.getCurrentSession().beginTransaction();
 			sessionFactory.getCurrentSession().persist(transientInstance);
+			sessionFactory.getCurrentSession().getTransaction().commit();
 			log.debug("persist successful");
 		} catch (RuntimeException re) {
 			log.error("persist failed", re);
@@ -56,7 +58,9 @@ public class RequestResponseTblHome {
 	public void attachDirty(RequestResponseTbl instance) {
 		log.debug("attaching dirty RequestResponseTbl instance");
 		try {
+			sessionFactory.getCurrentSession().beginTransaction();
 			sessionFactory.getCurrentSession().saveOrUpdate(instance);
+			sessionFactory.getCurrentSession().getTransaction().commit();
 			log.debug("attach successful");
 		} catch (RuntimeException re) {
 			log.error("attach failed", re);
@@ -67,7 +71,9 @@ public class RequestResponseTblHome {
 	public void attachClean(RequestResponseTbl instance) {
 		log.debug("attaching clean RequestResponseTbl instance");
 		try {
+			sessionFactory.getCurrentSession().beginTransaction();
 			sessionFactory.getCurrentSession().lock(instance, LockMode.NONE);
+			sessionFactory.getCurrentSession().getTransaction().commit();
 			log.debug("attach successful");
 		} catch (RuntimeException re) {
 			log.error("attach failed", re);
@@ -78,7 +84,9 @@ public class RequestResponseTblHome {
 	public void delete(RequestResponseTbl persistentInstance) {
 		log.debug("deleting RequestResponseTbl instance");
 		try {
+			sessionFactory.getCurrentSession().beginTransaction();
 			sessionFactory.getCurrentSession().delete(persistentInstance);
+			sessionFactory.getCurrentSession().getTransaction().commit();
 			log.debug("delete successful");
 		} catch (RuntimeException re) {
 			log.error("delete failed", re);
@@ -89,7 +97,9 @@ public class RequestResponseTblHome {
 	public RequestResponseTbl merge(RequestResponseTbl detachedInstance) {
 		log.debug("merging RequestResponseTbl instance");
 		try {
+			sessionFactory.getCurrentSession().beginTransaction();
 			RequestResponseTbl result = (RequestResponseTbl) sessionFactory.getCurrentSession().merge(detachedInstance);
+			sessionFactory.getCurrentSession().getTransaction().commit();
 			log.debug("merge successful");
 			return result;
 		} catch (RuntimeException re) {
@@ -101,9 +111,11 @@ public class RequestResponseTblHome {
 	public RequestResponseTbl findById(java.lang.Integer id) {
 		log.debug("getting RequestResponseTbl instance with id: " + id);
 		try {
+			sessionFactory.getCurrentSession().beginTransaction();
 			RequestResponseTbl instance = (RequestResponseTbl) sessionFactory.getCurrentSession().get("com.webcrawler.dao.RequestResponseTbl", id);
 			if (instance == null) {
 				log.debug("get successful, no instance found");
+				sessionFactory.getCurrentSession().getTransaction().commit();
 			} else {
 				log.debug("get successful, instance found");
 			}
@@ -117,9 +129,11 @@ public class RequestResponseTblHome {
 	public List findByExample(RequestResponseTbl instance) {
 		log.debug("finding RequestResponseTbl instance by example");
 		try {
+			sessionFactory.getCurrentSession().beginTransaction();
 			List results = sessionFactory.getCurrentSession().createCriteria("com.webcrawler.dao.RequestResponseTbl").add(Example.create(instance))
 					.list();
 			log.debug("find by example successful, result size: " + results.size());
+			sessionFactory.getCurrentSession().getTransaction().commit();
 			return results;
 		} catch (RuntimeException re) {
 			log.error("find by example failed", re);

@@ -10,6 +10,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cache.impl.NoCachingRegionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
+import org.hibernate.classic.Session;
 import org.hibernate.criterion.Example;
 
 /**
@@ -45,7 +46,9 @@ public class RunIdentTblHome {
 	public void persist(RunIdentTbl transientInstance) {
 		log.debug("persisting RunIdentTbl instance");
 		try {
+			sessionFactory.getCurrentSession().beginTransaction();
 			sessionFactory.getCurrentSession().persist(transientInstance);
+			sessionFactory.getCurrentSession().getTransaction().commit();
 			log.debug("persist successful");
 		} catch (RuntimeException re) {
 			log.error("persist failed", re);
@@ -56,7 +59,9 @@ public class RunIdentTblHome {
 	public void attachDirty(RunIdentTbl instance) {
 		log.debug("attaching dirty RunIdentTbl instance");
 		try {
+			sessionFactory.getCurrentSession().beginTransaction();
 			sessionFactory.getCurrentSession().saveOrUpdate(instance);
+			sessionFactory.getCurrentSession().getTransaction().commit();
 			log.debug("attach successful");
 		} catch (RuntimeException re) {
 			log.error("attach failed", re);
@@ -67,7 +72,9 @@ public class RunIdentTblHome {
 	public void attachClean(RunIdentTbl instance) {
 		log.debug("attaching clean RunIdentTbl instance");
 		try {
+			sessionFactory.getCurrentSession().beginTransaction();
 			sessionFactory.getCurrentSession().lock(instance, LockMode.NONE);
+			sessionFactory.getCurrentSession().getTransaction().commit();
 			log.debug("attach successful");
 		} catch (RuntimeException re) {
 			log.error("attach failed", re);
@@ -78,7 +85,9 @@ public class RunIdentTblHome {
 	public void delete(RunIdentTbl persistentInstance) {
 		log.debug("deleting RunIdentTbl instance");
 		try {
+			sessionFactory.getCurrentSession().beginTransaction();
 			sessionFactory.getCurrentSession().delete(persistentInstance);
+			sessionFactory.getCurrentSession().getTransaction().commit();
 			log.debug("delete successful");
 		} catch (RuntimeException re) {
 			log.error("delete failed", re);
@@ -89,7 +98,9 @@ public class RunIdentTblHome {
 	public RunIdentTbl merge(RunIdentTbl detachedInstance) {
 		log.debug("merging RunIdentTbl instance");
 		try {
+			sessionFactory.getCurrentSession().beginTransaction();
 			RunIdentTbl result = (RunIdentTbl) sessionFactory.getCurrentSession().merge(detachedInstance);
+			sessionFactory.getCurrentSession().getTransaction().commit();
 			log.debug("merge successful");
 			return result;
 		} catch (RuntimeException re) {
@@ -101,9 +112,11 @@ public class RunIdentTblHome {
 	public RunIdentTbl findById(java.lang.Integer id) {
 		log.debug("getting RunIdentTbl instance with id: " + id);
 		try {
+			sessionFactory.getCurrentSession().beginTransaction();
 			RunIdentTbl instance = (RunIdentTbl) sessionFactory.getCurrentSession().get("com.webcrawler.dao.RunIdentTbl", id);
 			if (instance == null) {
 				log.debug("get successful, no instance found");
+				sessionFactory.getCurrentSession().getTransaction().commit();
 			} else {
 				log.debug("get successful, instance found");
 			}
@@ -117,7 +130,9 @@ public class RunIdentTblHome {
 	public List findByExample(RunIdentTbl instance) {
 		log.debug("finding RunIdentTbl instance by example");
 		try {
+			sessionFactory.getCurrentSession().beginTransaction();
 			List results = sessionFactory.getCurrentSession().createCriteria("com.webcrawler.dao.RunIdentTbl").add(Example.create(instance)).list();
+			sessionFactory.getCurrentSession().getTransaction().commit();
 			log.debug("find by example successful, result size: " + results.size());
 			return results;
 		} catch (RuntimeException re) {
