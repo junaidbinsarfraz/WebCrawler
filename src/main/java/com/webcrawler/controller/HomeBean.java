@@ -2,6 +2,7 @@ package com.webcrawler.controller;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -14,6 +15,7 @@ import java.util.Queue;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 
+import org.hibernate.exception.GenericJDBCException;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Request;
 import org.jsoup.Connection.Response;
@@ -240,15 +242,16 @@ public class HomeBean implements Serializable {
 
 				if (urlProperty.getLastRequest() != null) {
 					fromUrl = urlProperty.getLastRequest().url().toString();
+					tempRequestResponseTbl.setFromPageUrl(fromUrl);
 				}
 
 				String toUrl = urlProperty.getName();
 
-				tempRequestResponseTbl.setFromPageUrl(fromUrl);
 				tempRequestResponseTbl.setToPageUrl(toUrl);
 				// tempRequestResponseTbl.setRunIdentTbl(runIdentTbl);
 
-				List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome.findByExample(tempRequestResponseTbl);
+				List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome
+						.findByExample(tempRequestResponseTbl);
 
 				Integer iterationNumer = 0;
 
@@ -257,7 +260,8 @@ public class HomeBean implements Serializable {
 					List<RequestResponseTbl> requestResponseTbls1 = new ArrayList<>();
 
 					for (RequestResponseTbl tempRequestResponseTbl1 : tempRequestResponseTbls) {
-						if (tempRequestResponseTbl1.getRunIdentTbl() != null && tempRequestResponseTbl1.getRunIdentTbl().getId() != null
+						if (tempRequestResponseTbl1.getRunIdentTbl() != null
+								&& tempRequestResponseTbl1.getRunIdentTbl().getId() != null
 								&& tempRequestResponseTbl1.getRunIdentTbl().getId().equals(runIdentTbl.getId())) {
 							requestResponseTbls1.add(tempRequestResponseTbl1);
 						}
@@ -336,20 +340,32 @@ public class HomeBean implements Serializable {
 						}
 
 						// TODO: Make things fancy for title with numbers
-						matchedUrlProperty = this.getMatchedUrlPropertiesByTitle(urlProperties, title);
+						if (Util.isNotNullAndEmpty(fromUrl) && Util.isNotNullAndEmpty(toUrl) && toUrl.equals(fromUrl)) {
 
-						if (matchedUrlProperty != null) {
+							matchedUrlProperty = this.getMatchedUrlPropertiesByTitle(urlProperties, title);
 
-							Integer distance = CrawlUtil.levenshteinDistance(matchedUrlProperty.getLastReponse().body(), response.body());
+							if (matchedUrlProperty != null) {
 
-							System.out.println("Distance : " + distance);
+								Integer distance = CrawlUtil.levenshteinDistance(
+										matchedUrlProperty.getLastReponse().body(), response.body());
 
-							if (Boolean.TRUE.equals(matchedUrlProperty.getTitleModified())) {
-								// Get last underscore
-								title += ("_" + (Integer.parseInt(
-										matchedUrlProperty.getLastTitle().substring(matchedUrlProperty.getLastTitle().lastIndexOf("_") + 1)) + 1));
-							} else {
-								title += "_1";
+								Double percentage = (((double) distance)
+										/ (Math.max(matchedUrlProperty.getLastReponse().body().length(),
+												response.body().length())))
+										* 100;
+
+								System.out.println("Distance : " + distance);
+								System.out.println("Percentage : " + percentage);
+
+								if (Boolean.TRUE.equals(matchedUrlProperty.getTitleModified())) {
+									// Get last underscore
+									title += ("_" + (Integer
+											.parseInt(matchedUrlProperty.getLastTitle()
+													.substring(matchedUrlProperty.getLastTitle().lastIndexOf("_") + 1))
+											+ 1));
+								} else {
+									title += "_1";
+								}
 							}
 						}
 
@@ -366,7 +382,8 @@ public class HomeBean implements Serializable {
 
 						String refectoredUrl = RequestResponseUtil.refectorUrl(link.attr("href"), baseDomain);
 
-						Boolean isWithinDomain = CrawlUtil.isWithinDomain(this.targetUrl, RequestResponseUtil.refectorUrl(refectoredUrl, baseDomain));
+						Boolean isWithinDomain = CrawlUtil.isWithinDomain(this.targetUrl,
+								RequestResponseUtil.refectorUrl(refectoredUrl, baseDomain));
 
 						Boolean isAllowed = CrawlUtil.isAllowed(rules, this.targetUrl, refectoredUrl);
 
@@ -396,13 +413,17 @@ public class HomeBean implements Serializable {
 				// No need to log
 			} catch (IOException e) {
 				e.printStackTrace();
+			} catch (GenericJDBCException e) {
+				// Ignore 
 			}
 
 		}
 
-		Map<String, Long> hoursMinutesSeconds = DateUtil.getHoursMinutesSecondsDifference(this.startTime, Calendar.getInstance().getTime());
+		Map<String, Long> hoursMinutesSeconds = DateUtil.getHoursMinutesSecondsDifference(this.startTime,
+				Calendar.getInstance().getTime());
 
-		this.runTime = hoursMinutesSeconds.get("hours") + ":" + hoursMinutesSeconds.get("minutes") + ":" + hoursMinutesSeconds.get("seconds");
+		this.runTime = hoursMinutesSeconds.get("hours") + ":" + hoursMinutesSeconds.get("minutes") + ":"
+				+ hoursMinutesSeconds.get("seconds");
 
 		this.hasStarted = Boolean.FALSE;
 	}
@@ -410,9 +431,11 @@ public class HomeBean implements Serializable {
 	public void stop() {
 		if (Boolean.TRUE.equals(this.hasStarted)) {
 			// Calculate time
-			Map<String, Long> hoursMinutesSeconds = DateUtil.getHoursMinutesSecondsDifference(this.startTime, Calendar.getInstance().getTime());
+			Map<String, Long> hoursMinutesSeconds = DateUtil.getHoursMinutesSecondsDifference(this.startTime,
+					Calendar.getInstance().getTime());
 
-			this.runTime = hoursMinutesSeconds.get("hours") + ":" + hoursMinutesSeconds.get("minutes") + ":" + hoursMinutesSeconds.get("seconds");
+			this.runTime = hoursMinutesSeconds.get("hours") + ":" + hoursMinutesSeconds.get("minutes") + ":"
+					+ hoursMinutesSeconds.get("seconds");
 
 		} else {
 			this.pagesMapped = 0;
@@ -426,9 +449,11 @@ public class HomeBean implements Serializable {
 
 		if (Boolean.TRUE.equals(this.hasStarted)) {
 			// Calculate time
-			Map<String, Long> hoursMinutesSeconds = DateUtil.getHoursMinutesSecondsDifference(this.startTime, Calendar.getInstance().getTime());
+			Map<String, Long> hoursMinutesSeconds = DateUtil.getHoursMinutesSecondsDifference(this.startTime,
+					Calendar.getInstance().getTime());
 
-			this.runTime = hoursMinutesSeconds.get("hours") + ":" + hoursMinutesSeconds.get("minutes") + ":" + hoursMinutesSeconds.get("seconds");
+			this.runTime = hoursMinutesSeconds.get("hours") + ":" + hoursMinutesSeconds.get("minutes") + ":"
+					+ hoursMinutesSeconds.get("seconds");
 
 		} else {
 			this.pagesMapped = 0;
