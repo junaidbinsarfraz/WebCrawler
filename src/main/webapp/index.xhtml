@@ -14,12 +14,16 @@
 </style>
 
 	<h:outputStylesheet name="css/style.css" />
+	
+	<h:outputScript name="js/custom.js" />
+	
 </h:head>
 
 <h:body>
 	<div class="center-all">
 		<h:form>
-			<p:outputLabel value="#{homeBean.error}"></p:outputLabel>
+			<p:outputLabel value="#{homeBean.error}" style="color: red;" styleClass="error" escape="false"></p:outputLabel>
+			<br />
 			<label>Target URL</label>
 			<br />
 			<p:inputText value="#{homeBean.targetUrl}"
@@ -40,9 +44,9 @@
 			<p:selectBooleanCheckbox value="#{homeBean.downloadImages}" />
 			<br />
 			<h:panelGrid columns="2">
-				<p:commandButton actionListener="#{homeBean.start()}" onclick=""
+				<p:commandButton actionListener="#{homeBean.start()}" onclick="start();"
 					disabled="#{homeBean.hasStarted}" value="Start" process="@form"
-					update="@form">
+					update="@form" styleClass="sendBtn">
 				</p:commandButton>
 				<p:commandButton actionListener="#{homeBean.stop()}" value="Stop"
 					async="true" process="@form" update="@form">

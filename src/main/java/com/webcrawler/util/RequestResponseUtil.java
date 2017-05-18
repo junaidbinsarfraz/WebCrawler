@@ -12,7 +12,7 @@ public class RequestResponseUtil {
 
 	public static Connection makeRequest(UrlProperty urlProperty) {
 
-		Response lastResponse = urlProperty.getReponse();
+		Response lastResponse = urlProperty.getLastReponse();
 		
 		Connection connection = Jsoup.connect(urlProperty.getName());
 		
@@ -48,7 +48,11 @@ public class RequestResponseUtil {
 		String newUrl = null;
 
 		if (url != null && !url.isEmpty()) {
-
+			
+			if(url.startsWith(" ")) {
+				url = url.replaceFirst(" ", "");
+			}
+			
 			if (!url.startsWith("http")) {
 				if (url.startsWith("//")) {
 					newUrl = "https:" + url;
@@ -57,6 +61,12 @@ public class RequestResponseUtil {
 				}
 			} else {
 				newUrl = url;
+			}
+			
+			if(Util.isNotNullAndEmpty(newUrl)) {
+				newUrl = Util.trim(newUrl);
+				newUrl = newUrl.replaceAll(" ", "%20");
+				newUrl = newUrl.replaceAll("\\^", "%");
 			}
 		}
 

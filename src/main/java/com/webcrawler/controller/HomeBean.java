@@ -3,6 +3,7 @@ package com.webcrawler.controller;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
@@ -115,35 +116,35 @@ public class HomeBean implements Serializable {
 	public void setHasStarted(Boolean hasStarted) {
 		this.hasStarted = hasStarted;
 	}
-	
+
 	private void validate() {
-		
-		if(Util.isNullOrEmpty(this.runName)) {
+
+		if (Util.isNullOrEmpty(this.runName)) {
 			this.error += "Run name cannot be empty<br/>";
 		}
-		
-		if(Util.isNullOrEmpty(this.targetUrl)) {
+
+		if (Util.isNullOrEmpty(this.targetUrl)) {
 			this.error += "Target url cannot be empty<br/>";
 		}
-		
-		if(Util.isNullOrEmpty(this.iterationPerPage)) {
+
+		if (Util.isNullOrEmpty(this.iterationPerPage)) {
 			this.error += "Iteration per page cannot be empty<br/>";
-		} else if(!Util.isNumber(this.iterationPerPage)) {
+		} else if (!Util.isNumber(this.iterationPerPage)) {
 			this.error += "Iteration per page must be a number<br/>";
-		} else { 
+		} else {
 			try {
 				Integer iterations = Integer.parseInt(this.iterationPerPage);
-				
-				if(iterations < 1) {
+
+				if (iterations < 1) {
 					this.error += "Iteration per page must be greater then 0<br/>";
-				} else if(iterations > 100) {
+				} else if (iterations > 100) {
 					this.error += "Iteration per page must not be greater then 100<br/>";
 				}
-			} catch(Exception e) {
+			} catch (Exception e) {
 				this.error += "Iteration per page must be an integer<br/>";
 			}
 		}
-		
+
 	}
 
 	public void start() {
@@ -151,10 +152,10 @@ public class HomeBean implements Serializable {
 		this.error = "";
 		this.pagesMapped = 0;
 		this.runTime = "00:00:00";
-		
+
 		this.validate();
-		
-		if(Util.isNullOrEmpty(this.error)) {
+
+		if (Util.isNotNullAndEmpty(this.error)) {
 			return;
 		}
 
@@ -207,6 +208,10 @@ public class HomeBean implements Serializable {
 		// Do web crawling here
 
 		Queue<UrlProperty> urlProperties = new LinkedList<>();
+		// TODO: Remove parsedLinks list if not significantly used
+		Queue<RequestResponseTbl> parsedLinks = new LinkedList<>();
+
+		Integer uniqueTitleCount = 0;
 
 		UrlProperty baseUrlProperty = new UrlProperty();
 
@@ -229,14 +234,52 @@ public class HomeBean implements Serializable {
 
 				UrlProperty urlProperty = urlProperties.poll();
 
+				RequestResponseTbl tempRequestResponseTbl = new RequestResponseTbl();
+
+				String fromUrl = null;
+
+				if (urlProperty.getLastRequest() != null) {
+					fromUrl = urlProperty.getLastRequest().url().toString();
+				}
+
+				String toUrl = urlProperty.getName();
+
+				tempRequestResponseTbl.setFromPageUrl(fromUrl);
+				tempRequestResponseTbl.setToPageUrl(toUrl);
+				// tempRequestResponseTbl.setRunIdentTbl(runIdentTbl);
+
+				List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome.findByExample(tempRequestResponseTbl);
+
+				Integer iterationNumer = 0;
+
+				if (tempRequestResponseTbls != null && Boolean.FALSE.equals(tempRequestResponseTbls.isEmpty())) {
+
+					List<RequestResponseTbl> requestResponseTbls1 = new ArrayList<>();
+
+					for (RequestResponseTbl tempRequestResponseTbl1 : tempRequestResponseTbls) {
+						if (tempRequestResponseTbl1.getRunIdentTbl() != null && tempRequestResponseTbl1.getRunIdentTbl().getId() != null
+								&& tempRequestResponseTbl1.getRunIdentTbl().getId().equals(runIdentTbl.getId())) {
+							requestResponseTbls1.add(tempRequestResponseTbl1);
+						}
+					}
+
+					if (requestResponseTbls1.size() >= iterations) {
+						continue;
+					} else {
+						iterationNumer = requestResponseTbls1.size() + 1;
+					}
+				} else {
+					iterationNumer = 1;
+				}
+
 				// TODO: Make valuable request
 				Connection connection = RequestResponseUtil.makeRequest(urlProperty);
 
 				Document htmlDocument = connection.get();
 
 				Document lastHtmlDocument = urlProperty.getHtmlDocument();
-				Response lastResponse = urlProperty.getReponse();
-				Request lastRequest = urlProperty.getRequest();
+				Response lastResponse = urlProperty.getLastReponse();
+				Request lastRequest = urlProperty.getLastRequest();
 
 				Response response = connection.response();
 				Request request = connection.request();
@@ -244,12 +287,13 @@ public class HomeBean implements Serializable {
 				// 200 is the HTTP OK status code
 				if (response.statusCode() == 200) {
 
-					if (Boolean.FALSE.equals(response.contentType().contains("text/html"))) {
+					if (Boolean.FALSE.equals(response.contentType().contains("text/html"))
+							&& Boolean.FALSE.equals(response.contentType().contains("application/xhtml+xml"))) {
 						continue;
 					}
 
 					this.pagesMapped++;
-					
+
 					System.out.println("Connected to : " + urlProperty.getName());
 
 					RequestResponseTbl requestResponseTbl = new RequestResponseTbl();
@@ -274,14 +318,16 @@ public class HomeBean implements Serializable {
 
 					}
 
-					// TODO: Make logic to set transition number
-					// requestResponseTbl.setPageTransitionIterationNumber(pageTransitionIterationNumber);
+					requestResponseTbl.setPageTransitionIterationNumber(iterationNumer);
 					requestResponseTbl.setRequestHeader(request.headers().toString());
 					requestResponseTbl.setResponseBody(response.body());
 					requestResponseTbl.setResponseHeader(response.headers().toString());
 					requestResponseTbl.setRunIdentTbl(runIdentTbl);
+
+					UrlProperty matchedUrlProperty = null;
+					String title = "";
+
 					if (htmlDocument != null) {
-						String title = "";
 
 						Elements elems = htmlDocument.head().getElementsByTag("title");
 
@@ -290,11 +336,29 @@ public class HomeBean implements Serializable {
 						}
 
 						// TODO: Make things fancy for title with numbers
+						matchedUrlProperty = this.getMatchedUrlPropertiesByTitle(urlProperties, title);
+
+						if (matchedUrlProperty != null) {
+
+							Integer distance = CrawlUtil.levenshteinDistance(matchedUrlProperty.getLastReponse().body(), response.body());
+
+							System.out.println("Distance : " + distance);
+
+							if (Boolean.TRUE.equals(matchedUrlProperty.getTitleModified())) {
+								// Get last underscore
+								title += ("_" + (Integer.parseInt(
+										matchedUrlProperty.getLastTitle().substring(matchedUrlProperty.getLastTitle().lastIndexOf("_") + 1)) + 1));
+							} else {
+								title += "_1";
+							}
+						}
+
 						requestResponseTbl.setToPageTitle(title);
 					}
 					requestResponseTbl.setToPageUrl(urlProperty.getName());
 
 					this.requestResponseTblHome.attachDirty(requestResponseTbl);
+					parsedLinks.add(requestResponseTbl);
 
 					Elements links = htmlDocument.select("a[href]");
 
@@ -311,9 +375,11 @@ public class HomeBean implements Serializable {
 							UrlProperty newUrlProperty = new UrlProperty();
 
 							newUrlProperty.setName(refectoredUrl);
-							newUrlProperty.setReponse(response);
-							newUrlProperty.setRequest(connection.request());
+							newUrlProperty.setLastReponse(response);
+							newUrlProperty.setLastRequest(connection.request());
 							newUrlProperty.setHtmlDocument(htmlDocument);
+							newUrlProperty.setLastTitle(title);
+							newUrlProperty.setTitleModified(matchedUrlProperty != null);
 
 							urlProperties.add(newUrlProperty);
 						}
@@ -326,18 +392,18 @@ public class HomeBean implements Serializable {
 					// url);
 				}
 
-			} catch(UnsupportedMimeTypeException e) {
+			} catch (UnsupportedMimeTypeException e) {
 				// No need to log
-			}catch (IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
+
 		}
 
 		Map<String, Long> hoursMinutesSeconds = DateUtil.getHoursMinutesSecondsDifference(this.startTime, Calendar.getInstance().getTime());
-		
+
 		this.runTime = hoursMinutesSeconds.get("hours") + ":" + hoursMinutesSeconds.get("minutes") + ":" + hoursMinutesSeconds.get("seconds");
-		
+
 		this.hasStarted = Boolean.FALSE;
 	}
 
@@ -369,6 +435,21 @@ public class HomeBean implements Serializable {
 			this.runTime = "00:00:00";
 		}
 
+	}
+
+	private UrlProperty getMatchedUrlPropertiesByTitle(Queue<UrlProperty> urlProperties, String title) {
+
+		UrlProperty matchedUrlProperty = null;
+
+		if (Util.isNotNullAndEmpty(title)) {
+			for (UrlProperty urlProperty : urlProperties) {
+				if (title.equalsIgnoreCase(urlProperty.getLastTitle())) {
+					matchedUrlProperty = urlProperty;
+				}
+			}
+		}
+
+		return matchedUrlProperty;
 	}
 
 }
