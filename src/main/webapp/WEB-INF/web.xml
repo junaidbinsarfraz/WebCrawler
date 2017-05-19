@@ -12,12 +12,12 @@
 		<param-value>humanity</param-value>
 	</context-param>
 	<error-page>
-	    <exception-type>javax.faces.application.ViewExpiredException</exception-type>
-	    <location>/WEB-INF/errorpages/expired.xhtml</location>
+		<exception-type>javax.faces.application.ViewExpiredException</exception-type>
+		<location>/WEB-INF/errorpages/expired.xhtml</location>
 	</error-page>
 	<error-page>
-	    <error-code>500</error-code>
-	    <location>/WEB-INF/errorpages/expired.xhtml</location>
+		<error-code>500</error-code>
+		<location>/WEB-INF/errorpages/expired.xhtml</location>
 	</error-page>
 	<session-config>
 		<session-timeout>-1</session-timeout>
