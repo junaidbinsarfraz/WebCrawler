@@ -14,60 +14,73 @@
 </style>
 
 	<h:outputStylesheet name="css/style.css" />
-	
+
 	<h:outputScript name="js/custom.js" />
-	
+
 </h:head>
 
 <h:body>
 	<div class="center-all">
-		<h:form>
-			<p:outputLabel value="#{homeBean.error}" style="color: red;" styleClass="error" escape="false" id="errors"></p:outputLabel>
-			<br />
-			<label>Target URL</label>
-			<br />
-			<p:inputText value="#{homeBean.targetUrl}"
-				requiredMessage="Target Url is required"></p:inputText>
-			<br />
-			<label>Iterations Per Page Transition</label>
-			<br />
-			<p:inputText value="#{homeBean.iterationPerPage}"
-				requiredMessage="Iterations Per Page Transition is required"></p:inputText>
-			<br />
-			<label>Run Name</label>
-			<br />
-			<p:inputText value="#{homeBean.runName}"
-				requiredMessage="Run Name is required"></p:inputText>
-			<br />
-			<label>Download Images?</label>
-			<br />
-			<p:selectBooleanCheckbox value="#{homeBean.downloadImages}" />
-			<br />
-			<h:panelGroup id="btns">
-				<h:panelGrid columns="2">
-					<p:commandButton actionListener="#{homeBean.start}" onclick="start();"
-						disabled="#{homeBean.hasStarted}" value="Start" process="@form"
-						update="@form" styleClass="sendBtn">
-					</p:commandButton>
-					<p:commandButton actionListener="#{homeBean.stop}" value="Stop" oncomplete="stop();"
-						async="true" process="@form" update="@form">
-					</p:commandButton>
-				</h:panelGrid>
-			</h:panelGroup>
+		<div class="ui-widget ui-widget-content ui-corner-all">
+			<div class="center-all" style="width: 50%; padding-bottom: 5%;">
+				<h:form>
+					<h2>Web Crawler</h2>
+					<p:outputLabel value="#{homeBean.error}" style="color: red;"
+						styleClass="error" escape="false" id="errors"></p:outputLabel>
+					<br />
+					<label>Target URL</label>
+					<br />
+					<p:inputText value="#{homeBean.targetUrl}"
+						requiredMessage="Target Url is required"></p:inputText>
+					<br />
+					<br />
+					<label>Iterations Per Page Transition</label>
+					<br />
+					<p:inputText value="#{homeBean.iterationPerPage}"
+						requiredMessage="Iterations Per Page Transition is required"></p:inputText>
+					<br />
+					<br />
+					<label>Run Name</label>
+					<br />
+					<p:inputText value="#{homeBean.runName}"
+						requiredMessage="Run Name is required"></p:inputText>
+					<br />
+					<br />
+					<label>Download Images?</label>
+					<br />
+					<p:selectBooleanCheckbox value="#{homeBean.downloadImages}" />
+					<br />
+					<br />
+					<h:panelGroup id="btns">
+						<h:panelGrid columns="2">
+							<p:commandButton actionListener="#{homeBean.start}"
+								onclick="start();" disabled="#{homeBean.hasStarted}"
+								value="Start" process="@form" update="@form"
+								styleClass="sendBtn">
+							</p:commandButton>
+							<p:commandButton actionListener="#{homeBean.stop}" value="Stop"
+								oncomplete="stop();" async="true" process="@form" update="@form">
+							</p:commandButton>
+						</h:panelGrid>
+					</h:panelGroup>
+					<br />
 
-			<h:panelGroup id="updates">
-				<h:panelGrid columns="2">
-					<label>Run Time: </label>
-					<p:outputLabel value="#{homeBean.runTime}"></p:outputLabel>
-					<label>Pages Mapped: </label>
-					<p:outputLabel value="#{homeBean.pagesMapped}"></p:outputLabel>
-				</h:panelGrid>
-			</h:panelGroup>
-			
-			<p:poll interval="1" listener="#{homeBean.fetchUpdates}" autoStart="false" async="true"
-				update="updates btns errors" widgetVar="poll" onerror="error();" />
+					<h:panelGroup id="updates">
+						<h:panelGrid columns="2">
+							<label>Run Time: </label>
+							<p:outputLabel value="#{homeBean.runTime}"></p:outputLabel>
+							<label>Pages Mapped: </label>
+							<p:outputLabel value="#{homeBean.pagesMapped}"></p:outputLabel>
+						</h:panelGrid>
+					</h:panelGroup>
 
-		</h:form>
+					<p:poll interval="1" listener="#{homeBean.fetchUpdates}"
+						autoStart="false" async="true" update="updates btns errors"
+						widgetVar="poll" onerror="error();" />
+
+				</h:form>
+			</div>
+		</div>
 	</div>
 </h:body>
 </html>
