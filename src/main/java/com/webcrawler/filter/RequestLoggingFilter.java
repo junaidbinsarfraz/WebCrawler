@@ -25,7 +25,6 @@ public class RequestLoggingFilter implements Filter {
 		try {
 			arg2.doFilter(arg0, arg1);
 		} catch (ServletException e) {
-			System.err.println("this is error lol");
 		}
 	}
 

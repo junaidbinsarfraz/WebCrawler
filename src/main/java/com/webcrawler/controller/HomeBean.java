@@ -194,20 +194,6 @@ public class HomeBean implements Serializable {
 			return;
 		}
 
-		// Start Time
-		this.startTime = Calendar.getInstance().getTime();
-
-		this.runIdentTblHome.attachDirty(runIdentTbl);
-
-		runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
-
-		if (runIdentTbls == null && runIdentTbls.isEmpty()) {
-			this.error += "Run Name Not saved in database<br/>";
-			return;
-		}
-
-		runIdentTbl = runIdentTbls.get(0);
-
 		BaseRobotRules rules = null;
 
 		try {
@@ -241,8 +227,13 @@ public class HomeBean implements Serializable {
 			return;
 		}
 		
+		// Start Time
+		this.startTime = Calendar.getInstance().getTime();
+		
 		this.hasStarted = Boolean.TRUE;
 		this.hasFinished = Boolean.FALSE;
+		
+		Integer count = 0;
 
 		while (Boolean.TRUE.equals(this.hasStarted) && Boolean.FALSE.equals(urlProperties.isEmpty())) {
 
@@ -275,7 +266,7 @@ public class HomeBean implements Serializable {
 
 					for (RequestResponseTbl tempRequestResponseTbl1 : tempRequestResponseTbls) {
 						if (tempRequestResponseTbl1.getRunIdentTbl() != null
-								&& tempRequestResponseTbl1.getRunIdentTbl().getId() != null
+								&& tempRequestResponseTbl1.getRunIdentTbl().getId() != null && runIdentTbl != null
 								&& tempRequestResponseTbl1.getRunIdentTbl().getId().equals(runIdentTbl.getId())) {
 							requestResponseTbls1.add(tempRequestResponseTbl1);
 						}
@@ -289,7 +280,7 @@ public class HomeBean implements Serializable {
 				} else {
 					iterationNumer = 1;
 				}
-
+				
 				Connection connection = RequestResponseUtil.makeRequest(urlProperty);
 
 				Document htmlDocument = connection.get();
@@ -303,9 +294,12 @@ public class HomeBean implements Serializable {
 
 				// 200 is the HTTP OK status code
 				if (response.statusCode() == 200) {
+					
+					Boolean isWithinDomain = CrawlUtil.isWithinDomain(this.targetUrl,
+							RequestResponseUtil.refectorUrl(response.url().toString(), baseDomain));
 
-					if (Boolean.FALSE.equals(response.contentType().contains("text/html"))
-							&& Boolean.FALSE.equals(response.contentType().contains("application/xhtml+xml"))) {
+					if (Boolean.FALSE.equals(isWithinDomain) || (Boolean.FALSE.equals(response.contentType().contains("text/html"))
+							&& Boolean.FALSE.equals(response.contentType().contains("application/xhtml+xml")))) {
 						continue;
 					}
 
@@ -339,7 +333,6 @@ public class HomeBean implements Serializable {
 					requestResponseTbl.setRequestHeader(request.headers().toString());
 					requestResponseTbl.setResponseBody(response.body());
 					requestResponseTbl.setResponseHeader(response.headers().toString());
-					requestResponseTbl.setRunIdentTbl(runIdentTbl);
 
 					UrlProperty matchedUrlProperty = null;
 					String title = "";
@@ -352,7 +345,7 @@ public class HomeBean implements Serializable {
 							title += elem.html();
 						}
 
-						if (Util.isNotNullAndEmpty(fromUrl) && Util.isNotNullAndEmpty(toUrl) && toUrl.equals(fromUrl)) {
+						if (Boolean.TRUE || (Util.isNotNullAndEmpty(fromUrl) && Util.isNotNullAndEmpty(toUrl) && toUrl.equals(fromUrl))) {
 
 							matchedUrlProperty = this.getMatchedUrlPropertiesByTitle(urlProperties, title);
 
@@ -383,7 +376,24 @@ public class HomeBean implements Serializable {
 
 						requestResponseTbl.setToPageTitle(title);
 					}
+					
+					if(count == 0) {
+						this.runIdentTblHome.attachDirty(runIdentTbl);
+						
+						runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
+						
+						if (runIdentTbls == null && runIdentTbls.isEmpty()) {
+							this.error += "Run Name Not saved in database<br/>";
+							return;
+						}
+						
+						runIdentTbl = runIdentTbls.get(0);
+						
+						count ++;
+					}
+					
 					requestResponseTbl.setToPageUrl(urlProperty.getName());
+					requestResponseTbl.setRunIdentTbl(runIdentTbl);
 
 					this.requestResponseTblHome.attachDirty(requestResponseTbl);
 					parsedLinks.add(requestResponseTbl);
@@ -394,7 +404,7 @@ public class HomeBean implements Serializable {
 
 						String refectoredUrl = RequestResponseUtil.refectorUrl(link.attr("href"), baseDomain);
 
-						Boolean isWithinDomain = CrawlUtil.isWithinDomain(this.targetUrl,
+						isWithinDomain = CrawlUtil.isWithinDomain(this.targetUrl,
 								RequestResponseUtil.refectorUrl(refectoredUrl, baseDomain));
 
 						Boolean isAllowed = CrawlUtil.isAllowed(rules, this.targetUrl, refectoredUrl);
@@ -428,7 +438,7 @@ public class HomeBean implements Serializable {
 			} catch (GenericJDBCException e) {
 				// Ignore
 			} catch (IllegalStateException e) {
-				System.err.println(e);
+//				System.err.println(e);
 				RequestContext reqCtx = RequestContext.getCurrentInstance();
 				reqCtx.execute("poll.stop();");
 			} catch (JDBCConnectionException e) {
