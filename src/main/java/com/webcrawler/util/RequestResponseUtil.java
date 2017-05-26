@@ -57,7 +57,11 @@ public class RequestResponseUtil {
 				if (url.startsWith("//")) {
 					newUrl = "https:" + url;
 				} else if (url.startsWith("/")) {
-					newUrl = "https://" + domain + url;
+					newUrl = "http://" + domain + url;
+				} else if(domain.endsWith("/")) {
+					newUrl = "http://" + domain + url;
+				} else {
+					newUrl = "http://" + domain + "/" + url;
 				}
 			} else {
 				newUrl = url;
