@@ -144,11 +144,11 @@
 
 		<!-- Primefaces Theme -->
 		<!-- https://mvnrepository.com/artifact/org.primefaces.extensions/all-themes -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.primefaces.extensions</groupId>
 			<artifactId>all-themes</artifactId>
 			<version>1.0.8</version>
-		</dependency>
+		</dependency> -->
 
 		<dependency>
 			<groupId>log4j</groupId>
