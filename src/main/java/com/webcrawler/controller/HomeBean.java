@@ -345,7 +345,8 @@ public class HomeBean implements Serializable {
 							title += elem.html();
 						}
 
-						if (Boolean.TRUE || (Util.isNotNullAndEmpty(fromUrl) && Util.isNotNullAndEmpty(toUrl) && toUrl.equals(fromUrl))) {
+						// To page title change base on pages' distance 
+						/*if (Boolean.TRUE || (Util.isNotNullAndEmpty(fromUrl) && Util.isNotNullAndEmpty(toUrl) && toUrl.equals(fromUrl))) {
 
 							matchedUrlProperty = this.getMatchedUrlPropertiesByTitle(urlProperties, title);
 
@@ -372,7 +373,7 @@ public class HomeBean implements Serializable {
 									}
 								}
 							}
-						}
+						}*/
 
 						requestResponseTbl.setToPageTitle(title);
 					}
