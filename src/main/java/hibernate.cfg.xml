@@ -15,6 +15,7 @@
         <property name="hibernate.current_session_context_class">thread</property>
         <property name="hibernate.cache.use_query_cache">false</property>
         <mapping resource="com/webcrawler/dao/RequestResponseTbl.hbm.xml" />
+        <mapping resource="com/webcrawler/dao/JmeterTransControllerTbl.hbm.xml" />
         <mapping resource="com/webcrawler/dao/RunIdentTbl.hbm.xml" />
     </session-factory>
 </hibernate-configuration>

@@ -1,16 +1,19 @@
 package com.webcrawler.controller;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Queue;
 
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 
@@ -23,8 +26,16 @@ import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxBinary;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxProfile;
 import org.primefaces.context.RequestContext;
 
+import com.webcrawler.dao.JmeterTransControllerTbl;
+import com.webcrawler.dao.JmeterTransControllerTblHome;
 import com.webcrawler.dao.RequestResponseTbl;
 import com.webcrawler.dao.RequestResponseTblHome;
 import com.webcrawler.dao.RunIdentTbl;
@@ -34,6 +45,7 @@ import com.webcrawler.util.Constants;
 import com.webcrawler.util.CrawlUtil;
 import com.webcrawler.util.DateUtil;
 import com.webcrawler.util.RequestResponseUtil;
+import com.webcrawler.util.ScreenShotUtil;
 import com.webcrawler.util.Util;
 
 import crawlercommons.robots.BaseRobotRules;
@@ -53,9 +65,11 @@ public class HomeBean implements Serializable {
 	private Boolean hasStarted;
 	private Boolean hasFinished;
 	private Date startTime;
+	private WebDriver driver;
 
 	private RunIdentTblHome runIdentTblHome = new RunIdentTblHome();
 	private RequestResponseTblHome requestResponseTblHome = new RequestResponseTblHome();
+	private JmeterTransControllerTblHome jmeterTransControllerTblHome = new JmeterTransControllerTblHome();
 
 	public String getError() {
 		return error;
@@ -127,6 +141,22 @@ public class HomeBean implements Serializable {
 
 	public void setHasFinished(Boolean hasFinished) {
 		this.hasFinished = hasFinished;
+	}
+	
+	@SuppressWarnings("deprecation")
+	@PostConstruct
+	public void init() {
+
+		try {
+			System.setProperty("webdriver.gecko.driver", Constants.GECKODRIVER_PATH);
+			File pathToBinary = new File(Constants.FIREFOX_PATH);
+			FirefoxBinary ffBinary = new FirefoxBinary(pathToBinary);
+			FirefoxProfile firefoxProfile = new FirefoxProfile();
+			firefoxProfile.setPreference("toolkit.startup.max_resumed_crashes", "-1");
+			this.driver = new FirefoxDriver(ffBinary, firefoxProfile);
+		} catch (Exception e) {
+			System.out.println("Unable to initialize firefox driver\n" + e);
+		}
 	}
 
 	private void validate() {
@@ -399,6 +429,27 @@ public class HomeBean implements Serializable {
 					requestResponseTbl.setRunIdentTbl(runIdentTbl);
 
 					this.requestResponseTblHome.attachDirty(requestResponseTbl);
+					
+					try {
+						
+						RequestResponseTbl requestResponseTblLastest = (RequestResponseTbl) this.requestResponseTblHome.findByExample(requestResponseTbl).get(0);
+							
+						if (this.driver != null) {
+							
+							this.driver.get(response.url().toString());
+							
+							JmeterTransControllerTbl jmeterTransControllerTbl = new JmeterTransControllerTbl();
+							
+							jmeterTransControllerTbl.setRequestResponseTbl(requestResponseTblLastest);
+							jmeterTransControllerTbl.setScreenShot(((TakesScreenshot)this.driver).getScreenshotAs(OutputType.BYTES));
+							
+							this.jmeterTransControllerTblHome.attachDirty(jmeterTransControllerTbl);
+						}
+						
+					} catch(Exception e) {
+						
+					}
+					
 					parsedLinks.add(requestResponseTbl);
 
 					Elements links = htmlDocument.select("a[href]");
@@ -461,6 +512,8 @@ public class HomeBean implements Serializable {
 
 		this.hasStarted = Boolean.FALSE;
 		this.hasFinished = Boolean.TRUE;
+		
+		ScreenShotUtil.killFirefox();
 	}
 
 	public void stop() {
@@ -476,6 +529,8 @@ public class HomeBean implements Serializable {
 			 * RequestContext reqCtx = RequestContext.getCurrentInstance();
 			 * reqCtx.execute("poll.stop();");
 			 */
+			
+			/*ScreenShotUtil.killFirefox();*/
 
 		} else {
 			this.pagesMapped = 0;

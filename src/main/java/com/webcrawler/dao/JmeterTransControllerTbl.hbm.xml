@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Jun 13, 2017 8:59:00 AM by Hibernate Tools 5.1.0.Alpha1 -->
+<hibernate-mapping>
+    <class name="com.webcrawler.dao.JmeterTransControllerTbl" table="jmeter_trans_controller_tbl" catalog="webcrawler" optimistic-lock="version">
+        <id name="id" type="java.lang.Integer">
+            <column name="Id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="requestResponseTbl" class="com.webcrawler.dao.RequestResponseTbl" fetch="select">
+            <column name="RequestResponseId" />
+        </many-to-one>
+        <property name="transContSec" type="string">
+            <column name="TransContSec" length="16777215" />
+        </property>
+        <property name="screenShot" type="binary">
+            <column name="ScreenShot" />
+        </property>
+    </class>
+</hibernate-mapping>
