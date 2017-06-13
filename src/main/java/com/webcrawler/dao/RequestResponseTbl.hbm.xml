@@ -20,6 +20,9 @@
         <property name="fromPageUrl" type="string">
             <column name="FromPageURL" length="65535" />
         </property>
+        <property name="toPageLevel" type="java.lang.Integer">
+            <column name="ToPageLevel" />
+        </property>
         <property name="toPageTitle" type="string">
             <column name="ToPageTitle" length="65535" />
         </property>

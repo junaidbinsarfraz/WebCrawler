@@ -11,6 +11,7 @@ public class RequestResponseTbl implements java.io.Serializable {
 	private String responseBody;
 	private String fromPageTitle;
 	private String fromPageUrl;
+	private Integer toPageLevel;
 	private String toPageTitle;
 	private String toPageUrl;
 	private Integer pageTransitionIterationNumber;
@@ -21,10 +22,11 @@ public class RequestResponseTbl implements java.io.Serializable {
 	}
 
 	public RequestResponseTbl(RunIdentTbl runIdentTbl, String responseBody, String fromPageTitle, String fromPageUrl, String toPageTitle,
-			String toPageUrl, Integer pageTransitionIterationNumber, String requestHeader, String responseHeader) {
+			String toPageUrl, Integer pageTransitionIterationNumber, String requestHeader, String responseHeader, Integer toPageLevel) {
 		this.runIdentTbl = runIdentTbl;
 		this.responseBody = responseBody;
 		this.fromPageTitle = fromPageTitle;
+		this.setToPageLevel(toPageLevel);
 		this.fromPageUrl = fromPageUrl;
 		this.toPageTitle = toPageTitle;
 		this.toPageUrl = toPageUrl;
@@ -111,6 +113,14 @@ public class RequestResponseTbl implements java.io.Serializable {
 
 	public void setResponseHeader(String responseHeader) {
 		this.responseHeader = responseHeader;
+	}
+
+	public Integer getToPageLevel() {
+		return toPageLevel;
+	}
+
+	public void setToPageLevel(Integer toPageLevel) {
+		this.toPageLevel = toPageLevel;
 	}
 
 }

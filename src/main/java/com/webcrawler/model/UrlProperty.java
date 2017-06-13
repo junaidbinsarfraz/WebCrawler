@@ -14,6 +14,7 @@ public class UrlProperty {
 	private Integer lastUniqueTitleCount;
 	private Integer uniqueTitleCount;
 	private Boolean titleModified;
+	private Integer toPageLevel;
 
 	public String getName() {
 		return name;
@@ -77,6 +78,14 @@ public class UrlProperty {
 
 	public void setTitleModified(Boolean titleModified) {
 		this.titleModified = titleModified;
+	}
+
+	public Integer getToPageLevel() {
+		return toPageLevel;
+	}
+
+	public void setToPageLevel(Integer toPageLevel) {
+		this.toPageLevel = toPageLevel;
 	}
 
 }

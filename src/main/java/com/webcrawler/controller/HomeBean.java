@@ -216,6 +216,7 @@ public class HomeBean implements Serializable {
 		UrlProperty baseUrlProperty = new UrlProperty();
 
 		baseUrlProperty.setName(this.targetUrl);
+		baseUrlProperty.setToPageLevel(0);
 
 		urlProperties.add(baseUrlProperty);
 
@@ -333,6 +334,7 @@ public class HomeBean implements Serializable {
 					requestResponseTbl.setRequestHeader(request.headers().toString());
 					requestResponseTbl.setResponseBody(response.body());
 					requestResponseTbl.setResponseHeader(response.headers().toString());
+					requestResponseTbl.setToPageLevel(urlProperty.getToPageLevel());
 
 					UrlProperty matchedUrlProperty = null;
 					String title = "";
@@ -410,7 +412,7 @@ public class HomeBean implements Serializable {
 
 						Boolean isAllowed = CrawlUtil.isAllowed(rules, this.targetUrl, refectoredUrl);
 
-						if (Boolean.TRUE.equals(isWithinDomain) && Boolean.TRUE.equals(isAllowed)) {
+						if (Boolean.TRUE.equals(isWithinDomain) && Boolean.TRUE.equals(isAllowed) && Constants.MAX_DEPTH > urlProperty.getToPageLevel()) {
 
 							UrlProperty newUrlProperty = new UrlProperty();
 
@@ -420,6 +422,7 @@ public class HomeBean implements Serializable {
 							newUrlProperty.setHtmlDocument(htmlDocument);
 							newUrlProperty.setLastTitle(title);
 							newUrlProperty.setTitleModified(matchedUrlProperty != null);
+							newUrlProperty.setToPageLevel(urlProperty.getToPageLevel() + 1);
 
 							urlProperties.add(newUrlProperty);
 						}
