@@ -2,15 +2,14 @@ package com.webcrawler.controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Queue;
 
 import javax.annotation.PostConstruct;
@@ -65,6 +64,17 @@ public class HomeBean implements Serializable {
 	private Boolean hasStarted;
 	private Boolean hasFinished;
 	private Date startTime;
+	
+	// Duplicate Run variables
+	private String duplicateError;
+	private String removalRunName;
+	private String percentage;
+	private String runTimeRemoval = "00:00:00";
+	private Integer pagesMappedRemoval = 0;
+	private Boolean hasStartedRemoval;
+	private Boolean hasFinishedRemoval;
+	private Date startTimeRemoval;
+	
 	private WebDriver driver;
 
 	private RunIdentTblHome runIdentTblHome = new RunIdentTblHome();
@@ -143,6 +153,78 @@ public class HomeBean implements Serializable {
 		this.hasFinished = hasFinished;
 	}
 	
+	public Date getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Date startTime) {
+		this.startTime = startTime;
+	}
+
+	public String getDuplicateError() {
+		return duplicateError;
+	}
+
+	public void setDuplicateError(String duplicateError) {
+		this.duplicateError = duplicateError;
+	}
+
+	public String getRemovalRunName() {
+		return removalRunName;
+	}
+
+	public void setRemovalRunName(String removalRunName) {
+		this.removalRunName = removalRunName;
+	}
+
+	public String getPercentage() {
+		return percentage;
+	}
+
+	public void setPercentage(String percentage) {
+		this.percentage = percentage;
+	}
+
+	public String getRunTimeRemoval() {
+		return runTimeRemoval;
+	}
+
+	public void setRunTimeRemoval(String runTimeRemoval) {
+		this.runTimeRemoval = runTimeRemoval;
+	}
+
+	public Integer getPagesMappedRemoval() {
+		return pagesMappedRemoval;
+	}
+
+	public void setPagesMappedRemoval(Integer pagesMappedRemoval) {
+		this.pagesMappedRemoval = pagesMappedRemoval;
+	}
+
+	public Boolean getHasStartedRemoval() {
+		return hasStartedRemoval;
+	}
+
+	public void setHasStartedRemoval(Boolean hasStartedRemoval) {
+		this.hasStartedRemoval = hasStartedRemoval;
+	}
+
+	public Boolean getHasFinishedRemoval() {
+		return hasFinishedRemoval;
+	}
+
+	public void setHasFinishedRemoval(Boolean hasFinishedRemoval) {
+		this.hasFinishedRemoval = hasFinishedRemoval;
+	}
+
+	public Date getStartTimeRemoval() {
+		return startTimeRemoval;
+	}
+
+	public void setStartTimeRemoval(Date startTimeRemoval) {
+		this.startTimeRemoval = startTimeRemoval;
+	}
+
 	@SuppressWarnings("deprecation")
 	@PostConstruct
 	public void init() {
@@ -411,6 +493,8 @@ public class HomeBean implements Serializable {
 					}
 					
 					if(count == 0) {
+						runIdentTbl.setBaseUrl(this.targetUrl);
+						
 						this.runIdentTblHome.attachDirty(runIdentTbl);
 						
 						runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
@@ -571,6 +655,167 @@ public class HomeBean implements Serializable {
 		}
 
 		return matchedUrlProperty;
+	}
+	
+	/////////// Duplicate Removal
+	
+	public void startRemoval() {
+		
+		// Init
+		this.pagesMappedRemoval = 0;
+		this.runTimeRemoval = "00:00:00";
+		this.duplicateError = "";
+		Integer percentageValue = 0;
+		
+		// Validate inputs
+		try {
+			percentageValue = Integer.parseInt(this.percentage);
+			
+			if(percentageValue <= 0) {
+				this.duplicateError += "Percentage should be a greater then 0<br/>";
+			} else if(percentageValue > 100) {
+				this.duplicateError += "Percentage should be a less then 100<br/>";
+			}
+		} catch (Exception e) {
+			// error
+			this.duplicateError += "Percentage should be a number<br/>";
+		}
+		
+		// Check if run Name exists
+		RunIdentTbl runIdentTbl = new RunIdentTbl();
+
+		runIdentTbl.setRunIdentifier(this.removalRunName);
+
+		List<RunIdentTbl> runIdentTbls = null;
+
+		try {
+			runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
+		} catch (JDBCConnectionException e) {
+			this.duplicateError = "Unable to connect to database<br/>";
+		}
+
+		if (runIdentTbls == null || Boolean.TRUE.equals(runIdentTbls.isEmpty())) {
+			this.duplicateError += "Run Name not found<br/>";
+		} else {
+			runIdentTbl = runIdentTbls.get(0);
+
+			// Check if run Name percentage is greater or not
+			if (Boolean.TRUE.equals(runIdentTbl.getCleansed()) && percentageValue <= runIdentTbl.getPercent()) {
+				this.duplicateError += "Already cleansed with " + runIdentTbl.getPercent() + "%<br/>";
+			}
+		}
+		
+		if (Util.isNotNullAndEmpty(this.duplicateError)) {
+			return;
+		}
+		
+		runIdentTbl.setPercent(percentageValue);
+		
+		this.runIdentTblHome.attachDirty(runIdentTbl);
+		
+		runIdentTbl = this.runIdentTblHome.findById(runIdentTbl.getId());
+		
+		// Start doing removals
+		RequestResponseTbl dummyRequestResponseTbl = new RequestResponseTbl();
+		
+		dummyRequestResponseTbl.setRunIdentTbl(runIdentTbl);
+		
+		// Get all parsed pages
+		List<RequestResponseTbl> requestResponseTbls = this.requestResponseTblHome.findByRunId(runIdentTbl.getId());
+		
+		// Start Time
+		this.startTimeRemoval = Calendar.getInstance().getTime();
+		
+		this.hasStartedRemoval = Boolean.TRUE;
+		this.hasFinishedRemoval = Boolean.FALSE;
+		
+		// Then apply bout-force algorithm
+		for (Iterator<RequestResponseTbl> iterator = requestResponseTbls.iterator(); iterator.hasNext();) {
+			if(Boolean.TRUE.equals(hasFinishedRemoval)) {
+				break;
+			}
+			
+			RequestResponseTbl requestResponseTbl = iterator.next();
+			
+			inner: for (RequestResponseTbl innerRequestResponseTbl : requestResponseTbls) {
+				
+				if(Boolean.TRUE.equals(hasFinishedRemoval)) {
+					break;
+				}
+
+				if (Boolean.FALSE.equals(requestResponseTbl.getId().equals(innerRequestResponseTbl.getId()))) {
+
+					Integer distance = CrawlUtil.levenshteinDistance(requestResponseTbl.getResponseBody(), innerRequestResponseTbl.getResponseBody());
+
+					Double percentage = 100 - (((double) distance)
+							/ (Math.max(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length()))) * 100;
+
+					if (percentage != null && percentage.intValue() > percentageValue) {
+
+						// Remove from database
+						this.requestResponseTblHome.delete(requestResponseTbl);
+						iterator.remove();
+						this.pagesMappedRemoval++;
+						break inner;
+					}
+
+				}
+			}
+		}
+		
+		if(Boolean.FALSE.equals(hasFinishedRemoval)) {
+			// Completely cleansed
+			
+			runIdentTbl.setCleansed(Boolean.TRUE);
+			
+			this.runIdentTblHome.attachDirty(runIdentTbl);
+			
+		}
+		
+		this.hasStartedRemoval = Boolean.FALSE;
+		this.hasFinishedRemoval = Boolean.TRUE;
+	}
+
+	public void stopRemoval() {
+		if (Boolean.TRUE.equals(this.hasStartedRemoval)) {
+			// Calculate time
+			Map<String, Long> hoursMinutesSeconds = DateUtil.getHoursMinutesSecondsDifference(this.startTimeRemoval,
+					Calendar.getInstance().getTime());
+
+			this.runTimeRemoval = hoursMinutesSeconds.get("hours") + ":" + hoursMinutesSeconds.get("minutes") + ":"
+					+ hoursMinutesSeconds.get("seconds");
+
+			/*
+			 * RequestContext reqCtx = RequestContext.getCurrentInstance();
+			 * reqCtx.execute("poll.stop();");
+			 */
+			
+			/*ScreenShotUtil.killFirefox();*/
+
+		} else {
+			this.pagesMappedRemoval = 0;
+			this.runTimeRemoval = "00:00:00";
+		}
+
+		this.hasStartedRemoval = Boolean.FALSE;
+		this.hasFinishedRemoval = Boolean.TRUE;
+	}
+
+	public void fetchUpdatesRemoval() {
+
+		if (Boolean.TRUE.equals(this.hasStartedRemoval)) {
+			// Calculate time
+			Map<String, Long> hoursMinutesSeconds = DateUtil.getHoursMinutesSecondsDifference(this.startTimeRemoval,
+					Calendar.getInstance().getTime());
+
+			this.runTimeRemoval = hoursMinutesSeconds.get("hours") + ":" + hoursMinutesSeconds.get("minutes") + ":"
+					+ hoursMinutesSeconds.get("seconds");
+
+		} else if (Boolean.FALSE.equals(hasFinishedRemoval)) {
+			this.pagesMappedRemoval = 0;
+			this.runTimeRemoval = "00:00:00";
+		}
+		
 	}
 
 }

@@ -1,5 +1,5 @@
 package com.webcrawler.dao;
-// Generated May 11, 2017 2:36:17 PM by Hibernate Tools 5.1.0.Alpha1
+// Generated Jun 15, 2017 8:33:41 AM by Hibernate Tools 5.1.0.Alpha1
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,13 +11,19 @@ public class RunIdentTbl implements java.io.Serializable {
 
 	private Integer id;
 	private String runIdentifier;
+	private String baseUrl;
+	private Boolean cleansed;
+	private Integer percent;
 	private Set requestResponseTbls = new HashSet(0);
 
 	public RunIdentTbl() {
 	}
 
-	public RunIdentTbl(String runIdentifier, Set requestResponseTbls) {
+	public RunIdentTbl(String runIdentifier, String baseUrl, Boolean cleansed, Integer percent, Set requestResponseTbls) {
 		this.runIdentifier = runIdentifier;
+		this.baseUrl = baseUrl;
+		this.cleansed = cleansed;
+		this.percent = percent;
 		this.requestResponseTbls = requestResponseTbls;
 	}
 
@@ -35,6 +41,30 @@ public class RunIdentTbl implements java.io.Serializable {
 
 	public void setRunIdentifier(String runIdentifier) {
 		this.runIdentifier = runIdentifier;
+	}
+
+	public String getBaseUrl() {
+		return this.baseUrl;
+	}
+
+	public void setBaseUrl(String baseUrl) {
+		this.baseUrl = baseUrl;
+	}
+
+	public Boolean getCleansed() {
+		return this.cleansed;
+	}
+
+	public void setCleansed(Boolean cleansed) {
+		this.cleansed = cleansed;
+	}
+
+	public Integer getPercent() {
+		return this.percent;
+	}
+
+	public void setPercent(Integer percent) {
+		this.percent = percent;
 	}
 
 	public Set getRequestResponseTbls() {

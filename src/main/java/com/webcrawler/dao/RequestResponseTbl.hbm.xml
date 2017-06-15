@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
-<!-- Generated May 11, 2017 2:36:17 PM by Hibernate Tools 5.1.0.Alpha1 -->
+<!-- Generated Jun 15, 2017 8:33:41 AM by Hibernate Tools 5.1.0.Alpha1 -->
 <hibernate-mapping>
     <class name="com.webcrawler.dao.RequestResponseTbl" table="request_response_tbl" catalog="webcrawler" optimistic-lock="version">
         <id name="id" type="java.lang.Integer">
@@ -38,5 +38,11 @@
         <property name="responseHeader" type="string">
             <column name="ResponseHeader" length="65535" />
         </property>
+        <set name="jmeterTransControllerTbls" table="jmeter_trans_controller_tbl" inverse="true" lazy="true" fetch="select">
+            <key>
+                <column name="RequestResponseId" />
+            </key>
+            <one-to-many class="com.webcrawler.dao.JmeterTransControllerTbl" />
+        </set>
     </class>
 </hibernate-mapping>

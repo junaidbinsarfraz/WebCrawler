@@ -140,4 +140,21 @@ public class RequestResponseTblHome {
 			throw re;
 		}
 	}
+	
+	public List<RequestResponseTbl> findByRunId(Integer runId) {
+		log.debug("finding RequestResponseTbl instance by example");
+		try {
+			sessionFactory.getCurrentSession().beginTransaction();
+
+			List<RequestResponseTbl> results = sessionFactory.getCurrentSession()
+					.createSQLQuery("select * from request_response_tbl r where r.RunId = " + runId).addEntity(RequestResponseTbl.class).list();
+
+			log.debug("find by example successful, result size: " + results.size());
+			sessionFactory.getCurrentSession().getTransaction().commit();
+			return results;
+		} catch (RuntimeException re) {
+			log.error("find by example failed", re);
+			throw re;
+		}
+	}
 }

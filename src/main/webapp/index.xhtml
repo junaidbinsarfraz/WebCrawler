@@ -21,8 +21,8 @@
 
 <h:body>
 	<div class="center-all">
-		<div class="ui-widget ui-widget-content ui-corner-all">
-			<div class="center-all" style="width: 50%; padding-bottom: 5%;">
+		<div class="ui-widget ui-widget-content ui-corner-all" style="overflow: hidden; padding: 2%;">
+			<div class="center-all" style="width: 50%; padding-bottom: 5%; float: left">
 				<h:form>
 					<h2>Web Crawler</h2>
 					<p:outputLabel value="#{homeBean.error}" style="color: red;"
@@ -80,6 +80,55 @@
 
 				</h:form>
 			</div>
+			
+			<div class="center-all" style="width: 50%; padding-bottom: 5%; float: left">
+				<h:form>
+					<h2>Duplicates Removal</h2>
+					<p:outputLabel value="#{homeBean.duplicateError}" style="color: red;"
+						styleClass="errorRemoval" escape="false" id="errors"></p:outputLabel>
+					<br />
+					<label>Removal From Run Name</label>
+					<br />
+					<p:inputText value="#{homeBean.removalRunName}"
+						requiredMessage="Run Name is required"></p:inputText>
+					<br />
+					<br />
+					<label>% matches</label>
+					<br />
+					<p:inputText value="#{homeBean.percentage}"
+						requiredMessage="Percentage Matches is required"></p:inputText>
+					<br />
+					<br />
+					<h:panelGroup id="btns">
+						<h:panelGrid columns="2">
+							<p:commandButton actionListener="#{homeBean.startRemoval}"
+								onclick="startRemoval();" disabled="#{homeBean.hasStartedRemoval}"
+								value="Start" process="@form" update="@form"
+								styleClass="sendBtnRemoval">
+							</p:commandButton>
+							<p:commandButton actionListener="#{homeBean.stopRemoval}" value="Stop"
+								oncomplete="stopRemoval();" async="true" process="@form" update="@form">
+							</p:commandButton>
+						</h:panelGrid>
+					</h:panelGroup>
+					<br />
+
+					<h:panelGroup id="updates">
+						<h:panelGrid columns="2">
+							<label>Run Time: </label>
+							<p:outputLabel value="#{homeBean.runTimeRemoval}"></p:outputLabel>
+							<label>Pages Removed: </label>
+							<p:outputLabel value="#{homeBean.pagesMappedRemoval}"></p:outputLabel>
+						</h:panelGrid>
+					</h:panelGroup>
+
+					<p:poll interval="1" listener="#{homeBean.fetchUpdatesRemoval}"
+						autoStart="false" async="true" update="updates btns errors"
+						widgetVar="pollRemoval" onerror="errorRemoval();" />
+
+				</h:form>
+			</div>
+			
 		</div>
 	</div>
 </h:body>
