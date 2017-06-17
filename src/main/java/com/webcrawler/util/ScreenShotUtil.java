@@ -1,11 +1,36 @@
 package com.webcrawler.util;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxBinary;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxProfile;
+
 public class ScreenShotUtil {
+	
+	@SuppressWarnings("deprecation")
+	public static WebDriver initFireFox() {
+		
+		WebDriver driver = null;
+		
+		try {
+			System.setProperty("webdriver.gecko.driver", Constants.GECKODRIVER_PATH);
+			File pathToBinary = new File(Constants.FIREFOX_PATH);
+			FirefoxBinary ffBinary = new FirefoxBinary(pathToBinary);
+			FirefoxProfile firefoxProfile = new FirefoxProfile();
+			firefoxProfile.setPreference("toolkit.startup.max_resumed_crashes", "-1");
+			driver = new FirefoxDriver(ffBinary, firefoxProfile);
+		} catch (Exception e) {
+			System.out.println("Unable to initialize firefox driver\n" + e);
+		}
+		
+		return driver;
+	}
 	
 	public static void killFirefox() {
 	    Runtime rt = Runtime.getRuntime();

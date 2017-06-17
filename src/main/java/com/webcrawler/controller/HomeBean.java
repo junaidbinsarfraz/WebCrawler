@@ -1,6 +1,5 @@
 package com.webcrawler.controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 
@@ -28,9 +26,6 @@ import org.jsoup.select.Elements;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxBinary;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
 import org.primefaces.context.RequestContext;
 
 import com.webcrawler.dao.JmeterTransControllerTbl;
@@ -225,22 +220,6 @@ public class HomeBean implements Serializable {
 		this.startTimeRemoval = startTimeRemoval;
 	}
 
-	@SuppressWarnings("deprecation")
-	@PostConstruct
-	public void init() {
-
-		try {
-			System.setProperty("webdriver.gecko.driver", Constants.GECKODRIVER_PATH);
-			File pathToBinary = new File(Constants.FIREFOX_PATH);
-			FirefoxBinary ffBinary = new FirefoxBinary(pathToBinary);
-			FirefoxProfile firefoxProfile = new FirefoxProfile();
-			firefoxProfile.setPreference("toolkit.startup.max_resumed_crashes", "-1");
-			this.driver = new FirefoxDriver(ffBinary, firefoxProfile);
-		} catch (Exception e) {
-			System.out.println("Unable to initialize firefox driver\n" + e);
-		}
-	}
-
 	private void validate() {
 
 		if (Util.isNullOrEmpty(this.runName)) {
@@ -347,7 +326,11 @@ public class HomeBean implements Serializable {
 		this.hasFinished = Boolean.FALSE;
 		
 		Integer count = 0;
-
+		
+		if(this.driver == null) {
+			this.driver = ScreenShotUtil.initFireFox();
+		}
+		
 		while (Boolean.TRUE.equals(this.hasStarted) && Boolean.FALSE.equals(urlProperties.isEmpty())) {
 
 			try {
@@ -657,7 +640,7 @@ public class HomeBean implements Serializable {
 		return matchedUrlProperty;
 	}
 	
-	/////////// Duplicate Removal
+	/////////// Duplicate Removal /////////////
 	
 	public void startRemoval() {
 		
