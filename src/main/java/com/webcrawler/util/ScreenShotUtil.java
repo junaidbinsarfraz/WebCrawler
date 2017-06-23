@@ -23,6 +23,9 @@ public class ScreenShotUtil {
 			File pathToBinary = new File(Constants.FIREFOX_PATH);
 			FirefoxBinary ffBinary = new FirefoxBinary(pathToBinary);
 			FirefoxProfile firefoxProfile = new FirefoxProfile();
+			/*firefoxProfile.setPreference("network.proxy.type", 1);
+			firefoxProfile.setPreference("network.proxy.http", "127.0.0.1");
+			firefoxProfile.setPreference("network.proxy.http_port", 8888);*/
 			firefoxProfile.setPreference("toolkit.startup.max_resumed_crashes", "-1");
 			driver = new FirefoxDriver(ffBinary, firefoxProfile);
 		} catch (Exception e) {

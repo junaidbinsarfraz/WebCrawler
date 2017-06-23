@@ -387,6 +387,10 @@ public class HomeBean implements Serializable {
 
 				Response response = connection.response();
 				Request request = connection.request();
+				
+				request.headers();
+				
+//				System.out.println(request.headers());
 
 				// 200 is the HTTP OK status code
 				if (response.statusCode() == 200) {
