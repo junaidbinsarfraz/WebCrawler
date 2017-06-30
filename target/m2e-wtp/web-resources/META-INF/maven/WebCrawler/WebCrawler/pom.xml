@@ -30,6 +30,7 @@
 		<primefaces.version>5.3</primefaces.version>
 		<maven.compiler.plugin.version>3.3</maven.compiler.plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<jmeter.version>3.2</jmeter.version>
 	</properties>
 
 	<repositories>
@@ -150,7 +151,7 @@
 			<version>1.0.8</version>
 		</dependency> -->
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.16</version>
@@ -172,7 +173,7 @@
 					<artifactId>jmxri</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
+		</dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
 		<dependency>
@@ -214,6 +215,54 @@
 		    <groupId>org.seleniumhq.selenium</groupId>
 		    <artifactId>selenium-firefox-driver</artifactId>
 		    <version>3.4.0</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.jmeter/ApacheJMeter_core -->
+		<dependency>
+		    <groupId>org.apache.jmeter</groupId>
+		    <artifactId>ApacheJMeter_core</artifactId>
+		    <version>${jmeter.version}</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.jmeter/ApacheJMeter_http -->
+		<dependency>
+		    <groupId>org.apache.jmeter</groupId>
+		    <artifactId>ApacheJMeter_http</artifactId>
+		    <version>${jmeter.version}</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>xml-apis</groupId>
+		    <artifactId>xml-apis</artifactId>
+		    <version>1.4.01</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.jmeter/ApacheJMeter_java -->
+		<dependency>
+		    <groupId>org.apache.jmeter</groupId>
+		    <artifactId>ApacheJMeter_java</artifactId>
+		    <version>${jmeter.version}</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/javax.xml.parsers/jaxp-api -->
+		<dependency>
+		    <groupId>javax.xml.parsers</groupId>
+		    <artifactId>jaxp-api</artifactId>
+		    <version>1.4.5</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/jaxen/jaxen -->
+		<dependency>
+		    <groupId>jaxen</groupId>
+		    <artifactId>jaxen</artifactId>
+		    <version>1.1.6</version>
+		</dependency>
+				
+		<!-- https://mvnrepository.com/artifact/org.w3c/dom -->
+		<dependency>
+		    <groupId>org.w3c</groupId>
+		    <artifactId>dom</artifactId>
+		    <version>2.3.0-jaxb-1.0.6</version>
 		</dependency>
 		
 	</dependencies>

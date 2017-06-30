@@ -1,5 +1,6 @@
 package com.webcrawler.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ import com.webcrawler.dao.RequestResponseTbl;
 import com.webcrawler.dao.RequestResponseTblHome;
 import com.webcrawler.dao.RunIdentTbl;
 import com.webcrawler.dao.RunIdentTblHome;
+import com.webcrawler.jmeter.handler.RecordingHandler;
+import com.webcrawler.jmeter.util.XmlParser;
 import com.webcrawler.model.UrlProperty;
 import com.webcrawler.util.Constants;
 import com.webcrawler.util.CrawlUtil;
@@ -71,6 +74,7 @@ public class HomeBean implements Serializable {
 	private Date startTimeRemoval;
 	
 	private WebDriver driver;
+	private RecordingHandler recordingHandler = new RecordingHandler();
 
 	private RunIdentTblHome runIdentTblHome = new RunIdentTblHome();
 	private RequestResponseTblHome requestResponseTblHome = new RequestResponseTblHome();
@@ -331,6 +335,13 @@ public class HomeBean implements Serializable {
 			this.driver = ScreenShotUtil.initFireFox();
 		}
 		
+		try {
+			recordingHandler.init();
+			recordingHandler.start();
+		} catch (Exception e) {
+//			System.out.println("Error \n" + e);
+		}
+		
 		while (Boolean.TRUE.equals(this.hasStarted) && Boolean.FALSE.equals(urlProperties.isEmpty())) {
 
 			try {
@@ -570,7 +581,7 @@ public class HomeBean implements Serializable {
 			} catch (JDBCConnectionException e) {
 				this.error = "Unable to connect to database";
 			} catch (Exception e) {
-
+//				System.out.println(e);
 			}
 
 		}
@@ -585,6 +596,11 @@ public class HomeBean implements Serializable {
 		this.hasFinished = Boolean.TRUE;
 		
 		ScreenShotUtil.killFirefox();
+		
+		File jmxFile = recordingHandler.stop();
+		
+		XmlParser.parseXmlWithGivenXPathExp(jmxFile, "//HeaderManager|//HTTPSamplerProxy");
+		
 	}
 
 	public void stop() {
