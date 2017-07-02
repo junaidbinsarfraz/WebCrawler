@@ -1,9 +1,7 @@
 package com.webcrawler.jmeter.handler;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.util.LinkedList;
 
 import org.apache.jmeter.control.LoopController;
@@ -21,16 +19,27 @@ import org.apache.jorphan.collections.ListedHashTree;
 
 import com.webcrawler.jmeter.util.Constants;
 
+/**
+ * The class RecordingHandler is use to Handle all the JMeter recording
+ * controller
+ * 
+ * @author Junaid
+ */
 public class RecordingHandler {
 
 	private ProxyControl proxy = null;
 	private JMeterTreeModel treeModel = null;
 
+	/**
+	 * The method init() is use to initialize all the JMeter non-gui parameter
+	 * 
+	 * @throws Exception
+	 *             when unable to initialize JMeter
+	 */
 	@SuppressWarnings("deprecation")
 	public void init() throws Exception {
 
-		JMeterUtils.setJMeterHome(Constants.JMETER_HOME); // Or wherever you put
-															// it.
+		JMeterUtils.setJMeterHome(Constants.JMETER_HOME); 
 		JMeterUtils.loadJMeterProperties(JMeterUtils.getJMeterBinDir() + "/jmeter.properties");
 		JMeterUtils.initLocale();
 
@@ -67,9 +76,13 @@ public class RecordingHandler {
 		proxy.setSamplerFollowRedirects(Boolean.TRUE);
 
 		treeModel.addComponent(proxy, (JMeterTreeNode) root.getChildAt(1));
-
 	}
 
+	/**
+	 * The method start() is use to start JMeter recording controller proxy
+	 * 
+	 * @return true is started successfully else false
+	 */
 	public Boolean start() {
 		try {
 			this.proxy.startProxy();
@@ -80,40 +93,45 @@ public class RecordingHandler {
 		return Boolean.TRUE;
 	}
 
-	public File stop() {
+	/**
+	 * The method stop() is use to stop JMeter recording controller proxy.
+	 * 
+	 * @return The tree that is recorded till now
+	 */
+	public String stop() {
 		this.proxy.stopProxy();
-
-		File jmxFile = null;
 
 		if (this.treeModel == null) {
 			return null;
 		}
 
+		OutputStream out = new ByteArrayOutputStream();
+		
 		try {
-			String fileName = new SimpleDateFormat("yyyyMMddhhmmss'.jmx'").format(new Date());
-
-			jmxFile = new File(fileName);
-
 			HashTree tree = treeModel.getTestPlan();
 
 			this.convertSubTree(tree);
 
-			SaveService.saveTree(tree, new FileOutputStream(jmxFile));
+			SaveService.saveTree(tree, out);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			// e.printStackTrace();
 			return null;
 		}
 
-		return jmxFile;
+		return out.toString();
 	}
 
+	/**
+	 * The method convertSubTree() is use to beatify the tree
+	 * 
+	 * @param tree
+	 *            beautified tree
+	 */
 	private void convertSubTree(HashTree tree) {
 		for (Object o : new LinkedList<>(tree.list())) {
 			JMeterTreeNode item = (JMeterTreeNode) o;
 			convertSubTree(tree.getTree(item));
-			TestElement testElement = item.getTestElement(); // requires
-																// JMeterTreeNode
+			TestElement testElement = item.getTestElement(); // requires JMeterTreeNode
 			tree.replaceKey(item, testElement);
 		}
 	}

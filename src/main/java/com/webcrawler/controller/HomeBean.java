@@ -1,11 +1,13 @@
 package com.webcrawler.controller;
 
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,6 +49,14 @@ import com.webcrawler.util.Util;
 
 import crawlercommons.robots.BaseRobotRules;
 
+/**
+ * The class HomeBean is used as a controller. It gets all the request and show
+ * the response. It also manage all the activities like initialize firefox,
+ * web-crawling, screenshots, removal of duplicates, start/stop web-crawling,
+ * start/stop duplicate removals, save/delete database operations.
+ * 
+ * @author Junaid
+ */
 @ManagedBean(name = "homeBean")
 // @ViewScoped
 @SessionScoped
@@ -224,6 +234,9 @@ public class HomeBean implements Serializable {
 		this.startTimeRemoval = startTimeRemoval;
 	}
 
+	/**
+	 * The method validate() is use to validate the input for web-crawling
+	 */
 	private void validate() {
 
 		if (Util.isNullOrEmpty(this.runName)) {
@@ -254,8 +267,11 @@ public class HomeBean implements Serializable {
 
 	}
 
+	/**
+	 * The method start() is use to start web-crawling
+	 */
 	public void start() {
-
+		
 		this.error = "";
 		this.pagesMapped = 0;
 		this.runTime = "00:00:00";
@@ -302,8 +318,6 @@ public class HomeBean implements Serializable {
 			return;
 		}
 
-		// Do web crawling here
-
 		Queue<UrlProperty> urlProperties = new LinkedList<>();
 		// TODO: Remove parsedLinks list if not significantly used
 		Queue<RequestResponseTbl> parsedLinks = new LinkedList<>();
@@ -315,6 +329,7 @@ public class HomeBean implements Serializable {
 
 		urlProperties.add(baseUrlProperty);
 
+		// Get domain name
 		String baseDomain = null;
 		try {
 			baseDomain = CrawlUtil.getDomainName(this.targetUrl);
@@ -331,19 +346,29 @@ public class HomeBean implements Serializable {
 		
 		Integer count = 0;
 		
-		if(this.driver == null) {
+		/*if(this.driver == null) {
 			this.driver = ScreenShotUtil.initFireFox();
-		}
+		}*/
 		
+		this.driver = ScreenShotUtil.initFireFox();
+		
+		// Initialize JMeter
 		try {
 			recordingHandler.init();
-			recordingHandler.start();
 		} catch (Exception e) {
 //			System.out.println("Error \n" + e);
 		}
 		
+		// Start web crawling here
 		while (Boolean.TRUE.equals(this.hasStarted) && Boolean.FALSE.equals(urlProperties.isEmpty())) {
-
+			
+			// Start JMeter recording
+			try {
+				recordingHandler.start();
+			} catch (Exception e) {
+				// Don't worry if recording not started. Proceed normally
+			}
+			
 			try {
 
 				UrlProperty urlProperty = urlProperties.poll();
@@ -367,6 +392,7 @@ public class HomeBean implements Serializable {
 
 				Integer iterationNumer = 0;
 
+				// Calculate iteration count/number
 				if (tempRequestResponseTbls != null && Boolean.FALSE.equals(tempRequestResponseTbls.isEmpty())) {
 
 					List<RequestResponseTbl> requestResponseTbls1 = new ArrayList<>();
@@ -388,8 +414,10 @@ public class HomeBean implements Serializable {
 					iterationNumer = 1;
 				}
 				
+				// Make request
 				Connection connection = RequestResponseUtil.makeRequest(urlProperty);
 
+				// Call HttpGet
 				Document htmlDocument = connection.get();
 
 				Document lastHtmlDocument = urlProperty.getHtmlDocument();
@@ -399,21 +427,31 @@ public class HomeBean implements Serializable {
 				Response response = connection.response();
 				Request request = connection.request();
 				
-				request.headers();
-				
-//				System.out.println(request.headers());
-
 				// 200 is the HTTP OK status code
 				if (response.statusCode() == 200) {
 					
 					Boolean isWithinDomain = CrawlUtil.isWithinDomain(this.targetUrl,
 							RequestResponseUtil.refectorUrl(response.url().toString(), baseDomain));
-
+					
+					// Check if response is valid 
 					if (Boolean.FALSE.equals(isWithinDomain) || (Boolean.FALSE.equals(response.contentType().contains("text/html"))
 							&& Boolean.FALSE.equals(response.contentType().contains("application/xhtml+xml")))) {
 						continue;
 					}
-
+					
+					// Get Sampler Proxy Controller as XML
+					String jmxHashTree = recordingHandler.stop();
+					
+					BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/httpsamplerproxy-transformer.xslt")));
+					
+					String transformedSamplerProxy = XmlParser.parseXmlWithXslTransformer(jmxHashTree, br);
+					
+					try {
+						br.close();
+					} catch(Exception e) {
+						// Do nothing
+					}
+					
 					this.pagesMapped++;
 
 					System.out.println("Connected to : " + urlProperty.getName());
@@ -437,9 +475,14 @@ public class HomeBean implements Serializable {
 					}
 
 					if (lastRequest != null) {
-
+						// Do nothing
 					}
 
+					Map<String, String> headers = new HashMap<>(request.headers());
+					
+					headers.putAll(request.cookies());
+					
+					requestResponseTbl.setRequestHeader(headers.toString());
 					requestResponseTbl.setPageTransitionIterationNumber(iterationNumer);
 					requestResponseTbl.setRequestHeader(request.headers().toString());
 					requestResponseTbl.setResponseBody(response.body());
@@ -448,7 +491,8 @@ public class HomeBean implements Serializable {
 
 					UrlProperty matchedUrlProperty = null;
 					String title = "";
-
+					
+					// Extract and make title
 					if (htmlDocument != null) {
 
 						Elements elems = htmlDocument.head().getElementsByTag("title");
@@ -512,21 +556,28 @@ public class HomeBean implements Serializable {
 
 					this.requestResponseTblHome.attachDirty(requestResponseTbl);
 					
+					// Take and save screen shot. Also save Jmeter output
 					try {
 						
+						JmeterTransControllerTbl jmeterTransControllerTbl = new JmeterTransControllerTbl();
+						
 						RequestResponseTbl requestResponseTblLastest = (RequestResponseTbl) this.requestResponseTblHome.findByExample(requestResponseTbl).get(0);
-							
+						
+						jmeterTransControllerTbl.setRequestResponseTbl(requestResponseTblLastest);
+						jmeterTransControllerTbl.setTransContSec(transformedSamplerProxy);
+						
 						if (this.driver != null) {
-							
-							this.driver.get(response.url().toString());
-							
-							JmeterTransControllerTbl jmeterTransControllerTbl = new JmeterTransControllerTbl();
-							
-							jmeterTransControllerTbl.setRequestResponseTbl(requestResponseTblLastest);
-							jmeterTransControllerTbl.setScreenShot(((TakesScreenshot)this.driver).getScreenshotAs(OutputType.BYTES));
-							
-							this.jmeterTransControllerTblHome.attachDirty(jmeterTransControllerTbl);
+							try {
+								this.driver.get(response.url().toString());
+
+								jmeterTransControllerTbl.setScreenShot(
+										((TakesScreenshot) this.driver).getScreenshotAs(OutputType.BYTES));
+							} catch (Exception e) {
+
+							}
 						}
+						
+						this.jmeterTransControllerTblHome.attachDirty(jmeterTransControllerTbl);
 						
 					} catch(Exception e) {
 						
@@ -535,7 +586,8 @@ public class HomeBean implements Serializable {
 					parsedLinks.add(requestResponseTbl);
 
 					Elements links = htmlDocument.select("a[href]");
-
+					
+					// Extract all links that will be called in next iteration
 					for (Element link : links) {
 
 						String refectoredUrl = RequestResponseUtil.refectorUrl(link.attr("href"), baseDomain);
@@ -545,6 +597,7 @@ public class HomeBean implements Serializable {
 
 						Boolean isAllowed = CrawlUtil.isAllowed(rules, this.targetUrl, refectoredUrl);
 
+						// Check if it is achieved MAX_DEPTH = vertical-depth
 						if (Boolean.TRUE.equals(isWithinDomain) && Boolean.TRUE.equals(isAllowed) && Constants.MAX_DEPTH > urlProperty.getToPageLevel()) {
 
 							UrlProperty newUrlProperty = new UrlProperty();
@@ -586,6 +639,7 @@ public class HomeBean implements Serializable {
 
 		}
 
+		// Stop timing
 		Map<String, Long> hoursMinutesSeconds = DateUtil.getHoursMinutesSecondsDifference(this.startTime,
 				Calendar.getInstance().getTime());
 
@@ -594,15 +648,15 @@ public class HomeBean implements Serializable {
 
 		this.hasStarted = Boolean.FALSE;
 		this.hasFinished = Boolean.TRUE;
-		
+	
+		// Kill firefox
 		ScreenShotUtil.killFirefox();
-		
-		File jmxFile = recordingHandler.stop();
-		
-		XmlParser.parseXmlWithGivenXPathExp(jmxFile, "//HeaderManager|//HTTPSamplerProxy");
 		
 	}
 
+	/**
+	 * The method stop() is use to stop web-crarwling
+	 */
 	public void stop() {
 		if (Boolean.TRUE.equals(this.hasStarted)) {
 			// Calculate time
@@ -628,6 +682,9 @@ public class HomeBean implements Serializable {
 		this.hasFinished = Boolean.TRUE;
 	}
 
+	/**
+	 * The method fetchUpdates() is use to fetch updated time and pags parsed
+	 */
 	public void fetchUpdates() {
 
 		if (Boolean.TRUE.equals(this.hasStarted)) {
@@ -645,6 +702,16 @@ public class HomeBean implements Serializable {
 
 	}
 
+	/**
+	 * The method getMatchedUrlPropertiesByTitle() is use to check if whose page
+	 * titles are matched with the give title
+	 * 
+	 * @param urlProperties
+	 *            queue of UrlProperties
+	 * @param title
+	 *            to be checked
+	 * @return UrlProperty that is mached else null
+	 */
 	private UrlProperty getMatchedUrlPropertiesByTitle(Queue<UrlProperty> urlProperties, String title) {
 
 		UrlProperty matchedUrlProperty = null;
@@ -662,6 +729,9 @@ public class HomeBean implements Serializable {
 	
 	/////////// Duplicate Removal /////////////
 	
+	/**
+	 * The method startRemoval() is use to start duplicate page removal
+	 */
 	public void startRemoval() {
 		
 		// Init
@@ -766,8 +836,8 @@ public class HomeBean implements Serializable {
 			}
 		}
 		
+		// Check Completely cleansed
 		if(Boolean.FALSE.equals(hasFinishedRemoval)) {
-			// Completely cleansed
 			
 			runIdentTbl.setCleansed(Boolean.TRUE);
 			
@@ -779,6 +849,9 @@ public class HomeBean implements Serializable {
 		this.hasFinishedRemoval = Boolean.TRUE;
 	}
 
+	/**
+	 * The method stopRemoval() is use to stop duplicate page remova;
+	 */
 	public void stopRemoval() {
 		if (Boolean.TRUE.equals(this.hasStartedRemoval)) {
 			// Calculate time
@@ -793,8 +866,6 @@ public class HomeBean implements Serializable {
 			 * reqCtx.execute("poll.stop();");
 			 */
 			
-			/*ScreenShotUtil.killFirefox();*/
-
 		} else {
 			this.pagesMappedRemoval = 0;
 			this.runTimeRemoval = "00:00:00";
@@ -804,6 +875,9 @@ public class HomeBean implements Serializable {
 		this.hasFinishedRemoval = Boolean.TRUE;
 	}
 
+	/**
+	 * The method fetchUpdatesRemoval() is use to update the timing and pages removed count
+	 */
 	public void fetchUpdatesRemoval() {
 
 		if (Boolean.TRUE.equals(this.hasStartedRemoval)) {
