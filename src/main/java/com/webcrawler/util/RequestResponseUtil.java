@@ -20,7 +20,7 @@ public class RequestResponseUtil {
 		Response lastResponse = urlProperty.getLastReponse();
 
 		// Proxy
-		Connection connection = Jsoup.connect(urlProperty.getName()).proxy("127.0.0.1", 8888);
+		Connection connection = Jsoup.connect(urlProperty.getName()).proxy("127.0.0.1", com.webcrawler.jmeter.util.Constants.PROXY_PORT);
 
 		connection.userAgent(Constants.USER_AGENT);
 		connection.timeout(Constants.TIME_OUT);

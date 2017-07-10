@@ -71,7 +71,7 @@ public class RecordingHandler {
 		proxy.setGroupingMode(2); // GROUPING_IN_SIMPLE_CONTROLLERS = 2
 		proxy.setSamplerTypeName("2"); // SAMPLER_TYPE_HTTP_SAMPLER_HC4 = "2"
 		proxy.setRegexMatch(Boolean.TRUE);
-		proxy.setPort(Constants.PORT); // Global Settings -> Port
+		proxy.setPort(Constants.PROXY_PORT); // Global Settings -> Port
 		proxy.setCaptureHttpHeaders(Boolean.TRUE);
 		proxy.setSamplerFollowRedirects(Boolean.TRUE);
 

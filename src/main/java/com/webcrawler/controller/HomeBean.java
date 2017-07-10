@@ -614,25 +614,27 @@ public class HomeBean implements Serializable {
 						}
 					}
 
-					// logger.info("**Visiting** Received web page at " + url);
 				} else {
 					System.err.println("Connection Error - status code : " + response.statusCode());
-					// logger.error("**Failure** Web page not recieved at " +
-					// url);
 				}
 
 			} catch (UnsupportedMimeTypeException e) {
 				// No need to log
+//				System.out.println(e);
 			} catch (IOException e) {
 				// Ignore
+//				System.out.println(e);
 			} catch (GenericJDBCException e) {
 				// Ignore
+//				System.out.println(e);
 			} catch (IllegalStateException e) {
 //				System.err.println(e);
 				RequestContext reqCtx = RequestContext.getCurrentInstance();
 				reqCtx.execute("poll.stop();");
+//				System.out.println(e);
 			} catch (JDBCConnectionException e) {
 				this.error = "Unable to connect to database";
+//				System.out.println(e);
 			} catch (Exception e) {
 //				System.out.println(e);
 			}
@@ -648,7 +650,7 @@ public class HomeBean implements Serializable {
 
 		this.hasStarted = Boolean.FALSE;
 		this.hasFinished = Boolean.TRUE;
-	
+		
 		// Kill firefox
 		ScreenShotUtil.killFirefox();
 		
