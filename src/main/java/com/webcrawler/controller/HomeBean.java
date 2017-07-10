@@ -831,19 +831,21 @@ public class HomeBean implements Serializable {
 						this.pagesMappedRemoval++;
 						break inner;
 					}
-
 				}
 			}
 		}
 		
-		// Check Completely cleansed
+		/*// Check Completely cleansed
 		if(Boolean.FALSE.equals(hasFinishedRemoval)) {
 			
 			runIdentTbl.setCleansed(Boolean.TRUE);
 			
 			this.runIdentTblHome.attachDirty(runIdentTbl);
 			
-		}
+		}*/
+		
+		runIdentTbl.setCleansed(Boolean.FALSE.equals(hasFinishedRemoval));
+		runIdentTblHome.attachDirty(runIdentTbl);
 		
 		this.hasStartedRemoval = Boolean.FALSE;
 		this.hasFinishedRemoval = Boolean.TRUE;
