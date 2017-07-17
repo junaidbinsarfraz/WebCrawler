@@ -8,7 +8,7 @@
             <column name="Id" />
             <generator class="identity" />
         </id>
-        <many-to-one name="runIdentTbl" class="com.webcrawler.dao.RunIdentTbl" fetch="select">
+        <many-to-one name="runIdentTbl" class="com.webcrawler.dao.RunIdentTbl" fetch="join" lazy="false">
             <column name="RunId" />
         </many-to-one>
         <property name="responseBody" type="string">
@@ -38,7 +38,7 @@
         <property name="responseHeader" type="string">
             <column name="ResponseHeader" length="65535" />
         </property>
-        <set name="jmeterTransControllerTbls" table="jmeter_trans_controller_tbl" inverse="true" lazy="true" fetch="select">
+        <set name="jmeterTransControllerTbls" table="jmeter_trans_controller_tbl" inverse="true" lazy="false" fetch="join">
             <key>
                 <column name="RequestResponseId" />
             </key>

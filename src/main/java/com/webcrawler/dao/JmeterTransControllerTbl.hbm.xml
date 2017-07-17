@@ -8,7 +8,7 @@
             <column name="Id" />
             <generator class="identity" />
         </id>
-        <many-to-one name="requestResponseTbl" class="com.webcrawler.dao.RequestResponseTbl" fetch="select">
+        <many-to-one name="requestResponseTbl" class="com.webcrawler.dao.RequestResponseTbl" fetch="join" lazy="false">
             <column name="RequestResponseId" />
         </many-to-one>
         <property name="transContSec" type="string">

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -22,6 +23,7 @@ import org.hibernate.exception.JDBCConnectionException;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Request;
 import org.jsoup.Connection.Response;
+import org.jsoup.Jsoup;
 import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -364,6 +366,7 @@ public class HomeBean implements Serializable {
 			
 			// Start JMeter recording
 			try {
+				recordingHandler.stop();
 				recordingHandler.start();
 			} catch (Exception e) {
 				// Don't worry if recording not started. Proceed normally
@@ -387,7 +390,7 @@ public class HomeBean implements Serializable {
 				tempRequestResponseTbl.setToPageUrl(toUrl);
 				// tempRequestResponseTbl.setRunIdentTbl(runIdentTbl);
 
-				List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome
+				/*List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome
 						.findByExample(tempRequestResponseTbl);
 
 				Integer iterationNumer = 0;
@@ -412,8 +415,19 @@ public class HomeBean implements Serializable {
 					}
 				} else {
 					iterationNumer = 1;
-				}
+				}*/
 				
+				List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome
+						.findByExample(toUrl, fromUrl, runIdentTbl.getId());
+				
+				Integer iterationNumer = 1;
+				
+				if (tempRequestResponseTbls.size() >= iterations) {
+					continue;
+				} else {
+					iterationNumer = tempRequestResponseTbls.size() + 1;
+				}
+
 				// Make request
 				Connection connection = RequestResponseUtil.makeRequest(urlProperty);
 
@@ -441,15 +455,19 @@ public class HomeBean implements Serializable {
 					
 					// Get Sampler Proxy Controller as XML
 					String jmxHashTree = recordingHandler.stop();
+					String transformedSamplerProxy = "";
 					
-					BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/httpsamplerproxy-transformer.xslt")));
+					if(jmxHashTree != null) {
 					
-					String transformedSamplerProxy = XmlParser.parseXmlWithXslTransformer(jmxHashTree, br);
-					
-					try {
-						br.close();
-					} catch(Exception e) {
-						// Do nothing
+						BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/httpsamplerproxy-transformer.xslt")));
+						
+						transformedSamplerProxy = XmlParser.parseXmlWithXslTransformer(jmxHashTree, br);
+						
+						try {
+							br.close();
+						} catch(Exception e) {
+							// Do nothing
+						}
 					}
 					
 					this.pagesMapped++;
@@ -818,18 +836,26 @@ public class HomeBean implements Serializable {
 
 				if (Boolean.FALSE.equals(requestResponseTbl.getId().equals(innerRequestResponseTbl.getId()))) {
 
-					Integer distance = CrawlUtil.levenshteinDistance(requestResponseTbl.getResponseBody(), innerRequestResponseTbl.getResponseBody());
+					/*Integer distance = CrawlUtil.levenshteinDistance(requestResponseTbl.getResponseBody(), innerRequestResponseTbl.getResponseBody());
 
 					Double percentage = 100 - (((double) distance)
-							/ (Math.max(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length()))) * 100;
-
-					if (percentage != null && percentage.intValue() > percentageValue) {
-
-						// Remove from database
-						this.requestResponseTblHome.delete(requestResponseTbl);
-						iterator.remove();
-						this.pagesMappedRemoval++;
-						break inner;
+							/ (Math.max(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length()))) * 100;*/
+					
+					if(requestResponseTbl.getToPageTitle().equalsIgnoreCase(innerRequestResponseTbl.getToPageTitle()) || 
+							requestResponseTbl.getToPageUrl().equalsIgnoreCase(innerRequestResponseTbl.getToPageUrl())) {
+					
+						Double percentage = 100 - (( (double)Math.max(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length())
+								- (double)Math.min(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length()))
+								/ ((requestResponseTbl.getResponseBody().length() + innerRequestResponseTbl.getResponseBody().length()) / 2)) * 100;
+	
+						if (percentage != null && percentage.intValue() > percentageValue) {
+	
+							// Remove from database
+							this.requestResponseTblHome.delete(requestResponseTbl);
+							iterator.remove();
+							this.pagesMappedRemoval++;
+							break inner;
+						}
 					}
 				}
 			}

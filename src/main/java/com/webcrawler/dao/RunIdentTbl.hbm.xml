@@ -20,7 +20,7 @@
         <property name="percent" type="java.lang.Integer">
             <column name="Percent" />
         </property>
-        <set name="requestResponseTbls" table="request_response_tbl" inverse="true" lazy="true" fetch="select">
+        <set name="requestResponseTbls" table="request_response_tbl" inverse="true" lazy="false" fetch="join">
             <key>
                 <column name="RunId" />
             </key>

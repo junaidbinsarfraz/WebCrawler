@@ -100,22 +100,24 @@ public class RecordingHandler {
 	 * @return The tree that is recorded till now
 	 */
 	public String stop() {
-		this.proxy.stopProxy();
 
-		if (this.treeModel == null) {
-			return null;
-		}
+		OutputStream out = null;
 
-		OutputStream out = new ByteArrayOutputStream();
-		
 		try {
+			this.proxy.stopProxy();
+
+			if (this.treeModel == null) {
+				return null;
+			}
+
+			out = new ByteArrayOutputStream();
+
 			HashTree tree = treeModel.getTestPlan();
 
 			this.convertSubTree(tree);
 
 			SaveService.saveTree(tree, out);
 		} catch (Exception e) {
-			// e.printStackTrace();
 			return null;
 		}
 

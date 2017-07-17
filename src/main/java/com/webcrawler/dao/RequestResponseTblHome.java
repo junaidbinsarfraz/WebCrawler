@@ -157,4 +157,24 @@ public class RequestResponseTblHome {
 			throw re;
 		}
 	}
+	
+	public List findByExample(String toUrl, String fromUrl, Integer runId) {
+		log.debug("finding RequestResponseTbl instance by example");
+		try {
+			sessionFactory.getCurrentSession().beginTransaction();
+			
+			String query = "select * from request_response_tbl where ToPageUrl like '" + toUrl + "' and RunId = " + runId +"";
+			if(fromUrl != null) {
+				query += " and FromPageURL like '" + fromUrl + "'";
+			}
+			
+			List results = sessionFactory.getCurrentSession().createSQLQuery(query).addEntity(RequestResponseTbl.class).list();
+			log.debug("find by example successful, result size: " + results.size());
+			sessionFactory.getCurrentSession().getTransaction().commit();
+			return results;
+		} catch (RuntimeException re) {
+			log.error("find by example failed", re);
+			throw re;
+		}
+	}
 }
