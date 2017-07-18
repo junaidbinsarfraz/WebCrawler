@@ -1,7 +1,9 @@
 package com.webcrawler.jmeter.handler;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.net.ServerSocket;
 import java.util.LinkedList;
 
 import org.apache.jmeter.control.LoopController;
@@ -37,9 +39,9 @@ public class RecordingHandler {
 	 *             when unable to initialize JMeter
 	 */
 	@SuppressWarnings("deprecation")
-	public void init() throws Exception {
+	public void init(Integer port) throws Exception {
 
-		JMeterUtils.setJMeterHome(Constants.JMETER_HOME); 
+		JMeterUtils.setJMeterHome(Constants.JMETER_HOME);
 		JMeterUtils.loadJMeterProperties(JMeterUtils.getJMeterBinDir() + "/jmeter.properties");
 		JMeterUtils.initLocale();
 
@@ -71,7 +73,7 @@ public class RecordingHandler {
 		proxy.setGroupingMode(2); // GROUPING_IN_SIMPLE_CONTROLLERS = 2
 		proxy.setSamplerTypeName("2"); // SAMPLER_TYPE_HTTP_SAMPLER_HC4 = "2"
 		proxy.setRegexMatch(Boolean.TRUE);
-		proxy.setPort(Constants.PORT); // Global Settings -> Port
+		proxy.setPort(port); // Global Settings -> Port
 		proxy.setCaptureHttpHeaders(Boolean.TRUE);
 		proxy.setSamplerFollowRedirects(Boolean.TRUE);
 		proxy.setSamplerDownloadImages(Boolean.TRUE);
@@ -84,14 +86,33 @@ public class RecordingHandler {
 	 * 
 	 * @return true is started successfully else false
 	 */
-	public Boolean start() {
+	public Integer start(Integer port) {
 		try {
+
+			/*
+			 * if(Boolean.FALSE.equals(isAvaiable(port))) { // Get new port
+			 * ServerSocket socket = new ServerSocket(0);
+			 * 
+			 * port = socket.getLocalPort();
+			 * 
+			 * socket.close();
+			 * 
+			 * this.proxy.setPort(port); }
+			 */
 			this.proxy.startProxy();
 		} catch (Exception e) {
-			return Boolean.FALSE;
+			try {
+				Integer freePort = getFreePort();
+				
+				port = freePort != null ? freePort : port;
+
+				this.proxy.setPort(port);
+			} catch (Exception e1) {
+
+			}
 		}
 
-		return Boolean.TRUE;
+		return port;
 	}
 
 	/**
@@ -134,9 +155,45 @@ public class RecordingHandler {
 		for (Object o : new LinkedList<>(tree.list())) {
 			JMeterTreeNode item = (JMeterTreeNode) o;
 			convertSubTree(tree.getTree(item));
-			TestElement testElement = item.getTestElement(); // requires JMeterTreeNode
+			TestElement testElement = item.getTestElement(); // requires
+																// JMeterTreeNode
 			tree.replaceKey(item, testElement);
 		}
+	}
+
+	private static Boolean isAvaiable(Integer port) {
+		boolean portTaken = false;
+		ServerSocket socket = null;
+		try {
+			socket = new ServerSocket(port);
+		} catch (IOException e) {
+			portTaken = true;
+		} finally {
+			if (socket != null) {
+				try {
+					socket.close();
+					socket = null;
+				} catch (IOException e) {
+
+				}
+			}
+		}
+
+		return portTaken;
+	}
+
+	public static Integer getFreePort() {
+		ServerSocket socket = null;
+		
+		try {
+			// Get new port
+			socket = new ServerSocket(0);
+			socket.close();
+		} catch (Exception e) {
+			return null;
+		}
+
+		return socket.getLocalPort();
 	}
 
 }

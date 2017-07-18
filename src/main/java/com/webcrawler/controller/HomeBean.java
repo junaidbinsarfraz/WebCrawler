@@ -91,6 +91,9 @@ public class HomeBean implements Serializable {
 	private RunIdentTblHome runIdentTblHome = new RunIdentTblHome();
 	private RequestResponseTblHome requestResponseTblHome = new RequestResponseTblHome();
 	private JmeterTransControllerTblHome jmeterTransControllerTblHome = new JmeterTransControllerTblHome();
+	
+	// Local variables
+	private Integer port;
 
 	public String getError() {
 		return error;
@@ -354,9 +357,13 @@ public class HomeBean implements Serializable {
 		
 		this.driver = ScreenShotUtil.initFireFox();
 		
+		Integer freePort = RecordingHandler.getFreePort();
+		
+		this.port = freePort != null ? freePort : com.webcrawler.jmeter.util.Constants.PORT;
+		
 		// Initialize JMeter
 		try {
-			recordingHandler.init();
+			recordingHandler.init(this.port);
 		} catch (Exception e) {
 //			System.out.println("Error \n" + e);
 		}
@@ -367,7 +374,7 @@ public class HomeBean implements Serializable {
 			// Start JMeter recording
 			try {
 				recordingHandler.stop();
-				recordingHandler.start();
+				this.port = recordingHandler.start(this.port);
 			} catch (Exception e) {
 				// Don't worry if recording not started. Proceed normally
 			}
@@ -429,7 +436,7 @@ public class HomeBean implements Serializable {
 				}
 
 				// Make request
-				Connection connection = RequestResponseUtil.makeRequest(urlProperty);
+				Connection connection = RequestResponseUtil.makeRequest(urlProperty, this.port);
 
 				// Call HttpGet
 				Document htmlDocument = connection.get();

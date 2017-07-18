@@ -1,8 +1,10 @@
 package com.webcrawler.util;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Map;
 
@@ -19,12 +21,12 @@ import com.webcrawler.model.UrlProperty;
  */
 public class RequestResponseUtil {
 
-	public static Connection makeRequest(UrlProperty urlProperty) {
+	public static Connection makeRequest(UrlProperty urlProperty, Integer port) {
 
 		Response lastResponse = urlProperty.getLastReponse();
 
 		// Connection making and proxy setting
-		Connection connection = Jsoup.connect(urlProperty.getName()).proxy("127.0.0.1", com.webcrawler.jmeter.util.Constants.PORT);
+		Connection connection = Jsoup.connect(urlProperty.getName()).proxy("127.0.0.1", port);
 
 		connection.userAgent(Constants.USER_AGENT);
 		connection.timeout(Constants.TIME_OUT);
