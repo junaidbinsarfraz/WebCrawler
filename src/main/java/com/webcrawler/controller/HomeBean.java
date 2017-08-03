@@ -508,7 +508,7 @@ public class HomeBean implements Serializable {
 					headers.putAll(request.cookies());
 					
 					requestResponseTbl.setRequestHeader(headers.toString());
-					requestResponseTbl.setPageTransitionIterationNumber(iterationNumer);
+//					requestResponseTbl.setPageTransitionIterationNumber(iterationNumer);
 					requestResponseTbl.setRequestHeader(request.headers().toString());
 					requestResponseTbl.setResponseBody(response.body());
 					requestResponseTbl.setResponseHeader(response.headers().toString());

@@ -29,9 +29,9 @@
         <property name="toPageUrl" type="string">
             <column name="ToPageURL" length="65535" />
         </property>
-        <property name="pageTransitionIterationNumber" type="java.lang.Integer">
+        <!-- <property name="pageTransitionIterationNumber" type="java.lang.Integer">
             <column name="PageTransitionIterationNumber" />
-        </property>
+        </property> -->
         <property name="requestHeader" type="string">
             <column name="RequestHeader" length="65535" />
         </property>
