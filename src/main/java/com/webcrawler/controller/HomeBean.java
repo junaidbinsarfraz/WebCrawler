@@ -66,7 +66,6 @@ public class HomeBean implements Serializable {
 
 	private String error;
 	private String targetUrl;
-	private String iterationPerPage;
 	private String runName;
 	private Boolean downloadImages;
 	private String runTime = "00:00:00";
@@ -109,14 +108,6 @@ public class HomeBean implements Serializable {
 
 	public void setTargetUrl(String targetUrl) {
 		this.targetUrl = targetUrl;
-	}
-
-	public String getIterationPerPage() {
-		return iterationPerPage;
-	}
-
-	public void setIterationPerPage(String iterationPerPage) {
-		this.iterationPerPage = iterationPerPage;
 	}
 
 	public String getRunName() {
@@ -252,7 +243,7 @@ public class HomeBean implements Serializable {
 			this.error += "Target url cannot be empty<br/>";
 		}
 
-		if (Util.isNullOrEmpty(this.iterationPerPage)) {
+		/*if (Util.isNullOrEmpty(this.iterationPerPage)) {
 			this.error += "Iteration per page cannot be empty<br/>";
 		} else if (!Util.isNumber(this.iterationPerPage)) {
 			this.error += "Iteration per page must be a number<br/>";
@@ -268,7 +259,7 @@ public class HomeBean implements Serializable {
 			} catch (Exception e) {
 				this.error += "Iteration per page must be an integer<br/>";
 			}
-		}
+		}*/
 
 	}
 
@@ -287,8 +278,9 @@ public class HomeBean implements Serializable {
 			return;
 		}
 
-		Integer iterations = Integer.parseInt(this.iterationPerPage);
-
+//		Integer iterations = Integer.parseInt(this.iterationPerPage);
+		Integer iterations = 1;
+		
 		// Get Run Name entry
 		RunIdentTbl runIdentTbl = new RunIdentTbl();
 
