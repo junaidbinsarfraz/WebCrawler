@@ -2,7 +2,7 @@ package com.webcrawler.dao;
 // Generated Jun 13, 2017 8:59:00 AM by Hibernate Tools 5.1.0.Alpha1
 
 import java.util.List;
-import javax.naming.InitialContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.LockMode;

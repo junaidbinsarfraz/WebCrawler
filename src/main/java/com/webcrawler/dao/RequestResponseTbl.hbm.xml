@@ -23,6 +23,9 @@
         <property name="toPageLevel" type="java.lang.Integer">
             <column name="ToPageLevel" />
         </property>
+        <property name="authenticated" type="java.lang.Integer">
+            <column name="Authenticated" />
+        </property>
         <property name="toPageTitle" type="string">
             <column name="ToPageTitle" length="65535" />
         </property>

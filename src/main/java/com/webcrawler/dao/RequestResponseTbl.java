@@ -15,6 +15,7 @@ public class RequestResponseTbl implements java.io.Serializable {
 	private String fromPageTitle;
 	private String fromPageUrl;
 	private Integer toPageLevel;
+	private Integer authenticated;
 	private String toPageTitle;
 	private String toPageUrl;
 	private Integer pageTransitionIterationNumber;
@@ -25,7 +26,7 @@ public class RequestResponseTbl implements java.io.Serializable {
 	public RequestResponseTbl() {
 	}
 
-	public RequestResponseTbl(RunIdentTbl runIdentTbl, String responseBody, String fromPageTitle, String fromPageUrl, Integer toPageLevel,
+	public RequestResponseTbl(RunIdentTbl runIdentTbl, String responseBody, String fromPageTitle, String fromPageUrl, Integer toPageLevel, Integer authenticated,
 			String toPageTitle, String toPageUrl, Integer pageTransitionIterationNumber, String requestHeader, String responseHeader,
 			Set jmeterTransControllerTbls) {
 		this.runIdentTbl = runIdentTbl;
@@ -33,6 +34,7 @@ public class RequestResponseTbl implements java.io.Serializable {
 		this.fromPageTitle = fromPageTitle;
 		this.fromPageUrl = fromPageUrl;
 		this.toPageLevel = toPageLevel;
+		this.setAuthenticated(authenticated);
 		this.toPageTitle = toPageTitle;
 		this.toPageUrl = toPageUrl;
 		this.pageTransitionIterationNumber = pageTransitionIterationNumber;
@@ -87,6 +89,14 @@ public class RequestResponseTbl implements java.io.Serializable {
 
 	public void setToPageLevel(Integer toPageLevel) {
 		this.toPageLevel = toPageLevel;
+	}
+
+	public Integer getAuthenticated() {
+		return authenticated;
+	}
+
+	public void setAuthenticated(Integer authenticated) {
+		this.authenticated = authenticated;
 	}
 
 	public String getToPageTitle() {

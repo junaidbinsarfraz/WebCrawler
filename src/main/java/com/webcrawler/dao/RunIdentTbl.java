@@ -14,17 +14,19 @@ public class RunIdentTbl implements java.io.Serializable {
 	private String baseUrl;
 	private Boolean cleansed;
 	private Integer percent;
+	private String authFileLoc;
 	private Set requestResponseTbls = new HashSet(0);
 
 	public RunIdentTbl() {
 	}
 
-	public RunIdentTbl(String runIdentifier, String baseUrl, Boolean cleansed, Integer percent, Set requestResponseTbls) {
+	public RunIdentTbl(String runIdentifier, String baseUrl, Boolean cleansed, Integer percent, String authFileLoc, Set requestResponseTbls) {
 		this.runIdentifier = runIdentifier;
 		this.baseUrl = baseUrl;
 		this.cleansed = cleansed;
 		this.percent = percent;
 		this.requestResponseTbls = requestResponseTbls;
+		this.setAuthFileLoc(authFileLoc);
 	}
 
 	public Integer getId() {
@@ -65,6 +67,14 @@ public class RunIdentTbl implements java.io.Serializable {
 
 	public void setPercent(Integer percent) {
 		this.percent = percent;
+	}
+
+	public String getAuthFileLoc() {
+		return authFileLoc;
+	}
+
+	public void setAuthFileLoc(String authFileLoc) {
+		this.authFileLoc = authFileLoc;
 	}
 
 	public Set getRequestResponseTbls() {

@@ -20,6 +20,9 @@
         <property name="percent" type="java.lang.Integer">
             <column name="Percent" />
         </property>
+        <property name="authFileLoc" type="string">
+            <column name="AuthFileLoc" length="200" />
+        </property>
         <set name="requestResponseTbls" table="request_response_tbl" inverse="true" lazy="false" fetch="join">
             <key>
                 <column name="RunId" />

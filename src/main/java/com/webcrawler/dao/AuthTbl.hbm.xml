@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Jun 15, 2017 8:33:41 AM by Hibernate Tools 5.1.0.Alpha1 -->
+<hibernate-mapping>
+    <class name="com.webcrawler.dao.AuthTbl" table="auth_tbl" catalog="webcrawler" optimistic-lock="version">
+        <id name="id" type="java.lang.Integer">
+            <column name="Id" />
+            <generator class="identity" />
+        </id>
+        <property name="authOppNav" type="string">
+            <column name="AuthOppNav" length="100" />
+        </property>
+        <property name="authId" type="string">
+            <column name="AuthId" length="100" />
+        </property>
+        <property name="authPass" type="string">
+            <column name="AuthPass" length="100" />
+        </property>
+        <property name="authSignoutNav" type="string">
+            <column name="AuthSignoutNav" length="100" />
+        </property>
+    </class>
+</hibernate-mapping>

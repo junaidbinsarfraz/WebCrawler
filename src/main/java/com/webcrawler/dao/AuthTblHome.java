@@ -13,13 +13,13 @@ import org.hibernate.cfg.Environment;
 import org.hibernate.criterion.Example;
 
 /**
- * Home object for domain model class RunIdentTbl.
- * @see com.webcrawler.dao.RunIdentTbl
+ * Home object for domain model class AuthTbl.
+ * @see com.webcrawler.dao.AuthTbl
  * @author Hibernate Tools
  */
-public class RunIdentTblHome {
+public class AuthTblHome {
 
-	private static final Log log = LogFactory.getLog(RunIdentTblHome.class);
+	private static final Log log = LogFactory.getLog(AuthTblHome.class);
 
 	private final SessionFactory sessionFactory = getSessionFactory();
 
@@ -42,8 +42,8 @@ public class RunIdentTblHome {
         }
 	}
 
-	public void persist(RunIdentTbl transientInstance) {
-		log.debug("persisting RunIdentTbl instance");
+	public void persist(AuthTbl transientInstance) {
+		log.debug("persisting AuthTbl instance");
 		try {
 			sessionFactory.getCurrentSession().beginTransaction();
 			sessionFactory.getCurrentSession().persist(transientInstance);
@@ -55,8 +55,8 @@ public class RunIdentTblHome {
 		}
 	}
 
-	public void attachDirty(RunIdentTbl instance) {
-		log.debug("attaching dirty RunIdentTbl instance");
+	public void attachDirty(AuthTbl instance) {
+		log.debug("attaching dirty AuthTbl instance");
 		try {
 			sessionFactory.getCurrentSession().beginTransaction();
 			sessionFactory.getCurrentSession().saveOrUpdate(instance);
@@ -68,8 +68,8 @@ public class RunIdentTblHome {
 		}
 	}
 
-	public void attachClean(RunIdentTbl instance) {
-		log.debug("attaching clean RunIdentTbl instance");
+	public void attachClean(AuthTbl instance) {
+		log.debug("attaching clean AuthTbl instance");
 		try {
 			sessionFactory.getCurrentSession().beginTransaction();
 			sessionFactory.getCurrentSession().lock(instance, LockMode.NONE);
@@ -81,8 +81,8 @@ public class RunIdentTblHome {
 		}
 	}
 
-	public void delete(RunIdentTbl persistentInstance) {
-		log.debug("deleting RunIdentTbl instance");
+	public void delete(AuthTbl persistentInstance) {
+		log.debug("deleting AuthTbl instance");
 		try {
 			sessionFactory.getCurrentSession().beginTransaction();
 			sessionFactory.getCurrentSession().delete(persistentInstance);
@@ -94,11 +94,11 @@ public class RunIdentTblHome {
 		}
 	}
 
-	public RunIdentTbl merge(RunIdentTbl detachedInstance) {
-		log.debug("merging RunIdentTbl instance");
+	public AuthTbl merge(AuthTbl detachedInstance) {
+		log.debug("merging AuthTbl instance");
 		try {
 			sessionFactory.getCurrentSession().beginTransaction();
-			RunIdentTbl result = (RunIdentTbl) sessionFactory.getCurrentSession().merge(detachedInstance);
+			AuthTbl result = (AuthTbl) sessionFactory.getCurrentSession().merge(detachedInstance);
 			sessionFactory.getCurrentSession().getTransaction().commit();
 			log.debug("merge successful");
 			return result;
@@ -108,11 +108,11 @@ public class RunIdentTblHome {
 		}
 	}
 
-	public RunIdentTbl findById(java.lang.Integer id) {
-		log.debug("getting RunIdentTbl instance with id: " + id);
+	public AuthTbl findById(java.lang.Integer id) {
+		log.debug("getting AuthTbl instance with id: " + id);
 		try {
 			sessionFactory.getCurrentSession().beginTransaction();
-			RunIdentTbl instance = (RunIdentTbl) sessionFactory.getCurrentSession().get("com.webcrawler.dao.RunIdentTbl", id);
+			AuthTbl instance = (AuthTbl) sessionFactory.getCurrentSession().get("com.webcrawler.dao.AuthTbl", id);
 			if (instance == null) {
 				log.debug("get successful, no instance found");
 				sessionFactory.getCurrentSession().getTransaction().commit();
@@ -126,11 +126,11 @@ public class RunIdentTblHome {
 		}
 	}
 
-	public List findByExample(RunIdentTbl instance) {
-		log.debug("finding RunIdentTbl instance by example");
+	public List findByExample(AuthTbl instance) {
+		log.debug("finding AuthTbl instance by example");
 		try {
 			sessionFactory.getCurrentSession().beginTransaction();
-			List results = sessionFactory.getCurrentSession().createCriteria("com.webcrawler.dao.RunIdentTbl").add(Example.create(instance)).list();
+			List results = sessionFactory.getCurrentSession().createCriteria("com.webcrawler.dao.AuthTbl").add(Example.create(instance)).list();
 			sessionFactory.getCurrentSession().getTransaction().commit();
 			log.debug("find by example successful, result size: " + results.size());
 			return results;
