@@ -45,6 +45,13 @@
 					<p:selectBooleanCheckbox value="#{homeBean.downloadImages}" />
 					<br />
 					<br />
+					<label>Associate user credentials?</label>
+					<p:selectBooleanCheckbox value="#{homeBean.associateUserCredentials}" /><br />
+					<br />
+					<br />
+					<p:inputText value="#{homeBean.userCredentialFilePath}"></p:inputText>
+					<br />
+					<br />
 					<h:panelGroup id="btns">
 						<h:panelGrid columns="2">
 							<p:commandButton actionListener="#{homeBean.start}"

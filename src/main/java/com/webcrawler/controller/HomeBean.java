@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.net.HttpURLConnection;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,7 +21,6 @@ import org.hibernate.exception.JDBCConnectionException;
 import org.jsoup.Connection;
 import org.jsoup.Connection.Request;
 import org.jsoup.Connection.Response;
-import org.jsoup.Jsoup;
 import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -45,6 +42,7 @@ import com.webcrawler.model.UrlProperty;
 import com.webcrawler.util.Constants;
 import com.webcrawler.util.CrawlUtil;
 import com.webcrawler.util.DateUtil;
+import com.webcrawler.util.FileUtil;
 import com.webcrawler.util.RequestResponseUtil;
 import com.webcrawler.util.ScreenShotUtil;
 import com.webcrawler.util.Util;
@@ -73,6 +71,8 @@ public class HomeBean implements Serializable {
 	private Boolean hasStarted;
 	private Boolean hasFinished;
 	private Date startTime;
+	private Boolean associateUserCredentials;
+	private String userCredentialFilePath;
 	
 	// Duplicate Run variables
 	private String duplicateError;
@@ -166,6 +166,22 @@ public class HomeBean implements Serializable {
 		this.startTime = startTime;
 	}
 
+	public Boolean getAssociateUserCredentials() {
+		return associateUserCredentials;
+	}
+
+	public void setAssociateUserCredentials(Boolean associateUserCredentials) {
+		this.associateUserCredentials = associateUserCredentials;
+	}
+
+	public String getUserCredentialFilePath() {
+		return userCredentialFilePath;
+	}
+
+	public void setUserCredentialFilePath(String userCredentialFilePath) {
+		this.userCredentialFilePath = userCredentialFilePath;
+	}
+
 	public String getDuplicateError() {
 		return duplicateError;
 	}
@@ -241,6 +257,19 @@ public class HomeBean implements Serializable {
 
 		if (Util.isNullOrEmpty(this.targetUrl)) {
 			this.error += "Target url cannot be empty<br/>";
+		}
+		
+		if(Boolean.TRUE.equals(this.associateUserCredentials)) {
+			if(Util.isNullOrEmpty(this.userCredentialFilePath)) {
+				this.error += "User Credential File Path cannot be empty<br/>";
+			} else {
+				// Check if file exists
+				Boolean isFileExists = FileUtil.isFileExists(this.userCredentialFilePath);
+				
+				if(Boolean.FALSE.equals(isFileExists)) {
+					this.error += "File does not eixt<br/>";
+				}
+			}
 		}
 
 		/*if (Util.isNullOrEmpty(this.iterationPerPage)) {
