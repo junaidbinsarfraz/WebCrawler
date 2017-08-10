@@ -40,8 +40,7 @@ public class CrawlUtil {
 	public static BaseRobotRules getWebsiteRules(String userAgent, String url) throws Exception {
 
 		URL urlObj = new URL(url);
-		String hostId = urlObj.getProtocol() + "://" + urlObj.getHost()
-				+ (urlObj.getPort() > -1 ? ":" + urlObj.getPort() : "");
+		String hostId = urlObj.getProtocol() + "://" + urlObj.getHost() + (urlObj.getPort() > -1 ? ":" + urlObj.getPort() : "");
 		BaseRobotRules rules = null;
 		HttpGet httpget = new HttpGet(hostId + "/robots.txt");
 		HttpContext context = new BasicHttpContext();
@@ -99,8 +98,7 @@ public class CrawlUtil {
 
 		try {
 			if (Util.isNotNullAndEmpty(baseUrl) && Util.isNotNullAndEmpty(toUrl)
-					&& (getDomainName(baseUrl).equals(getDomainName(toUrl))
-							|| getDomainName(toUrl).contains(getDomainName(baseUrl)))) {
+					&& (getDomainName(baseUrl).equals(getDomainName(toUrl)) || getDomainName(toUrl).contains(getDomainName(baseUrl)))) {
 				return Boolean.TRUE;
 			}
 		} catch (URISyntaxException e) {
@@ -177,6 +175,37 @@ public class CrawlUtil {
 
 		// the distance is the cost for transforming all letters in both strings
 		return cost[len0 - 1];
+	}
+
+	/**
+	 * The method beautifyActionUrl() is use to beautify action url of form
+	 * 
+	 * @param actionUrl
+	 *            to be beautified
+	 * @param loginUrl
+	 *            referenced url
+	 * @return beautified action url
+	 */
+	public static String beautifyActionUrl(String actionUrl, String loginUrl) {
+		if (actionUrl.startsWith("http://") || actionUrl.startsWith("https://")) {
+			return actionUrl;
+		}
+
+		String domainUrl = loginUrl;
+
+		try {
+			domainUrl = getDomainName(loginUrl);
+			domainUrl = loginUrl.contains("www.") ? "www." + domainUrl : domainUrl;
+			domainUrl = loginUrl.startsWith("https://") ? "https://" + domainUrl : "http://" + domainUrl;
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+
+		if (actionUrl.equals("/") || actionUrl.equals("./")) {
+			return domainUrl.endsWith("/") ? domainUrl : domainUrl + "/";
+		}
+
+		return (domainUrl + actionUrl);
 	}
 
 }

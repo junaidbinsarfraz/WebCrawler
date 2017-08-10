@@ -139,4 +139,18 @@ public class AuthTblHome {
 			throw re;
 		}
 	}
+	
+	public List getAll() {
+		log.debug("getAll AuthTbl instances");
+		try {
+			sessionFactory.getCurrentSession().beginTransaction();
+			List results = sessionFactory.getCurrentSession().createCriteria("com.webcrawler.dao.AuthTbl").list();
+			sessionFactory.getCurrentSession().getTransaction().commit();
+			log.debug("getAll AuthTbl instances successful, result size: " + results.size());
+			return results;
+		} catch (RuntimeException re) {
+			log.error("getAll AuthTbl instances failed", re);
+			throw re;
+		}
+	}
 }

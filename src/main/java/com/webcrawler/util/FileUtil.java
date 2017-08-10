@@ -16,12 +16,14 @@ public class FileUtil {
 		return (f.exists() && !f.isDirectory());
 	}
 	
-	public static Map<String, String> extractUsernamePassword(File file) {
+	public static Map<String, String> extractUsernamePassword(String filePath) {
 		Map<String, String> usernamePassword = new HashMap<>();
 		
-		if(file == null) {
+		if(Boolean.FALSE.equals(isFileExists(filePath))) {
 			return null;
 		}
+		
+		File file = new File(filePath);
 		
 		try {
 			

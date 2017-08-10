@@ -15,6 +15,8 @@ public class UrlProperty {
 	private Integer uniqueTitleCount;
 	private Boolean titleModified;
 	private Integer toPageLevel;
+	private AuthenticationForm authForm;
+	private Boolean loginLink = Boolean.FALSE;
 
 	public String getName() {
 		return name;
@@ -86,6 +88,22 @@ public class UrlProperty {
 
 	public void setToPageLevel(Integer toPageLevel) {
 		this.toPageLevel = toPageLevel;
+	}
+
+	public AuthenticationForm getAuthForm() {
+		return authForm;
+	}
+
+	public void setAuthForm(AuthenticationForm authForm) {
+		this.authForm = authForm;
+	}
+
+	public Boolean getLoginLink() {
+		return loginLink;
+	}
+
+	public void setLoginLink(Boolean loginLink) {
+		this.loginLink = loginLink;
 	}
 
 }

@@ -1,10 +1,8 @@
 package com.webcrawler.util;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Map;
 
@@ -21,12 +19,18 @@ import com.webcrawler.model.UrlProperty;
  */
 public class RequestResponseUtil {
 
-	public static Connection makeRequest(UrlProperty urlProperty, Integer port) {
+	public static Connection makeRequest(UrlProperty urlProperty, Integer port, Boolean forLogin) {
 
 		Response lastResponse = urlProperty.getLastReponse();
 
+		String url = urlProperty.getName();
+		
+		if(Boolean.TRUE.equals(forLogin)) {
+			url = CrawlUtil.beautifyActionUrl(urlProperty.getAuthForm().getForm().attr("action"), url);
+		}
+		
 		// Connection making and proxy setting
-		Connection connection = Jsoup.connect(urlProperty.getName()).proxy("127.0.0.1", port);
+		Connection connection = Jsoup.connect(url).proxy("127.0.0.1", port);
 
 		connection.userAgent(Constants.USER_AGENT);
 		connection.timeout(Constants.TIME_OUT);
@@ -46,11 +50,11 @@ public class RequestResponseUtil {
 				connection.request().header("Cookie", cookieString);
 			}
 		}
-
-		/*
-		 * response.charset(); response.contentType(); response.headers();
-		 * response.method();
-		 */
+		
+		if(forLogin) {
+			connection.header("Referer", urlProperty.getName());
+			connection.data(urlProperty.getAuthForm().getData());
+		}
 
 		return connection;
 	}

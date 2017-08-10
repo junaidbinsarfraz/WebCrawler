@@ -19,6 +19,8 @@ import javax.faces.bean.SessionScoped;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.Connection.KeyVal;
 import org.jsoup.Connection.Request;
 import org.jsoup.Connection.Response;
 import org.jsoup.UnsupportedMimeTypeException;
@@ -38,7 +40,9 @@ import com.webcrawler.dao.RunIdentTbl;
 import com.webcrawler.dao.RunIdentTblHome;
 import com.webcrawler.jmeter.handler.RecordingHandler;
 import com.webcrawler.jmeter.util.XmlParser;
+import com.webcrawler.model.AuthenticationForm;
 import com.webcrawler.model.UrlProperty;
+import com.webcrawler.util.AuthUtil;
 import com.webcrawler.util.Constants;
 import com.webcrawler.util.CrawlUtil;
 import com.webcrawler.util.DateUtil;
@@ -364,6 +368,33 @@ public class HomeBean implements Serializable {
 			return;
 		}
 		
+		// Initialize login vars
+		Boolean isLoggedIn = Boolean.FALSE;
+		Boolean isLoggingIn = Boolean.FALSE;
+		UrlProperty loginLinkUrlProperty = null;
+		String username = null;
+		String password = null;
+		
+		// Check login credentials 
+		if(Boolean.TRUE.equals(this.associateUserCredentials)) {
+			Map<String, String> usernamePasswordMap = FileUtil.extractUsernamePassword(this.userCredentialFilePath);
+			
+			if(usernamePasswordMap == null || Boolean.FALSE.equals(usernamePasswordMap.containsKey("username")) 
+					|| Boolean.FALSE.equals(usernamePasswordMap.containsKey("password"))) {
+				
+				this.error += "Unable to fetch username password from given file path<br/>";
+				return;
+				
+			} else {
+				// Go for authentication process
+				username = usernamePasswordMap.get("username");
+				password = usernamePasswordMap.get("password");
+				
+				AuthUtil.loginPassword = password;
+				AuthUtil.loginUsername = username;
+			}
+		}
+		
 		// Start Time
 		this.startTime = Calendar.getInstance().getTime();
 		
@@ -389,302 +420,372 @@ public class HomeBean implements Serializable {
 //			System.out.println("Error \n" + e);
 		}
 		
-		// Start web crawling here
-		while (Boolean.TRUE.equals(this.hasStarted) && Boolean.FALSE.equals(urlProperties.isEmpty())) {
-			
-			// Start JMeter recording
-			try {
-				recordingHandler.stop();
-				this.port = recordingHandler.start(this.port);
-			} catch (Exception e) {
-				// Don't worry if recording not started. Proceed normally
-			}
-			
-			try {
-
-				UrlProperty urlProperty = urlProperties.poll();
-
-				RequestResponseTbl tempRequestResponseTbl = new RequestResponseTbl();
-
-				String fromUrl = null;
-
-				if (urlProperty.getLastRequest() != null) {
-					fromUrl = urlProperty.getLastRequest().url().toString();
-					tempRequestResponseTbl.setFromPageUrl(fromUrl);
+		// Loop helps for login
+		while(true) {
+			// Start web crawling here
+			while (Boolean.TRUE.equals(this.hasStarted) && Boolean.FALSE.equals(urlProperties.isEmpty())) {
+				
+				// Start JMeter recording
+				try {
+					recordingHandler.stop();
+					this.port = recordingHandler.start(this.port);
+				} catch (Exception e) {
+					// Don't worry if recording not started. Proceed normally
 				}
-
-				String toUrl = urlProperty.getName();
-
-				tempRequestResponseTbl.setToPageUrl(toUrl);
-				// tempRequestResponseTbl.setRunIdentTbl(runIdentTbl);
-
-				/*List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome
-						.findByExample(tempRequestResponseTbl);
-
-				Integer iterationNumer = 0;
-
-				// Calculate iteration count/number
-				if (tempRequestResponseTbls != null && Boolean.FALSE.equals(tempRequestResponseTbls.isEmpty())) {
-
-					List<RequestResponseTbl> requestResponseTbls1 = new ArrayList<>();
-
-					for (RequestResponseTbl tempRequestResponseTbl1 : tempRequestResponseTbls) {
-						if (tempRequestResponseTbl1.getRunIdentTbl() != null
-								&& tempRequestResponseTbl1.getRunIdentTbl().getId() != null && runIdentTbl != null
-								&& tempRequestResponseTbl1.getRunIdentTbl().getId().equals(runIdentTbl.getId())) {
-							requestResponseTbls1.add(tempRequestResponseTbl1);
-						}
+				
+				try {
+	
+					UrlProperty urlProperty = urlProperties.poll();
+	
+					RequestResponseTbl tempRequestResponseTbl = new RequestResponseTbl();
+	
+					String fromUrl = null;
+	
+					if (urlProperty.getLastRequest() != null) {
+						fromUrl = urlProperty.getLastRequest().url().toString();
+						tempRequestResponseTbl.setFromPageUrl(fromUrl);
 					}
-
-					if (requestResponseTbls1.size() >= iterations) {
+	
+					String toUrl = urlProperty.getName();
+	
+					tempRequestResponseTbl.setToPageUrl(toUrl);
+					// tempRequestResponseTbl.setRunIdentTbl(runIdentTbl);
+	
+					/*List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome
+							.findByExample(tempRequestResponseTbl);
+	
+					Integer iterationNumer = 0;
+	
+					// Calculate iteration count/number
+					if (tempRequestResponseTbls != null && Boolean.FALSE.equals(tempRequestResponseTbls.isEmpty())) {
+	
+						List<RequestResponseTbl> requestResponseTbls1 = new ArrayList<>();
+	
+						for (RequestResponseTbl tempRequestResponseTbl1 : tempRequestResponseTbls) {
+							if (tempRequestResponseTbl1.getRunIdentTbl() != null
+									&& tempRequestResponseTbl1.getRunIdentTbl().getId() != null && runIdentTbl != null
+									&& tempRequestResponseTbl1.getRunIdentTbl().getId().equals(runIdentTbl.getId())) {
+								requestResponseTbls1.add(tempRequestResponseTbl1);
+							}
+						}
+	
+						if (requestResponseTbls1.size() >= iterations) {
+							continue;
+						} else {
+							iterationNumer = requestResponseTbls1.size() + 1;
+						}
+					} else {
+						iterationNumer = 1;
+					}*/
+					
+					List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome
+							.findByExample(toUrl, fromUrl, runIdentTbl.getId(), Boolean.TRUE.equals(isLoggedIn) ? 1 : 0);
+					
+					Integer iterationNumer = 1;
+					
+					if (tempRequestResponseTbls.size() >= iterations) {
 						continue;
 					} else {
-						iterationNumer = requestResponseTbls1.size() + 1;
+						iterationNumer = tempRequestResponseTbls.size() + 1;
 					}
-				} else {
-					iterationNumer = 1;
-				}*/
-				
-				List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome
-						.findByExample(toUrl, fromUrl, runIdentTbl.getId());
-				
-				Integer iterationNumer = 1;
-				
-				if (tempRequestResponseTbls.size() >= iterations) {
-					continue;
-				} else {
-					iterationNumer = tempRequestResponseTbls.size() + 1;
-				}
-
-				// Make request
-				Connection connection = RequestResponseUtil.makeRequest(urlProperty, this.port);
-
-				// Call HttpGet
-				Document htmlDocument = connection.get();
-
-				Document lastHtmlDocument = urlProperty.getHtmlDocument();
-				Response lastResponse = urlProperty.getLastReponse();
-				Request lastRequest = urlProperty.getLastRequest();
-
-				Response response = connection.response();
-				Request request = connection.request();
-				
-				// 200 is the HTTP OK status code
-				if (response.statusCode() == 200) {
+	
+					Document lastHtmlDocument = urlProperty.getHtmlDocument();
+					Document htmlDocument = null;
+					Connection connection = null;
 					
-					Boolean isWithinDomain = CrawlUtil.isWithinDomain(this.targetUrl,
-							RequestResponseUtil.refectorUrl(response.url().toString(), baseDomain));
-					
-					// Check if response is valid 
-					if (Boolean.FALSE.equals(isWithinDomain) || (Boolean.FALSE.equals(response.contentType().contains("text/html"))
-							&& Boolean.FALSE.equals(response.contentType().contains("application/xhtml+xml")))) {
-						continue;
-					}
-					
-					// Get Sampler Proxy Controller as XML
-					String jmxHashTree = recordingHandler.stop();
-					String transformedSamplerProxy = "";
-					
-					if(jmxHashTree != null) {
-					
-						BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/httpsamplerproxy-transformer.xslt")));
+					if(Boolean.FALSE.equals(isLoggingIn)) {
+						// Make request
+						connection = RequestResponseUtil.makeRequest(urlProperty, this.port, Boolean.FALSE);
+						// Call HttpGet
+						htmlDocument = connection.get();
 						
-						transformedSamplerProxy = XmlParser.parseXmlWithXslTransformer(jmxHashTree, br);
+					} else {
+						isLoggingIn = Boolean.FALSE;
 						
+						// login
+						AuthenticationForm authForm = AuthUtil.findAndFillForm(lastHtmlDocument);
+
+						if (authForm == null) {
+							this.error = "Unable to find login form<br />";
+							break;
+						}
+
+						urlProperty.setAuthForm(authForm);
+
+						connection = RequestResponseUtil.makeRequest(urlProperty, this.port, Boolean.TRUE);
 						try {
-							br.close();
-						} catch(Exception e) {
+
+							Document loginDocument = connection.post();
+
+							Boolean isSuccessfulLogin = AuthUtil.isLoginSuccessful(loginDocument, authForm);
+
+							if (Boolean.FALSE.equals(isSuccessfulLogin)) {
+								this.error = "Unable to login<br />";
+								break;
+							}
+
+							isLoggedIn = Boolean.TRUE;
+
+						} catch (Exception e) {
+							this.error = "Unable to login<br />";
+							break;
+						}
+					}
+	
+					Response lastResponse = urlProperty.getLastReponse();
+					Request lastRequest = urlProperty.getLastRequest();
+	
+					Response response = connection.response();
+					Request request = connection.request();
+					
+					// 200 is the HTTP OK status code
+					if (response.statusCode() == 200) {
+						
+						Boolean isWithinDomain = CrawlUtil.isWithinDomain(this.targetUrl,
+								RequestResponseUtil.refectorUrl(response.url().toString(), baseDomain));
+						
+						// Check if response is valid 
+						if (Boolean.FALSE.equals(isWithinDomain) || (Boolean.FALSE.equals(response.contentType().contains("text/html"))
+								&& Boolean.FALSE.equals(response.contentType().contains("application/xhtml+xml")))) {
+							continue;
+						}
+	
+						// Get Sampler Proxy Controller as XML
+						String jmxHashTree = recordingHandler.stop();
+						String transformedSamplerProxy = "";
+						
+						if(jmxHashTree != null) {
+						
+							BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/httpsamplerproxy-transformer.xslt")));
+							
+							transformedSamplerProxy = XmlParser.parseXmlWithXslTransformer(jmxHashTree, br);
+							
+							try {
+								br.close();
+							} catch(Exception e) {
+								// Do nothing
+							}
+						}
+						
+						this.pagesMapped++;
+	
+						System.out.println("Connected to : " + urlProperty.getName());
+	
+						RequestResponseTbl requestResponseTbl = new RequestResponseTbl();
+	
+						if (lastHtmlDocument != null) {
+							String title = "";
+	
+							Elements elems = lastHtmlDocument.head().getElementsByTag("title");
+	
+							for (Element elem : elems) {
+								title += elem.html();
+							}
+	
+							requestResponseTbl.setFromPageTitle(title);
+						}
+	
+						if (lastResponse != null) {
+							requestResponseTbl.setFromPageUrl(lastResponse.url().toString());
+						}
+	
+						if (lastRequest != null) {
 							// Do nothing
 						}
-					}
-					
-					this.pagesMapped++;
-
-					System.out.println("Connected to : " + urlProperty.getName());
-
-					RequestResponseTbl requestResponseTbl = new RequestResponseTbl();
-
-					if (lastHtmlDocument != null) {
+	
+						Map<String, String> headers = new HashMap<>(request.headers());
+						
+						headers.putAll(request.cookies());
+						
+						for(KeyVal keyVal : request.data()) {
+							headers.put(keyVal.key(), keyVal.value());
+						}
+						
+						requestResponseTbl.setRequestHeader(headers.toString());
+	//					requestResponseTbl.setPageTransitionIterationNumber(iterationNumer);
+						requestResponseTbl.setRequestHeader(request.headers().toString());
+						requestResponseTbl.setResponseBody(response.body());
+						requestResponseTbl.setResponseHeader(response.headers().toString());
+						requestResponseTbl.setToPageLevel(urlProperty.getToPageLevel());
+	
+						UrlProperty matchedUrlProperty = null;
 						String title = "";
-
-						Elements elems = lastHtmlDocument.head().getElementsByTag("title");
-
-						for (Element elem : elems) {
-							title += elem.html();
-						}
-
-						requestResponseTbl.setFromPageTitle(title);
-					}
-
-					if (lastResponse != null) {
-						requestResponseTbl.setFromPageUrl(lastResponse.url().toString());
-					}
-
-					if (lastRequest != null) {
-						// Do nothing
-					}
-
-					Map<String, String> headers = new HashMap<>(request.headers());
-					
-					headers.putAll(request.cookies());
-					
-					requestResponseTbl.setRequestHeader(headers.toString());
-//					requestResponseTbl.setPageTransitionIterationNumber(iterationNumer);
-					requestResponseTbl.setRequestHeader(request.headers().toString());
-					requestResponseTbl.setResponseBody(response.body());
-					requestResponseTbl.setResponseHeader(response.headers().toString());
-					requestResponseTbl.setToPageLevel(urlProperty.getToPageLevel());
-
-					UrlProperty matchedUrlProperty = null;
-					String title = "";
-					
-					// Extract and make title
-					if (htmlDocument != null) {
-
-						Elements elems = htmlDocument.head().getElementsByTag("title");
-
-						for (Element elem : elems) {
-							title += elem.html();
-						}
-
-						// To page title change base on pages' distance 
-						/*if (Boolean.TRUE || (Util.isNotNullAndEmpty(fromUrl) && Util.isNotNullAndEmpty(toUrl) && toUrl.equals(fromUrl))) {
-
-							matchedUrlProperty = this.getMatchedUrlPropertiesByTitle(urlProperties, title);
-
-							if (matchedUrlProperty != null) {
-
-								Integer distance = CrawlUtil.levenshteinDistance(
-										matchedUrlProperty.getLastReponse().body(), response.body());
-
-								Double percentage = (((double) distance)
-										/ (Math.max(matchedUrlProperty.getLastReponse().body().length(),
-												response.body().length())))
-										* 100;
-
-								if (percentage != null && percentage > Constants.PERCENTAGE_MATCH_MIN_LIMIT) {
-									if (Boolean.TRUE.equals(matchedUrlProperty.getTitleModified())) {
-										// Get last underscore
-										title += ("_"
-												+ (Integer
-														.parseInt(matchedUrlProperty.getLastTitle().substring(
-																matchedUrlProperty.getLastTitle().lastIndexOf("_") + 1))
-														+ 1));
-									} else {
-										title += "_1";
+						
+						// Extract and make title
+						if (htmlDocument != null) {
+	
+							Elements elems = htmlDocument.head().getElementsByTag("title");
+	
+							for (Element elem : elems) {
+								title += elem.html();
+							}
+	
+							// To page title change base on pages' distance 
+							/*if (Boolean.TRUE || (Util.isNotNullAndEmpty(fromUrl) && Util.isNotNullAndEmpty(toUrl) && toUrl.equals(fromUrl))) {
+	
+								matchedUrlProperty = this.getMatchedUrlPropertiesByTitle(urlProperties, title);
+	
+								if (matchedUrlProperty != null) {
+	
+									Integer distance = CrawlUtil.levenshteinDistance(
+											matchedUrlProperty.getLastReponse().body(), response.body());
+	
+									Double percentage = (((double) distance)
+											/ (Math.max(matchedUrlProperty.getLastReponse().body().length(),
+													response.body().length())))
+											* 100;
+	
+									if (percentage != null && percentage > Constants.PERCENTAGE_MATCH_MIN_LIMIT) {
+										if (Boolean.TRUE.equals(matchedUrlProperty.getTitleModified())) {
+											// Get last underscore
+											title += ("_"
+													+ (Integer
+															.parseInt(matchedUrlProperty.getLastTitle().substring(
+																	matchedUrlProperty.getLastTitle().lastIndexOf("_") + 1))
+															+ 1));
+										} else {
+											title += "_1";
+										}
 									}
 								}
+							}*/
+	
+							requestResponseTbl.setToPageTitle(title);
+						}
+						
+						if(count == 0) {
+							runIdentTbl.setBaseUrl(this.targetUrl);
+							runIdentTbl.setAuthFileLoc(this.userCredentialFilePath);
+							
+							this.runIdentTblHome.attachDirty(runIdentTbl);
+							
+							runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
+							
+							if (runIdentTbls == null && runIdentTbls.isEmpty()) {
+								this.error += "Run Name Not saved in database<br/>";
+								break;
 							}
-						}*/
-
-						requestResponseTbl.setToPageTitle(title);
-					}
-					
-					if(count == 0) {
-						runIdentTbl.setBaseUrl(this.targetUrl);
-						
-						this.runIdentTblHome.attachDirty(runIdentTbl);
-						
-						runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
-						
-						if (runIdentTbls == null && runIdentTbls.isEmpty()) {
-							this.error += "Run Name Not saved in database<br/>";
-							return;
+							
+							runIdentTbl = runIdentTbls.get(0);
+							
+							count ++;
 						}
 						
-						runIdentTbl = runIdentTbls.get(0);
+						requestResponseTbl.setToPageUrl(urlProperty.getName());
+						requestResponseTbl.setRunIdentTbl(runIdentTbl);
+						requestResponseTbl.setAuthenticated(Boolean.TRUE.equals(isLoggedIn) ? 1 : 0);
+	
+						this.requestResponseTblHome.attachDirty(requestResponseTbl);
 						
-						count ++;
-					}
-					
-					requestResponseTbl.setToPageUrl(urlProperty.getName());
-					requestResponseTbl.setRunIdentTbl(runIdentTbl);
+						// Take and save screen shot. Also save Jmeter output
+						try {
+							
+							JmeterTransControllerTbl jmeterTransControllerTbl = new JmeterTransControllerTbl();
+							
+							RequestResponseTbl requestResponseTblLastest = (RequestResponseTbl) this.requestResponseTblHome.findByExample(requestResponseTbl).get(0);
+							
+							jmeterTransControllerTbl.setRequestResponseTbl(requestResponseTblLastest);
+							jmeterTransControllerTbl.setTransContSec(transformedSamplerProxy);
+							
+							if (this.driver != null) {
+								try {
+									this.driver.get(response.url().toString());
+	
+									jmeterTransControllerTbl.setScreenShot(
+											((TakesScreenshot) this.driver).getScreenshotAs(OutputType.BYTES));
+								} catch (Exception e) {
+	
+								}
+							}
+							
+							this.jmeterTransControllerTblHome.attachDirty(jmeterTransControllerTbl);
+							
+						} catch(Exception e) {
+							
+						}
+						
+						parsedLinks.add(requestResponseTbl);
+						
+						// Do not get href links of login page b/c login page is only used for login purpose not for navigation purpose
+						if(Boolean.TRUE.equals(urlProperty.getLoginLink())) {
 
-					this.requestResponseTblHome.attachDirty(requestResponseTbl);
-					
-					// Take and save screen shot. Also save Jmeter output
-					try {
+							urlProperty.setLoginLink(Boolean.FALSE);
+							
+							urlProperties.add(urlProperty);
+							
+							continue;
+						}
 						
-						JmeterTransControllerTbl jmeterTransControllerTbl = new JmeterTransControllerTbl();
+						Elements links = htmlDocument.select("a[href]");
 						
-						RequestResponseTbl requestResponseTblLastest = (RequestResponseTbl) this.requestResponseTblHome.findByExample(requestResponseTbl).get(0);
-						
-						jmeterTransControllerTbl.setRequestResponseTbl(requestResponseTblLastest);
-						jmeterTransControllerTbl.setTransContSec(transformedSamplerProxy);
-						
-						if (this.driver != null) {
-							try {
-								this.driver.get(response.url().toString());
-
-								jmeterTransControllerTbl.setScreenShot(
-										((TakesScreenshot) this.driver).getScreenshotAs(OutputType.BYTES));
-							} catch (Exception e) {
-
+						// Extract all links that will be called in next iteration
+						for (Element link : links) {
+							
+							Boolean isAuthLink = Boolean.TRUE.equals(this.associateUserCredentials) && Boolean.TRUE.equals(AuthUtil.isLoginLink(link));
+							
+							String refectoredUrl = RequestResponseUtil.refectorUrl(link.attr("href"), baseDomain);
+	
+							isWithinDomain = CrawlUtil.isWithinDomain(this.targetUrl,
+									RequestResponseUtil.refectorUrl(refectoredUrl, baseDomain));
+	
+							Boolean isAllowed = CrawlUtil.isAllowed(rules, this.targetUrl, refectoredUrl);
+	
+							// Check if it is achieved MAX_DEPTH = vertical-depth
+							if (Boolean.TRUE.equals(isWithinDomain) && Boolean.TRUE.equals(isAllowed) && Constants.MAX_DEPTH > urlProperty.getToPageLevel()) {
+	
+								UrlProperty newUrlProperty = new UrlProperty();
+	
+								newUrlProperty.setName(refectoredUrl);
+								newUrlProperty.setLastReponse(response);
+								newUrlProperty.setLastRequest(connection.request());
+								newUrlProperty.setHtmlDocument(htmlDocument);
+								newUrlProperty.setLastTitle(title);
+								newUrlProperty.setTitleModified(matchedUrlProperty != null);
+								newUrlProperty.setToPageLevel(urlProperty.getToPageLevel() + 1);
+	
+								if(isAuthLink) {
+									if(loginLinkUrlProperty == null && Boolean.FALSE.equals(isLoggedIn) ) {
+										loginLinkUrlProperty = newUrlProperty;
+										loginLinkUrlProperty.setLoginLink(Boolean.TRUE);
+									}
+								} else if(Boolean.TRUE.equals(isLoggedIn) && Boolean.TRUE.equals(AuthUtil.isLogoutLink(link))) {
+									// Check if link signout link or not. If signout then do nothing
+								} else {
+									urlProperties.add(newUrlProperty);
+								}
 							}
 						}
-						
-						this.jmeterTransControllerTblHome.attachDirty(jmeterTransControllerTbl);
-						
-					} catch(Exception e) {
-						
+	
+					} else {
+						System.err.println("Connection Error - status code : " + response.statusCode());
 					}
-					
-					parsedLinks.add(requestResponseTbl);
-
-					Elements links = htmlDocument.select("a[href]");
-					
-					// Extract all links that will be called in next iteration
-					for (Element link : links) {
-
-						String refectoredUrl = RequestResponseUtil.refectorUrl(link.attr("href"), baseDomain);
-
-						isWithinDomain = CrawlUtil.isWithinDomain(this.targetUrl,
-								RequestResponseUtil.refectorUrl(refectoredUrl, baseDomain));
-
-						Boolean isAllowed = CrawlUtil.isAllowed(rules, this.targetUrl, refectoredUrl);
-
-						// Check if it is achieved MAX_DEPTH = vertical-depth
-						if (Boolean.TRUE.equals(isWithinDomain) && Boolean.TRUE.equals(isAllowed) && Constants.MAX_DEPTH > urlProperty.getToPageLevel()) {
-
-							UrlProperty newUrlProperty = new UrlProperty();
-
-							newUrlProperty.setName(refectoredUrl);
-							newUrlProperty.setLastReponse(response);
-							newUrlProperty.setLastRequest(connection.request());
-							newUrlProperty.setHtmlDocument(htmlDocument);
-							newUrlProperty.setLastTitle(title);
-							newUrlProperty.setTitleModified(matchedUrlProperty != null);
-							newUrlProperty.setToPageLevel(urlProperty.getToPageLevel() + 1);
-
-							urlProperties.add(newUrlProperty);
-						}
-					}
-
-					// logger.info("**Visiting** Received web page at " + url);
-				} else {
-					System.err.println("Connection Error - status code : " + response.statusCode());
-					// logger.error("**Failure** Web page not recieved at " +
-					// url);
+	
+				} catch (UnsupportedMimeTypeException e) {
+					// No need to log
+				} catch (IOException e) {
+					// Ignore
+				} catch (GenericJDBCException e) {
+					// Ignore
+				} catch (IllegalStateException e) {
+	//				System.err.println(e);
+					RequestContext reqCtx = RequestContext.getCurrentInstance();
+					reqCtx.execute("poll.stop();");
+				} catch (JDBCConnectionException e) {
+					this.error = "Unable to connect to database";
+				} catch (Exception e) {
+	//				System.out.println(e);
 				}
-
-			} catch (UnsupportedMimeTypeException e) {
-				// No need to log
-			} catch (IOException e) {
-				// Ignore
-			} catch (GenericJDBCException e) {
-				// Ignore
-			} catch (IllegalStateException e) {
-//				System.err.println(e);
-				RequestContext reqCtx = RequestContext.getCurrentInstance();
-				reqCtx.execute("poll.stop();");
-			} catch (JDBCConnectionException e) {
-				this.error = "Unable to connect to database";
-			} catch (Exception e) {
-//				System.out.println(e);
+				
 			}
-
+				
+			if(Boolean.FALSE.equals(this.associateUserCredentials) || loginLinkUrlProperty == null) {
+				break;
+			}
+			
+			urlProperties.add(loginLinkUrlProperty);
+			isLoggingIn = Boolean.TRUE;
 		}
-
+		
 		// Stop timing
 		Map<String, Long> hoursMinutesSeconds = DateUtil.getHoursMinutesSecondsDifference(this.startTime,
 				Calendar.getInstance().getTime());

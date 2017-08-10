@@ -1,7 +1,6 @@
 package com.webcrawler.util;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.jsoup.nodes.Document;
@@ -11,48 +10,110 @@ import org.jsoup.select.Elements;
 import com.webcrawler.model.AuthenticationForm;
 
 public class AuthUtil {
+	
+	public static String loginUsername = "enquiries@loadmetrics.co.uk";
+	public static String loginPassword = "#Unst0n3#";
 
-	public static AuthenticationForm findForm(Document document, List<String> usernameKeys, List<String> passwordKeys, List<String> loginKeys) {
-
+	public static Boolean isLoginSuccessful(Document document, AuthenticationForm loginForm) {
+		
+		if(loginForm == null) {
+			return Boolean.FALSE;
+		}
+		
+		// Locate authentication form
+		Object form = null;
+		form = findAndFillForm(document);
+		if(form != null) {
+			return Boolean.FALSE;
+		}
+		
+		// Locate logout button/link, if found then return true
+		
+		// Locate error message if found the return false
+		
+		
+		return Boolean.TRUE;
+	}
+	
+	public static Boolean isLoginLink(Element loginLink) {
+		
+		for(String loginKey : DataUtil.getLoginKeys()) {
+			if(loginKey.equalsIgnoreCase(loginLink.attr("href") != null ? loginLink.attr("href") : "")
+					|| loginKey.equalsIgnoreCase(loginLink.attr("title") != null ? loginLink.attr("title") : "")
+					|| loginLink.html().toLowerCase().contains(loginKey.toLowerCase())) {
+				return Boolean.TRUE;
+			}
+		}
+		
+		return Boolean.FALSE;
+	}
+	
+	public static Boolean isLogoutLink(Element loginLink) {
+		
+		for(String loginKey : DataUtil.getLogoutKeys()) {
+			if(loginKey.equalsIgnoreCase(loginLink.attr("href") != null ? loginLink.attr("href") : "")
+					|| loginKey.equalsIgnoreCase(loginLink.attr("title") != null ? loginLink.attr("title") : "")
+					|| loginLink.html().toLowerCase().contains(loginKey.toLowerCase())) {
+				return Boolean.TRUE;
+			}
+		}
+		
+		return Boolean.FALSE;
+	}
+	
+	public static AuthenticationForm findAndFillForm(Document document) {
+		
 		AuthenticationForm loginForm = null;
-
+		
 		Elements forms = document.getElementsByTag("form");
-
-		if (forms.size() > 0) {
-
-			for (Element myForm : forms) {
-				/*
-				 * Get username and password field to check if form is login
-				 * form or not Also check for button or link's text if its login
-				 * or not because it can be register link
-				 */
-				for (String usernameKey : usernameKeys) {
+		
+		if(forms.size() > 0) {
+			
+			for(Element myForm : forms) {
+				// Get username and password field to check if form is login form or not
+				// Also check for button or link's text if its login or not because it can be register link
+				
+				for(String usernameKey : DataUtil.getUsernameKeys()) {
 					Elements usernameElems = myForm.getElementsByAttributeValue("name", usernameKey);
-
-					if (usernameElems.size() > 0) {
-						for (String passwordKey : passwordKeys) {
+					
+					if(usernameElems.size() > 0) {
+						for(String passwordKey : DataUtil.getPasswordKeys()) {
 							Elements passwordElems = myForm.getElementsByAttributeValue("name", passwordKey);
-
-							if (passwordElems.size() > 0) {
+							
+							if(passwordElems.size() > 0) {
 								// Check for login button or link
-
+								
 								Elements loginButton = myForm.getElementsByAttributeValue("type", "submit");
-
-								for (String loginKey : loginKeys) {
-
-									if (loginButton.size() > 0) {
-										if (loginKey.equalsIgnoreCase(loginButton.attr("title")) || loginKey.equalsIgnoreCase(loginButton.text())
-												|| loginButton.html().contains(loginKey) || loginKey.equalsIgnoreCase(loginButton.attr("value"))) {
+								
+								for(String loginKey : DataUtil.getLoginKeys()) {
+									
+									if(loginButton.size() > 0) {
+										if(loginKey.equalsIgnoreCase(loginButton.first().attr("title")) || loginKey.equalsIgnoreCase(loginButton.first().text())
+											|| loginButton.first().html().toLowerCase().contains(loginKey.toLowerCase()) || loginKey.equalsIgnoreCase(loginButton.first().attr("value"))) {
 											// Login button/link exists
+											
+											Elements hiddenElems = myForm.select("input[type=hidden]");
+									        Map<String, String> nameValue = new HashMap<>();
 
+									        for(Element elem : hiddenElems) {
+									            nameValue.put(elem.attr("name"), elem.attr("value"));
+									        }
+									        
+									        nameValue.put(passwordElems.first().attr("name"), loginPassword);
+									        nameValue.put(usernameElems.first().attr("name"), loginUsername);
+									        
+									        if(loginButton.first().attr("name") != null && loginButton.first().attr("name") != "") {
+									        	nameValue.put(loginButton.first().attr("name"), loginButton.first().attr("value"));
+									        }
+											
 											loginForm = new AuthenticationForm();
-
+											
+											loginForm.setData(nameValue);
 											loginForm.setForm(myForm);
-											loginForm.setPassword(passwordKey);
 											loginForm.setPasswordField(passwordElems.first());
-											loginForm.setUsername(usernameKey);
 											loginForm.setUsernameField(usernameElems.first());
-
+											loginForm.setLoginBtnField(loginButton.first());
+											
 											break;
 										}
 									}
@@ -63,23 +124,8 @@ public class AuthUtil {
 				}
 			}
 		}
-
+		
 		return loginForm;
-	}
-
-	public static Map<String, String> getHiddenFields(Document document) {
-		Map<String, String> hiddenFields = new HashMap<String, String>(0);
-
-		// TODO: Get all hidden fields
-
-		return hiddenFields;
-	}
-	
-	public static Boolean isLoginSuccessful() {
-		
-		
-		
-		return Boolean.FALSE;
 	}
 
 }

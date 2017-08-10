@@ -1,31 +1,26 @@
 package com.webcrawler.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jsoup.nodes.Element;
 
 public class AuthenticationForm {
 
-	private String username;
-	private String password;
+	private Map<String, String> data = new HashMap<>();
 	private Element form;
 	private Element usernameField;
 	private Element passwordField;
+	private Element loginBtnField;
 
-	public String getUsername() {
-		return username;
+	public Map<String, String> getData() {
+		return data;
 	}
-
-	public void setUsername(String username) {
-		this.username = username;
+	
+	public void setData(Map<String, String> data) {
+		this.data = data;
 	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
+	
 	public Element getForm() {
 		return form;
 	}
@@ -48,6 +43,14 @@ public class AuthenticationForm {
 
 	public void setPasswordField(Element passwordField) {
 		this.passwordField = passwordField;
+	}
+
+	public Element getLoginBtnField() {
+		return loginBtnField;
+	}
+
+	public void setLoginBtnField(Element loginBtnField) {
+		this.loginBtnField = loginBtnField;
 	}
 
 }

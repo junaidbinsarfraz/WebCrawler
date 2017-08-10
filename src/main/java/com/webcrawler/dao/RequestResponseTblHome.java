@@ -158,12 +158,12 @@ public class RequestResponseTblHome {
 		}
 	}
 	
-	public List findByExample(String toUrl, String fromUrl, Integer runId) {
+	public List findByExample(String toUrl, String fromUrl, Integer runId, Integer authenticationStatus) {
 		log.debug("finding RequestResponseTbl instance by example");
 		try {
 			sessionFactory.getCurrentSession().beginTransaction();
 			
-			String query = "select * from request_response_tbl where ToPageUrl like '" + toUrl + "' and RunId = " + runId +"";
+			String query = "select * from request_response_tbl where ToPageUrl like '" + toUrl + "' and RunId = " + runId +" and Authenticated = " + authenticationStatus + "";
 			if(fromUrl != null) {
 				query += " and FromPageURL like '" + fromUrl + "'";
 			}
