@@ -1,6 +1,7 @@
 package com.webcrawler.dao;
 // Generated May 11, 2017 2:36:17 PM by Hibernate Tools 5.1.0.Alpha1
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -11,6 +12,8 @@ import org.hibernate.cache.impl.NoCachingRegionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.criterion.Example;
+
+import com.webcrawler.util.Util;
 
 /**
  * Home object for domain model class RequestResponseTbl.
@@ -160,6 +163,11 @@ public class RequestResponseTblHome {
 	
 	public List findByExample(String toUrl, String fromUrl, Integer runId, Integer authenticationStatus) {
 		log.debug("finding RequestResponseTbl instance by example");
+		
+		if((Util.isNotNullAndEmpty(toUrl) && toUrl.contains("\'")) || (Util.isNotNullAndEmpty(fromUrl) && fromUrl.contains("\'"))) {
+			return new ArrayList<>();
+		}
+		
 		try {
 			sessionFactory.getCurrentSession().beginTransaction();
 			

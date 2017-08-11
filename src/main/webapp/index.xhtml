@@ -45,11 +45,13 @@
 					<p:selectBooleanCheckbox value="#{homeBean.downloadImages}" />
 					<br />
 					<br />
-					<label>Associate user credentials?</label>
-					<p:selectBooleanCheckbox value="#{homeBean.associateUserCredentials}" /><br />
+					<label>Associate user credentials?</label> 
+					<p:selectBooleanCheckbox value="#{homeBean.associateUserCredentials}" >
+						<p:ajax event="change" update="userCredentialFilePathField" /> 
+					</p:selectBooleanCheckbox>
 					<br />
 					<br />
-					<p:inputText value="#{homeBean.userCredentialFilePath}"></p:inputText>
+					<p:inputText id="userCredentialFilePathField" value="#{homeBean.userCredentialFilePath}" disabled="#{!homeBean.associateUserCredentials}"></p:inputText>
 					<br />
 					<br />
 					<h:panelGroup id="btns">

@@ -104,7 +104,7 @@ public class CrawlUtil {
 		} catch (URISyntaxException e) {
 			// e.printStackTrace();
 			// Donot need to log
-			System.out.println("Url syntax is inccorrect : " + toUrl);
+//			System.out.println("Url syntax is inccorrect : " + toUrl);
 		}
 
 		return Boolean.FALSE;

@@ -144,7 +144,10 @@ public class AuthTblHome {
 		log.debug("getAll AuthTbl instances");
 		try {
 			sessionFactory.getCurrentSession().beginTransaction();
-			List results = sessionFactory.getCurrentSession().createCriteria("com.webcrawler.dao.AuthTbl").list();
+
+			String query = "select * from auth_tbl";
+			
+			List results = sessionFactory.getCurrentSession().createSQLQuery(query).addEntity(AuthTbl.class).list();
 			sessionFactory.getCurrentSession().getTransaction().commit();
 			log.debug("getAll AuthTbl instances successful, result size: " + results.size());
 			return results;

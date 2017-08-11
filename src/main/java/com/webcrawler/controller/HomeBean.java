@@ -417,7 +417,6 @@ public class HomeBean implements Serializable {
 		try {
 			recordingHandler.init(this.port);
 		} catch (Exception e) {
-//			System.out.println("Error \n" + e);
 		}
 		
 		// Loop helps for login
@@ -478,12 +477,16 @@ public class HomeBean implements Serializable {
 						iterationNumer = 1;
 					}*/
 					
+					// TODO: Uncomment this line and comment out below line
+					/*List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome
+							.findByExample(toUrl, fromUrl, runIdentTbl.getId(), Boolean.TRUE.equals(isLoggedIn) ? 1 : 0);*/
+					//TODO: Check if there is any issue with auth = 1/0 ...
 					List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome
-							.findByExample(toUrl, fromUrl, runIdentTbl.getId(), Boolean.TRUE.equals(isLoggedIn) ? 1 : 0);
+							.findByExample(toUrl, null, runIdentTbl.getId(), Boolean.TRUE.equals(isLoggedIn) ? 1 : 0);
 					
 					Integer iterationNumer = 1;
 					
-					if (tempRequestResponseTbls.size() >= iterations) {
+					if (tempRequestResponseTbls.size() >= iterations && Boolean.FALSE.equals(isLoggingIn)) {
 						continue;
 					} else {
 						iterationNumer = tempRequestResponseTbls.size() + 1;
@@ -515,9 +518,13 @@ public class HomeBean implements Serializable {
 						connection = RequestResponseUtil.makeRequest(urlProperty, this.port, Boolean.TRUE);
 						try {
 
-							Document loginDocument = connection.post();
+							/*Document loginDocument = connection.post();
 
-							Boolean isSuccessfulLogin = AuthUtil.isLoginSuccessful(loginDocument, authForm);
+							Boolean isSuccessfulLogin = AuthUtil.isLoginSuccessful(loginDocument, authForm);*/
+							
+							htmlDocument = connection.post();
+
+							Boolean isSuccessfulLogin = AuthUtil.isLoginSuccessful(htmlDocument, authForm);
 
 							if (Boolean.FALSE.equals(isSuccessfulLogin)) {
 								this.error = "Unable to login<br />";
@@ -707,14 +714,14 @@ public class HomeBean implements Serializable {
 						parsedLinks.add(requestResponseTbl);
 						
 						// Do not get href links of login page b/c login page is only used for login purpose not for navigation purpose
-						if(Boolean.TRUE.equals(urlProperty.getLoginLink())) {
+						/*if(Boolean.TRUE.equals(urlProperty.getLoginLink())) {
 
 							urlProperty.setLoginLink(Boolean.FALSE);
 							
 							urlProperties.add(urlProperty);
 							
 							continue;
-						}
+						}*/
 						
 						Elements links = htmlDocument.select("a[href]");
 						
@@ -778,7 +785,8 @@ public class HomeBean implements Serializable {
 				
 			}
 				
-			if(Boolean.FALSE.equals(this.associateUserCredentials) || loginLinkUrlProperty == null) {
+			if(Boolean.FALSE.equals(this.associateUserCredentials) || loginLinkUrlProperty == null 
+					|| Boolean.TRUE.equals(isLoggedIn) || Boolean.TRUE.equals(isLoggingIn)) {
 				break;
 			}
 			
