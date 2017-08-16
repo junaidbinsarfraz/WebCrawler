@@ -123,6 +123,20 @@ public class CrawlUtil {
 		String domain = uri.getHost();
 		return domain.startsWith("www.") ? domain.substring(4) : domain;
 	}
+	
+	/**
+	 * The method getFullDomainName() is use to extract full domain name from the url
+	 * 
+	 * @param url
+	 *            given url
+	 * @return domain
+	 * @throws URISyntaxException
+	 */
+	public static String getFullDomainName(String url) throws URISyntaxException {
+		URI uri = new URI(url);
+		String domain = uri.getHost();
+		return domain;
+	}
 
 	/**
 	 * The method levenshteinDistance() is use to calculate the distance between

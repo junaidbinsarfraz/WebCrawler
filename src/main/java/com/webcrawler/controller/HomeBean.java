@@ -361,8 +361,10 @@ public class HomeBean implements Serializable {
 
 		// Get domain name
 		String baseDomain = null;
+		String fullDomain = null;
 		try {
 			baseDomain = CrawlUtil.getDomainName(this.targetUrl);
+			fullDomain = CrawlUtil.getFullDomainName(this.targetUrl);
 		} catch (Exception e1) {
 			this.error += "Unable to fetch domain of the website<br/>";
 			return;
@@ -374,6 +376,7 @@ public class HomeBean implements Serializable {
 		UrlProperty loginLinkUrlProperty = null;
 		String username = null;
 		String password = null;
+		Map<String, String> authCookies = null;
 		
 		// Check login credentials 
 		if(Boolean.TRUE.equals(this.associateUserCredentials)) {
@@ -498,7 +501,7 @@ public class HomeBean implements Serializable {
 					
 					if(Boolean.FALSE.equals(isLoggingIn)) {
 						// Make request
-						connection = RequestResponseUtil.makeRequest(urlProperty, this.port, Boolean.FALSE);
+						connection = RequestResponseUtil.makeRequest(urlProperty, this.port, Boolean.FALSE, authCookies);
 						// Call HttpGet
 						htmlDocument = connection.get();
 						
@@ -515,7 +518,7 @@ public class HomeBean implements Serializable {
 
 						urlProperty.setAuthForm(authForm);
 
-						connection = RequestResponseUtil.makeRequest(urlProperty, this.port, Boolean.TRUE);
+						connection = RequestResponseUtil.makeRequest(urlProperty, this.port, Boolean.TRUE, null);
 						try {
 
 							/*Document loginDocument = connection.post();
@@ -532,6 +535,7 @@ public class HomeBean implements Serializable {
 							}
 
 							isLoggedIn = Boolean.TRUE;
+							authCookies = urlProperty.getLastReponse().cookies();
 
 						} catch (Exception e) {
 							this.error = "Unable to login<br />";
@@ -563,7 +567,8 @@ public class HomeBean implements Serializable {
 						
 						if(jmxHashTree != null) {
 						
-							BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/httpsamplerproxy-transformer.xslt")));
+							BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(Boolean.TRUE.equals(isLoggingIn) ? 
+									"/httpsamplerproxy-transformer-post-method.xslt" : "/httpsamplerproxy-transformer.xslt")));
 							
 							transformedSamplerProxy = XmlParser.parseXmlWithXslTransformer(jmxHashTree, br);
 							
@@ -606,6 +611,10 @@ public class HomeBean implements Serializable {
 						
 						for(KeyVal keyVal : request.data()) {
 							headers.put(keyVal.key(), keyVal.value());
+						}
+						
+						if(Boolean.TRUE.equals(isLoggingIn) && urlProperty.getAuthForm() != null) {
+							headers.putAll(urlProperty.getAuthForm().getData());
 						}
 						
 						requestResponseTbl.setRequestHeader(headers.toString());
@@ -728,12 +737,17 @@ public class HomeBean implements Serializable {
 						// Extract all links that will be called in next iteration
 						for (Element link : links) {
 							
+							// TODO: remove this in final version. Just for testing
+							if(link.attr("href") != null && link.attr("href").contains("?") && !link.attr("href").contains("login.jsp")) {
+								continue;
+							}
+							
 							Boolean isAuthLink = Boolean.TRUE.equals(this.associateUserCredentials) && Boolean.TRUE.equals(AuthUtil.isLoginLink(link));
 							
-							String refectoredUrl = RequestResponseUtil.refectorUrl(link.attr("href"), baseDomain);
+							String refectoredUrl = RequestResponseUtil.refectorUrl(link.attr("href"), fullDomain);
 	
 							isWithinDomain = CrawlUtil.isWithinDomain(this.targetUrl,
-									RequestResponseUtil.refectorUrl(refectoredUrl, baseDomain));
+									RequestResponseUtil.refectorUrl(refectoredUrl, fullDomain));
 	
 							Boolean isAllowed = CrawlUtil.isAllowed(rules, this.targetUrl, refectoredUrl);
 	
@@ -771,6 +785,7 @@ public class HomeBean implements Serializable {
 					// No need to log
 				} catch (IOException e) {
 					// Ignore
+//					System.out.println(e);
 				} catch (GenericJDBCException e) {
 					// Ignore
 				} catch (IllegalStateException e) {
@@ -780,7 +795,7 @@ public class HomeBean implements Serializable {
 				} catch (JDBCConnectionException e) {
 					this.error = "Unable to connect to database";
 				} catch (Exception e) {
-	//				System.out.println(e);
+//					System.out.println(e);
 				}
 				
 			}

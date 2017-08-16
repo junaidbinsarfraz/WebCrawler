@@ -40,7 +40,8 @@ public class AuthUtil {
 		for(String loginKey : DataUtil.getLoginKeys()) {
 			if(loginKey.equalsIgnoreCase(loginLink.attr("href") != null ? loginLink.attr("href") : "")
 					|| loginKey.equalsIgnoreCase(loginLink.attr("title") != null ? loginLink.attr("title") : "")
-					|| loginLink.html().toLowerCase().contains(loginKey.toLowerCase())) {
+					|| loginLink.html().toLowerCase().contains(loginKey.toLowerCase())
+					|| (loginLink.attr("id") != null && loginLink.attr("id").toLowerCase().contains(loginKey.toLowerCase()))) {
 				return Boolean.TRUE;
 			}
 		}

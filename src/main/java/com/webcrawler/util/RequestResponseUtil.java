@@ -19,7 +19,7 @@ import com.webcrawler.model.UrlProperty;
  */
 public class RequestResponseUtil {
 
-	public static Connection makeRequest(UrlProperty urlProperty, Integer port, Boolean forLogin) {
+	public static Connection makeRequest(UrlProperty urlProperty, Integer port, Boolean forLogin, Map<String, String> authCookies) {
 
 		Response lastResponse = urlProperty.getLastReponse();
 
@@ -34,9 +34,18 @@ public class RequestResponseUtil {
 
 		connection.userAgent(Constants.USER_AGENT);
 		connection.timeout(Constants.TIME_OUT);
+		connection.validateTLSCertificates(Boolean.FALSE);
 
 		if (lastResponse != null) {
-			Map<String, String> cookies = lastResponse.cookies();
+			
+			Map<String, String> cookies = null;//lastResponse.cookies();
+			
+			if(authCookies != null) {
+				cookies = authCookies;
+				cookies.putAll(lastResponse.cookies());
+			} else {
+				cookies = lastResponse.cookies();
+			}
 
 			connection.cookies(cookies);
 
