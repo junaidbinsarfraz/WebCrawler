@@ -39,7 +39,6 @@ public class RequestResponseTblHome {
             return sessionFactory;
 
         } catch (Exception e) {
-
             log.error("Initial SessionFactory creation failed." + e);
             throw new IllegalStateException("Initial Session Factory creation failed.");
         }
@@ -54,6 +53,8 @@ public class RequestResponseTblHome {
 			log.debug("persist successful");
 		} catch (RuntimeException re) {
 			log.error("persist failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -67,6 +68,8 @@ public class RequestResponseTblHome {
 			log.debug("attach successful");
 		} catch (RuntimeException re) {
 			log.error("attach failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -80,6 +83,8 @@ public class RequestResponseTblHome {
 			log.debug("attach successful");
 		} catch (RuntimeException re) {
 			log.error("attach failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -93,6 +98,8 @@ public class RequestResponseTblHome {
 			log.debug("delete successful");
 		} catch (RuntimeException re) {
 			log.error("delete failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -107,6 +114,8 @@ public class RequestResponseTblHome {
 			return result;
 		} catch (RuntimeException re) {
 			log.error("merge failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -125,6 +134,8 @@ public class RequestResponseTblHome {
 			return instance;
 		} catch (RuntimeException re) {
 			log.error("get failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -140,6 +151,8 @@ public class RequestResponseTblHome {
 			return results;
 		} catch (RuntimeException re) {
 			log.error("find by example failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -157,6 +170,8 @@ public class RequestResponseTblHome {
 			return results;
 		} catch (RuntimeException re) {
 			log.error("find by example failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -182,6 +197,8 @@ public class RequestResponseTblHome {
 			return results;
 		} catch (RuntimeException re) {
 			log.error("find by example failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}

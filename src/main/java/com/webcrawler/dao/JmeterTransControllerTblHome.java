@@ -51,6 +51,8 @@ public class JmeterTransControllerTblHome {
 			log.debug("persist successful");
 		} catch (RuntimeException re) {
 			log.error("persist failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -64,6 +66,8 @@ public class JmeterTransControllerTblHome {
 			log.debug("attach successful");
 		} catch (RuntimeException re) {
 			log.error("attach failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -77,6 +81,8 @@ public class JmeterTransControllerTblHome {
 			log.debug("attach successful");
 		} catch (RuntimeException re) {
 			log.error("attach failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -90,6 +96,8 @@ public class JmeterTransControllerTblHome {
 			log.debug("delete successful");
 		} catch (RuntimeException re) {
 			log.error("delete failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -104,6 +112,8 @@ public class JmeterTransControllerTblHome {
 			return result;
 		} catch (RuntimeException re) {
 			log.error("merge failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -123,6 +133,8 @@ public class JmeterTransControllerTblHome {
 			return instance;
 		} catch (RuntimeException re) {
 			log.error("get failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -138,6 +150,8 @@ public class JmeterTransControllerTblHome {
 			return results;
 		} catch (RuntimeException re) {
 			log.error("find by example failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}

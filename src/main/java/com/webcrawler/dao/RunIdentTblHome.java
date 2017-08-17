@@ -51,6 +51,8 @@ public class RunIdentTblHome {
 			log.debug("persist successful");
 		} catch (RuntimeException re) {
 			log.error("persist failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -64,6 +66,8 @@ public class RunIdentTblHome {
 			log.debug("attach successful");
 		} catch (RuntimeException re) {
 			log.error("attach failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -77,6 +81,8 @@ public class RunIdentTblHome {
 			log.debug("attach successful");
 		} catch (RuntimeException re) {
 			log.error("attach failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -90,6 +96,8 @@ public class RunIdentTblHome {
 			log.debug("delete successful");
 		} catch (RuntimeException re) {
 			log.error("delete failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -104,6 +112,8 @@ public class RunIdentTblHome {
 			return result;
 		} catch (RuntimeException re) {
 			log.error("merge failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -122,6 +132,8 @@ public class RunIdentTblHome {
 			return instance;
 		} catch (RuntimeException re) {
 			log.error("get failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}
@@ -136,6 +148,8 @@ public class RunIdentTblHome {
 			return results;
 		} catch (RuntimeException re) {
 			log.error("find by example failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
 			throw re;
 		}
 	}

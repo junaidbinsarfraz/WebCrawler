@@ -481,11 +481,11 @@ public class HomeBean implements Serializable {
 					}*/
 					
 					// TODO: Uncomment this line and comment out below line
-					/*List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome
-							.findByExample(toUrl, fromUrl, runIdentTbl.getId(), Boolean.TRUE.equals(isLoggedIn) ? 1 : 0);*/
-					//TODO: Check if there is any issue with auth = 1/0 ...
 					List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome
-							.findByExample(toUrl, null, runIdentTbl.getId(), Boolean.TRUE.equals(isLoggedIn) ? 1 : 0);
+							.findByExample(toUrl, fromUrl, runIdentTbl.getId(), Boolean.TRUE.equals(isLoggedIn) ? 1 : 0);
+					//TODO: Check if there is any issue with auth = 1/0 ...
+					/*List<RequestResponseTbl> tempRequestResponseTbls = this.requestResponseTblHome
+							.findByExample(toUrl, null, runIdentTbl.getId(), Boolean.TRUE.equals(isLoggedIn) ? 1 : 0);*/
 					
 					Integer iterationNumer = 1;
 					
@@ -738,9 +738,9 @@ public class HomeBean implements Serializable {
 						for (Element link : links) {
 							
 							// TODO: remove this in final version. Just for testing
-							if(link.attr("href") != null && link.attr("href").contains("?") && !link.attr("href").contains("login.jsp")) {
+							/*if(link.attr("href") != null && link.attr("href").contains("?") && !link.attr("href").contains("signin")) {
 								continue;
-							}
+							}*/
 							
 							Boolean isAuthLink = Boolean.TRUE.equals(this.associateUserCredentials) && Boolean.TRUE.equals(AuthUtil.isLoginLink(link));
 							
