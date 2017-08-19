@@ -20,6 +20,7 @@ public class RequestResponseTbl implements java.io.Serializable {
 	private String toPageUrl;
 	private Integer pageTransitionIterationNumber;
 	private String requestHeader;
+	private String requestParameters;
 	private String responseHeader;
 	private Set jmeterTransControllerTbls = new HashSet(0);
 
@@ -27,7 +28,7 @@ public class RequestResponseTbl implements java.io.Serializable {
 	}
 
 	public RequestResponseTbl(RunIdentTbl runIdentTbl, String responseBody, String fromPageTitle, String fromPageUrl, Integer toPageLevel, Integer authenticated,
-			String toPageTitle, String toPageUrl, Integer pageTransitionIterationNumber, String requestHeader, String responseHeader,
+			String toPageTitle, String toPageUrl, Integer pageTransitionIterationNumber, String requestHeader, String requestParameters, String responseHeader,
 			Set jmeterTransControllerTbls) {
 		this.runIdentTbl = runIdentTbl;
 		this.responseBody = responseBody;
@@ -39,6 +40,7 @@ public class RequestResponseTbl implements java.io.Serializable {
 		this.toPageUrl = toPageUrl;
 		this.pageTransitionIterationNumber = pageTransitionIterationNumber;
 		this.requestHeader = requestHeader;
+		this.setRequestParameters(requestParameters);
 		this.responseHeader = responseHeader;
 		this.jmeterTransControllerTbls = jmeterTransControllerTbls;
 	}
@@ -129,6 +131,14 @@ public class RequestResponseTbl implements java.io.Serializable {
 
 	public void setRequestHeader(String requestHeader) {
 		this.requestHeader = requestHeader;
+	}
+
+	public String getRequestParameters() {
+		return requestParameters;
+	}
+
+	public void setRequestParameters(String requestParameters) {
+		this.requestParameters = requestParameters;
 	}
 
 	public String getResponseHeader() {

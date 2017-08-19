@@ -38,6 +38,9 @@
         <property name="requestHeader" type="string">
             <column name="RequestHeader" length="65535" />
         </property>
+        <property name="requestParameters" type="string">
+            <column name="RequestParameters" length="65535" />
+        </property>
         <property name="responseHeader" type="string">
             <column name="ResponseHeader" length="65535" />
         </property>

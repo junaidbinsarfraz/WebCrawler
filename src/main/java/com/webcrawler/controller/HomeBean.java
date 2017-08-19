@@ -613,8 +613,8 @@ public class HomeBean implements Serializable {
 							headers.put(keyVal.key(), keyVal.value());
 						}
 						
-						if(Boolean.TRUE.equals(isLoggingIn) && urlProperty.getAuthForm() != null) {
-							headers.putAll(urlProperty.getAuthForm().getData());
+						if(Boolean.TRUE.equals(isLoggingIn) && urlProperty.getAuthForm() != null && urlProperty.getAuthForm().getData() != null) {
+							requestResponseTbl.setRequestParameters(urlProperty.getAuthForm().getData().toString());
 						}
 						
 						requestResponseTbl.setRequestHeader(headers.toString());
