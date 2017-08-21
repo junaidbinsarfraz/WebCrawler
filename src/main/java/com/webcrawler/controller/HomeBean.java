@@ -19,7 +19,6 @@ import javax.faces.bean.SessionScoped;
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 import org.jsoup.Connection.KeyVal;
 import org.jsoup.Connection.Request;
 import org.jsoup.Connection.Response;
@@ -77,6 +76,7 @@ public class HomeBean implements Serializable {
 	private Date startTime;
 	private Boolean associateUserCredentials;
 	private String userCredentialFilePath;
+	private String loginPageUrl;
 	
 	// Duplicate Run variables
 	private String duplicateError;
@@ -184,6 +184,14 @@ public class HomeBean implements Serializable {
 
 	public void setUserCredentialFilePath(String userCredentialFilePath) {
 		this.userCredentialFilePath = userCredentialFilePath;
+	}
+
+	public String getLoginPageUrl() {
+		return loginPageUrl;
+	}
+
+	public void setLoginPageUrl(String loginPageUrl) {
+		this.loginPageUrl = loginPageUrl;
 	}
 
 	public String getDuplicateError() {
@@ -388,7 +396,13 @@ public class HomeBean implements Serializable {
 				this.error += "Unable to fetch username password from given file path<br/>";
 				return;
 				
+			} else if(Util.isNullOrEmpty(this.loginPageUrl)) {
+
+				this.error += "Login Page Url cannot be empty<br/>";
+				return;
+				
 			} else {
+				
 				// Go for authentication process
 				username = usernamePasswordMap.get("username");
 				password = usernamePasswordMap.get("password");
@@ -420,6 +434,25 @@ public class HomeBean implements Serializable {
 		try {
 			recordingHandler.init(this.port);
 		} catch (Exception e) {
+		}
+		
+		// Do login
+		if(Boolean.TRUE.equals(this.userCredentialFilePath)) {
+			
+			// Start JMeter recording
+			try {
+				recordingHandler.stop();
+				this.port = recordingHandler.start(this.port);
+			} catch (Exception e) {
+				// Don't worry if recording not started. Proceed normally
+			}
+			
+			UrlProperty urlProperty = new UrlProperty();
+			
+			urlProperty.setName(this.loginPageUrl);
+			
+			Connection loginForm = RequestResponseUtil.makeRequest(urlProperty, this.port, Boolean.FALSE, null);
+			
 		}
 		
 		// Loop helps for login

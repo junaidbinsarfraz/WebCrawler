@@ -47,11 +47,18 @@
 					<br />
 					<label>Associate user credentials?</label> 
 					<p:selectBooleanCheckbox value="#{homeBean.associateUserCredentials}" >
-						<p:ajax event="change" update="userCredentialFilePathField" /> 
+						<p:ajax event="change" update="userCredentialFilePathField loginPageUrl" /> 
 					</p:selectBooleanCheckbox>
 					<br />
 					<br />
+					<label>Credential File Path</label>
+					<br />
 					<p:inputText id="userCredentialFilePathField" value="#{homeBean.userCredentialFilePath}" disabled="#{!homeBean.associateUserCredentials}"></p:inputText>
+					<br />
+					<br />
+					<label>Login Page Url</label>
+					<br />
+					<p:inputText id="loginPageUrl" value="#{homeBean.loginPageUrl}" disabled="#{!homeBean.associateUserCredentials}"></p:inputText>
 					<br />
 					<br />
 					<h:panelGroup id="btns">
