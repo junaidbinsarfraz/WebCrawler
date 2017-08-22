@@ -335,7 +335,8 @@ public class HomeBean implements Serializable {
 			this.error = "Unable to connect to database<br/>";
 		}
 		
-		if (runIdentTbls != null && Boolean.FALSE.equals(runIdentTbls.isEmpty())) {
+		if (runIdentTbls != null && Boolean.FALSE.equals(runIdentTbls.isEmpty()) 
+				&& Boolean.FALSE.equals(runIdentTbls.get(0).getBaseUrl().toLowerCase().contains(this.targetUrl.toLowerCase()))) {
 			this.error += "Run Name already exists<br/>";
 		}
 
@@ -452,6 +453,191 @@ public class HomeBean implements Serializable {
 			urlProperty.setName(this.loginPageUrl);
 			
 			Connection loginForm = RequestResponseUtil.makeRequest(urlProperty, this.port, Boolean.FALSE, null);
+			
+			try {
+				Document lastHtmlDocument = loginForm.get();
+				Response response = loginForm.response();
+				Request request = loginForm.request();
+				
+				// login
+				AuthenticationForm authForm = AuthUtil.findAndFillForm(lastHtmlDocument);
+	
+				if (authForm == null) {
+					this.error = "Unable to find login form<br />";
+					return;
+				}
+	
+				urlProperty.setAuthForm(authForm);
+				urlProperty.setLastReponse(response);
+				urlProperty.setLastRequest(request);
+	
+				Connection connection = RequestResponseUtil.makeRequest(urlProperty, this.port, Boolean.TRUE, null);
+
+				Document htmlDocument = connection.post();
+
+				Boolean isSuccessfulLogin = AuthUtil.isLoginSuccessful(htmlDocument, authForm);
+
+				if (Boolean.FALSE.equals(isSuccessfulLogin)) {
+					this.error = "Unable to login<br />";
+					return;
+				}
+
+				isLoggedIn = Boolean.TRUE;
+				authCookies = response.cookies();
+				
+				// TODO: Check Jmeter and db instructions
+				
+				runIdentTbl.setBaseUrl(this.targetUrl);
+				runIdentTbl.setAuthFileLoc(this.userCredentialFilePath);
+				
+				this.runIdentTblHome.attachDirty(runIdentTbl);
+				
+				runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
+				
+				if (runIdentTbls == null && runIdentTbls.isEmpty()) {
+					this.error += "Run Name Not saved in database<br/>";
+					return;
+				}
+				
+				runIdentTbl = runIdentTbls.get(0);
+				
+				count ++;
+				
+				// 200 is the HTTP OK status code
+				if (response.statusCode() == 200) {
+					
+					// Get Sampler Proxy Controller as XML
+					String jmxHashTree = recordingHandler.stop();
+					String transformedSamplerProxy = "";
+					
+					if(jmxHashTree != null) {
+					
+						BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/httpsamplerproxy-transformer-post-method.xslt")));
+						
+						transformedSamplerProxy = XmlParser.parseXmlWithXslTransformer(jmxHashTree, br);
+						
+						try {
+							br.close();
+						} catch(Exception e) {
+							// Do nothing
+						}
+					}
+					
+					this.pagesMapped++;
+					
+					System.out.println("Connected to : " + urlProperty.getName());
+					
+					RequestResponseTbl requestResponseTbl = new RequestResponseTbl();
+					
+					if (lastHtmlDocument != null) {
+						String title = "";
+
+						Elements elems = lastHtmlDocument.head().getElementsByTag("title");
+
+						for (Element elem : elems) {
+							title += elem.html();
+						}
+
+						requestResponseTbl.setFromPageTitle(title);
+					}
+
+					if (response != null) {
+						requestResponseTbl.setFromPageUrl(response.url().toString());
+					}
+
+					Map<String, String> headers = new HashMap<>(request.headers());
+					
+					headers.putAll(request.cookies());
+					
+					for(KeyVal keyVal : request.data()) {
+						headers.put(keyVal.key(), keyVal.value());
+					}
+					
+					if(urlProperty.getAuthForm() != null && urlProperty.getAuthForm().getData() != null) {
+						requestResponseTbl.setRequestParameters(urlProperty.getAuthForm().getData().toString());
+					}
+					
+					requestResponseTbl.setRequestHeader(headers.toString());
+					requestResponseTbl.setRequestHeader(request.headers().toString());
+					requestResponseTbl.setResponseBody(response.body());
+					requestResponseTbl.setResponseHeader(response.headers().toString());
+					requestResponseTbl.setToPageLevel(urlProperty.getToPageLevel());
+
+					String title = "";
+					
+					// Extract and make title
+					if (htmlDocument != null) {
+
+						Elements elems = htmlDocument.head().getElementsByTag("title");
+
+						for (Element elem : elems) {
+							title += elem.html();
+						}
+
+						requestResponseTbl.setToPageTitle(title);
+					}
+					
+					if(count == 0) {
+						runIdentTbl.setBaseUrl(this.targetUrl);
+						runIdentTbl.setAuthFileLoc(this.userCredentialFilePath);
+						
+						this.runIdentTblHome.attachDirty(runIdentTbl);
+						
+						runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
+						
+						if (runIdentTbls == null && runIdentTbls.isEmpty()) {
+							this.error += "Run Name Not saved in database<br/>";
+							return;
+						}
+						
+						runIdentTbl = runIdentTbls.get(0);
+						
+						count ++;
+					}
+					
+					requestResponseTbl.setToPageUrl(urlProperty.getName());
+					requestResponseTbl.setRunIdentTbl(runIdentTbl);
+					requestResponseTbl.setAuthenticated(Boolean.TRUE.equals(isLoggedIn) ? 1 : 0);
+
+					this.requestResponseTblHome.attachDirty(requestResponseTbl);
+					
+					// Take and save screen shot. Also save Jmeter output
+					try {
+						
+						JmeterTransControllerTbl jmeterTransControllerTbl = new JmeterTransControllerTbl();
+						
+						RequestResponseTbl requestResponseTblLastest = (RequestResponseTbl) this.requestResponseTblHome.findByExample(requestResponseTbl).get(0);
+						
+						jmeterTransControllerTbl.setRequestResponseTbl(requestResponseTblLastest);
+						jmeterTransControllerTbl.setTransContSec(transformedSamplerProxy);
+						
+						if (this.driver != null) {
+							try {
+								this.driver.get(response.url().toString());
+
+								jmeterTransControllerTbl.setScreenShot(
+										((TakesScreenshot) this.driver).getScreenshotAs(OutputType.BYTES));
+							} catch (Exception e) {
+
+							}
+						}
+						
+						this.jmeterTransControllerTblHome.attachDirty(jmeterTransControllerTbl);
+						
+					} catch(Exception e) {
+						
+					}
+					
+				} else {
+					// Because response is not 200
+					this.error += "Unable to login<br/>";
+					return;
+				}
+
+			} catch (Exception e) {
+				this.error = "Unable to login<br />";
+				return;
+			}
 			
 		}
 		
