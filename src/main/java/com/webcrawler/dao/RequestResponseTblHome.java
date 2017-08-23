@@ -189,6 +189,8 @@ public class RequestResponseTblHome {
 			String query = "select * from request_response_tbl where ToPageUrl like '" + toUrl + "' and RunId = " + runId +" and Authenticated = " + authenticationStatus + "";
 			if(fromUrl != null) {
 				query += " and FromPageURL like '" + fromUrl + "'";
+			} else {
+				query += " and FromPageURL is null";
 			}
 			
 			List results = sessionFactory.getCurrentSession().createSQLQuery(query).addEntity(RequestResponseTbl.class).list();

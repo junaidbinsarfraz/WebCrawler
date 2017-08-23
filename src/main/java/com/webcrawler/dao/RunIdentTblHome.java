@@ -1,6 +1,7 @@
 package com.webcrawler.dao;
 // Generated May 11, 2017 2:36:17 PM by Hibernate Tools 5.1.0.Alpha1
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -11,6 +12,8 @@ import org.hibernate.cache.impl.NoCachingRegionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.criterion.Example;
+
+import com.webcrawler.util.Util;
 
 /**
  * Home object for domain model class RunIdentTbl.
@@ -148,6 +151,30 @@ public class RunIdentTblHome {
 			return results;
 		} catch (RuntimeException re) {
 			log.error("find by example failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
+			throw re;
+		}
+	}
+	
+	public List findByRunName(String runName) {
+		log.debug("finding findByRunName instance by example");
+		
+		if(Util.isNullOrEmpty(runName)) {
+			return new ArrayList<>();
+		}
+		
+		try {
+			sessionFactory.getCurrentSession().beginTransaction();
+			
+			String query = "select * from run_ident_tbl where RunIdentifier = '" + runName + "'";
+			
+			List results = sessionFactory.getCurrentSession().createSQLQuery(query).addEntity(RunIdentTbl.class).list();
+			log.debug("find by example successful, result size: " + results.size());
+			sessionFactory.getCurrentSession().getTransaction().commit();
+			return results;
+		} catch (RuntimeException re) {
+			log.error("find by run name failed", re);
 			sessionFactory.getCurrentSession().clear();
 			sessionFactory.getCurrentSession().flush();
 			throw re;

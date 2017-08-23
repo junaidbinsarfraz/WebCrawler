@@ -330,14 +330,21 @@ public class HomeBean implements Serializable {
 		List<RunIdentTbl> runIdentTbls = null;
 
 		try {
-			runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
+			runIdentTbls = this.runIdentTblHome.findByRunName(runIdentTbl.getRunIdentifier());
 		} catch (JDBCConnectionException e) {
 			this.error = "Unable to connect to database<br/>";
 		}
 		
-		if (runIdentTbls != null && Boolean.FALSE.equals(runIdentTbls.isEmpty()) 
-				&& Boolean.FALSE.equals(runIdentTbls.get(0).getBaseUrl().toLowerCase().contains(this.targetUrl.toLowerCase()))) {
-			this.error += "Run Name already exists<br/>";
+		if (runIdentTbls != null && Boolean.FALSE.equals(runIdentTbls.isEmpty())) {
+			
+			for(RunIdentTbl runIdentTblTemp : runIdentTbls) {
+			
+				if (Boolean.FALSE.equals(runIdentTblTemp.getBaseUrl().toLowerCase().contains(this.targetUrl.toLowerCase()))
+					|| (Boolean.FALSE.equals(this.associateUserCredentials) && Util.isNullOrEmpty(runIdentTblTemp.getAuthFileLoc())
+							|| Boolean.TRUE.equals(this.associateUserCredentials) && Util.isNotNullAndEmpty(runIdentTblTemp.getAuthFileLoc()))) {
+								this.error += "Run Name already exists<br/>";
+				}
+			}
 		}
 
 		if (Util.isNotNullAndEmpty(this.error)) {
@@ -437,7 +444,7 @@ public class HomeBean implements Serializable {
 		}
 		
 		// Do login
-		if(Boolean.TRUE.equals(this.userCredentialFilePath)) {
+		if(Boolean.TRUE.equals(this.associateUserCredentials)) {
 			
 			// Start JMeter recording
 			try {
@@ -843,7 +850,7 @@ public class HomeBean implements Serializable {
 					
 					if(count == 0) {
 						runIdentTbl.setBaseUrl(this.targetUrl);
-						runIdentTbl.setAuthFileLoc(this.userCredentialFilePath);
+						runIdentTbl.setAuthFileLoc(null);
 						
 						this.runIdentTblHome.attachDirty(runIdentTbl);
 						
@@ -854,7 +861,7 @@ public class HomeBean implements Serializable {
 							break;
 						}
 						
-						runIdentTbl = runIdentTbls.get(0);
+						runIdentTbl = runIdentTbls.get(runIdentTbls.size() -1);
 						
 						count ++;
 					}
@@ -1088,95 +1095,99 @@ public class HomeBean implements Serializable {
 		List<RunIdentTbl> runIdentTbls = null;
 
 		try {
-			runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
+			runIdentTbls = this.runIdentTblHome.findByRunName(runIdentTbl.getRunIdentifier());
 		} catch (JDBCConnectionException e) {
 			this.duplicateError = "Unable to connect to database<br/>";
 		}
 
 		if (runIdentTbls == null || Boolean.TRUE.equals(runIdentTbls.isEmpty())) {
 			this.duplicateError += "Run Name not found<br/>";
-		} else {
-			runIdentTbl = runIdentTbls.get(0);
-
-			// Check if run Name percentage is greater or not
-			if (Boolean.TRUE.equals(runIdentTbl.getCleansed()) && percentageValue <= runIdentTbl.getPercent()) {
-				this.duplicateError += "Already cleansed with " + runIdentTbl.getPercent() + "%<br/>";
-			}
+			return;
 		}
 		
 		if (Util.isNotNullAndEmpty(this.duplicateError)) {
 			return;
 		}
 		
-		runIdentTbl.setPercent(percentageValue);
-		
-		this.runIdentTblHome.attachDirty(runIdentTbl);
-		
-		runIdentTbl = this.runIdentTblHome.findById(runIdentTbl.getId());
-		
-		// Start doing removals
-		RequestResponseTbl dummyRequestResponseTbl = new RequestResponseTbl();
-		
-		dummyRequestResponseTbl.setRunIdentTbl(runIdentTbl);
-		
-		// Get all parsed pages
-		List<RequestResponseTbl> requestResponseTbls = this.requestResponseTblHome.findByRunId(runIdentTbl.getId());
-		
-		// Start Time
-		this.startTimeRemoval = Calendar.getInstance().getTime();
-		
-		this.hasStartedRemoval = Boolean.TRUE;
-		this.hasFinishedRemoval = Boolean.FALSE;
-		
-		// Then apply bout-force algorithm
-		for (Iterator<RequestResponseTbl> iterator = requestResponseTbls.iterator(); iterator.hasNext();) {
-			if(Boolean.TRUE.equals(hasFinishedRemoval)) {
-				break;
+		for(RunIdentTbl runIdentTbl1 : runIdentTbls) {
+			runIdentTbl = runIdentTbl1;
+			
+			// Check if run Name percentage is greater or not
+			if (Boolean.TRUE.equals(runIdentTbl.getCleansed()) && percentageValue <= runIdentTbl.getPercent()) {
+				this.duplicateError += "Already cleansed with " + runIdentTbl.getPercent() + "%<br/>";
+				continue;
 			}
 			
-			RequestResponseTbl requestResponseTbl = iterator.next();
+			runIdentTbl.setPercent(percentageValue);
 			
-			inner: for (RequestResponseTbl innerRequestResponseTbl : requestResponseTbls) {
-				
+			this.runIdentTblHome.attachDirty(runIdentTbl);
+			
+			runIdentTbl = this.runIdentTblHome.findById(runIdentTbl.getId());
+			
+			// Start doing removals
+			RequestResponseTbl dummyRequestResponseTbl = new RequestResponseTbl();
+			
+			dummyRequestResponseTbl.setRunIdentTbl(runIdentTbl);
+			
+			// Get all parsed pages
+			List<RequestResponseTbl> requestResponseTbls = this.requestResponseTblHome.findByRunId(runIdentTbl.getId());
+			
+			// Start Time
+			this.startTimeRemoval = Calendar.getInstance().getTime();
+			
+			this.hasStartedRemoval = Boolean.TRUE;
+			this.hasFinishedRemoval = Boolean.FALSE;
+			
+			// Then apply bout-force algorithm
+			for (Iterator<RequestResponseTbl> iterator = requestResponseTbls.iterator(); iterator.hasNext();) {
 				if(Boolean.TRUE.equals(hasFinishedRemoval)) {
 					break;
 				}
-
-				if (Boolean.FALSE.equals(requestResponseTbl.getId().equals(innerRequestResponseTbl.getId()))) {
-
-					/*Integer distance = CrawlUtil.levenshteinDistance(requestResponseTbl.getResponseBody(), innerRequestResponseTbl.getResponseBody());
-
-					Double percentage = 100 - (((double) distance)
-							/ (Math.max(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length()))) * 100;*/
+				
+				RequestResponseTbl requestResponseTbl = iterator.next();
+				
+				inner: for (RequestResponseTbl innerRequestResponseTbl : requestResponseTbls) {
 					
-					if(requestResponseTbl.getToPageTitle().equalsIgnoreCase(innerRequestResponseTbl.getToPageTitle()) || 
-							requestResponseTbl.getToPageUrl().equalsIgnoreCase(innerRequestResponseTbl.getToPageUrl())) {
-					
-						Double percentage = 100 - (( (double)Math.max(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length())
-								- (double)Math.min(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length()))
-								/ ((requestResponseTbl.getResponseBody().length() + innerRequestResponseTbl.getResponseBody().length()) / 2)) * 100;
+					if(Boolean.TRUE.equals(hasFinishedRemoval)) {
+						break;
+					}
 	
-						if (percentage != null && percentage.intValue() > percentageValue) {
+					if (Boolean.FALSE.equals(requestResponseTbl.getId().equals(innerRequestResponseTbl.getId()))) {
 	
-							// Remove from database
-							this.requestResponseTblHome.delete(requestResponseTbl);
-							iterator.remove();
-							this.pagesMappedRemoval++;
-							break inner;
+						/*Integer distance = CrawlUtil.levenshteinDistance(requestResponseTbl.getResponseBody(), innerRequestResponseTbl.getResponseBody());
+	
+						Double percentage = 100 - (((double) distance)
+								/ (Math.max(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length()))) * 100;*/
+						
+						if(requestResponseTbl.getToPageTitle().equalsIgnoreCase(innerRequestResponseTbl.getToPageTitle()) || 
+								requestResponseTbl.getToPageUrl().equalsIgnoreCase(innerRequestResponseTbl.getToPageUrl())) {
+						
+							Double percentage = 100 - (( (double)Math.max(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length())
+									- (double)Math.min(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length()))
+									/ ((requestResponseTbl.getResponseBody().length() + innerRequestResponseTbl.getResponseBody().length()) / 2)) * 100;
+		
+							if (percentage != null && percentage.intValue() > percentageValue) {
+		
+								// Remove from database
+								this.requestResponseTblHome.delete(requestResponseTbl);
+								iterator.remove();
+								this.pagesMappedRemoval++;
+								break inner;
+							}
 						}
 					}
 				}
 			}
+			
+			/*// Check Completely cleansed
+			if(Boolean.FALSE.equals(hasFinishedRemoval)) {
+				
+				runIdentTbl.setCleansed(Boolean.TRUE);
+				
+				this.runIdentTblHome.attachDirty(runIdentTbl);
+				
+			}*/
 		}
-		
-		/*// Check Completely cleansed
-		if(Boolean.FALSE.equals(hasFinishedRemoval)) {
-			
-			runIdentTbl.setCleansed(Boolean.TRUE);
-			
-			this.runIdentTblHome.attachDirty(runIdentTbl);
-			
-		}*/
 		
 		runIdentTbl.setCleansed(Boolean.FALSE.equals(hasFinishedRemoval));
 		runIdentTblHome.attachDirty(runIdentTbl);

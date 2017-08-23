@@ -6,6 +6,7 @@
 		http://mymachine.com/changed.xml
 	</xsl:variable>
 	<xsl:template match="/">
+		<xsl:copy-of select="(//HTTPSamplerProxy)[last() - 1]" />
 		<xsl:copy-of select="(//HTTPSamplerProxy)[last()]" />
 	</xsl:template>
 </xsl:stylesheet>
