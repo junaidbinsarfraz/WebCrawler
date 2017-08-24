@@ -470,6 +470,8 @@ public class HomeBean implements Serializable {
 	
 				if (authForm == null) {
 					this.error = "Unable to find login form<br />";
+					crawlingFinished();
+					
 					return;
 				}
 	
@@ -485,6 +487,8 @@ public class HomeBean implements Serializable {
 
 				if (Boolean.FALSE.equals(isSuccessfulLogin)) {
 					this.error = "Unable to login<br />";
+					crawlingFinished();
+					
 					return;
 				}
 
@@ -502,6 +506,8 @@ public class HomeBean implements Serializable {
 				
 				if (runIdentTbls == null && runIdentTbls.isEmpty()) {
 					this.error += "Run Name Not saved in database<br/>";
+					crawlingFinished();
+					
 					return;
 				}
 				
@@ -637,11 +643,15 @@ public class HomeBean implements Serializable {
 				} else {
 					// Because response is not 200
 					this.error += "Unable to login<br/>";
+					crawlingFinished();
+					
 					return;
 				}
 
 			} catch (Exception e) {
 				this.error = "Unable to login<br />";
+				crawlingFinished();
+				
 				return;
 			}
 			
@@ -969,9 +979,12 @@ public class HomeBean implements Serializable {
 			} catch (Exception e) {
 //					System.out.println(e);
 			}
-			
 		}
-				
+		
+		crawlingFinished();
+	}
+	
+	private void crawlingFinished() {
 		// Stop timing
 		Map<String, Long> hoursMinutesSeconds = DateUtil.getHoursMinutesSecondsDifference(this.startTime,
 				Calendar.getInstance().getTime());
@@ -984,7 +997,6 @@ public class HomeBean implements Serializable {
 	
 		// Kill firefox
 		ScreenShotUtil.killFirefox();
-		
 	}
 
 	/**
