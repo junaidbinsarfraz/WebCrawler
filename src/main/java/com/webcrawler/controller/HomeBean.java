@@ -493,7 +493,21 @@ public class HomeBean implements Serializable {
 				}
 
 				isLoggedIn = Boolean.TRUE;
-				authCookies = response.cookies();
+				if(response.cookies() != null) {
+					authCookies = response.cookies();
+					authCookies.putAll(connection.response().cookies());
+				} else {
+					authCookies = connection.response().cookies();
+				}
+				
+				UrlProperty baseUrlProp = urlProperties.poll();
+				
+				if(baseUrlProp != null) {
+					baseUrlProp.setLastReponse(connection.response());
+					baseUrlProp.setLastRequest(connection.request());
+				}
+				
+				urlProperties.add(baseUrlProp);
 				
 				// TODO: Check Jmeter and db instructions
 				

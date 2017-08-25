@@ -36,7 +36,7 @@ public class RequestResponseUtil {
 		connection.timeout(Constants.TIME_OUT);
 		connection.validateTLSCertificates(Boolean.FALSE);
 
-		if (lastResponse != null) {
+		if (lastResponse != null || authCookies != null) {
 			
 			Map<String, String> cookies = null;//lastResponse.cookies();
 			
@@ -52,12 +52,12 @@ public class RequestResponseUtil {
 			String cookieString = "";
 
 			for (Map.Entry<String, String> cookie : cookies.entrySet()) {
-				cookieString = cookie.getKey() + "=" + cookie.getValue() + "; ";
+				cookieString += cookie.getKey() + "=" + cookie.getValue() + "; ";
 			}
 
-			if (!cookieString.isEmpty()) {
+			/*if (!cookieString.isEmpty()) {
 				connection.request().header("Cookie", cookieString);
-			}
+			}*/
 		}
 		
 		if(forLogin) {
