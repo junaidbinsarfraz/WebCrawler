@@ -40,7 +40,8 @@ public class CrawlUtil {
 	public static BaseRobotRules getWebsiteRules(String userAgent, String url) throws Exception {
 
 		URL urlObj = new URL(url);
-		String hostId = urlObj.getProtocol() + "://" + urlObj.getHost() + (urlObj.getPort() > -1 ? ":" + urlObj.getPort() : "");
+		String hostId = urlObj.getProtocol() + "://" + urlObj.getHost()
+				+ (urlObj.getPort() > -1 ? ":" + urlObj.getPort() : "");
 		BaseRobotRules rules = null;
 		HttpGet httpget = new HttpGet(hostId + "/robots.txt");
 		HttpContext context = new BasicHttpContext();
@@ -98,13 +99,14 @@ public class CrawlUtil {
 
 		try {
 			if (Util.isNotNullAndEmpty(baseUrl) && Util.isNotNullAndEmpty(toUrl)
-					&& (getDomainName(baseUrl).equals(getDomainName(toUrl)) || getDomainName(toUrl).contains(getDomainName(baseUrl)))) {
+					&& (getDomainName(baseUrl).equals(getDomainName(toUrl))
+							|| getDomainName(toUrl).contains(getDomainName(baseUrl)))) {
 				return Boolean.TRUE;
 			}
 		} catch (URISyntaxException e) {
 			// e.printStackTrace();
 			// Donot need to log
-//			System.out.println("Url syntax is inccorrect : " + toUrl);
+			// System.out.println("Url syntax is inccorrect : " + toUrl);
 		}
 
 		return Boolean.FALSE;
@@ -123,9 +125,10 @@ public class CrawlUtil {
 		String domain = uri.getHost();
 		return domain.startsWith("www.") ? domain.substring(4) : domain;
 	}
-	
+
 	/**
-	 * The method getFullDomainName() is use to extract full domain name from the url
+	 * The method getFullDomainName() is use to extract full domain name from
+	 * the url
 	 * 
 	 * @param url
 	 *            given url
@@ -220,6 +223,35 @@ public class CrawlUtil {
 		}
 
 		return (domainUrl + actionUrl);
+	}
+
+	/**
+	 * The canTakeScreenShot method is use to check if the given url is good
+	 * enough to take the screen shot
+	 * 
+	 * @param url
+	 *            to be checked
+	 * @return true if url is good enough to take the screen with
+	 */
+	public static Boolean canTakeScreenShot(String url) {
+
+		Boolean isWellFormedUrl = Boolean.FALSE;
+
+		if (url != null && Boolean.FALSE.equals(url.endsWith("#"))) {
+			String[] splittedStr = url.split("#");
+
+			if (splittedStr.length > 1) {
+
+				if (splittedStr[0].contains("?")) {
+					isWellFormedUrl = Boolean.TRUE;
+				}
+
+			} else {
+				isWellFormedUrl = Boolean.TRUE;
+			}
+		}
+
+		return isWellFormedUrl;
 	}
 
 }

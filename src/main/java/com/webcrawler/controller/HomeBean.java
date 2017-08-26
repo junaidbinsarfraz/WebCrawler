@@ -12,6 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
@@ -26,6 +28,7 @@ import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -639,6 +642,7 @@ public class HomeBean implements Serializable {
 						
 						if (this.driver != null) {
 							try {
+								
 								this.driver.get(response.url().toString());
 
 								jmeterTransControllerTbl.setScreenShot(
@@ -907,10 +911,22 @@ public class HomeBean implements Serializable {
 						
 						if (this.driver != null) {
 							try {
-								this.driver.get(response.url().toString());
-
-								jmeterTransControllerTbl.setScreenShot(
-										((TakesScreenshot) this.driver).getScreenshotAs(OutputType.BYTES));
+								
+								if(authCookies != null) {
+									Set<String> keys = authCookies.keySet();
+									
+									for(String key : keys) {
+										this.driver.manage().addCookie(new Cookie(key, authCookies.get(key)));
+									}
+								}
+								
+								if(CrawlUtil.canTakeScreenShot(response.url().toString())) {
+									this.driver.get(response.url().toString());
+									
+									jmeterTransControllerTbl.setScreenShot(
+											((TakesScreenshot) this.driver).getScreenshotAs(OutputType.BYTES));
+								}
+								
 							} catch (Exception e) {
 
 							}
@@ -950,7 +966,7 @@ public class HomeBean implements Serializable {
 								RequestResponseUtil.refectorUrl(refectoredUrl, fullDomain));
 
 						Boolean isAllowed = CrawlUtil.isAllowed(rules, this.targetUrl, refectoredUrl);
-
+						
 						// Check if it is achieved MAX_DEPTH = vertical-depth
 						if (Boolean.TRUE.equals(isWithinDomain) && Boolean.TRUE.equals(isAllowed) && Constants.MAX_DEPTH > urlProperty.getToPageLevel()) {
 

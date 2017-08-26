@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxBinary;
@@ -40,6 +41,10 @@ public class ScreenShotUtil {
 			 */
 			firefoxProfile.setPreference("toolkit.startup.max_resumed_crashes", "-1");
 			driver = new FirefoxDriver(ffBinary, firefoxProfile);
+			driver.manage().timeouts().pageLoadTimeout(new Long(1), TimeUnit.MINUTES);
+			driver.manage().timeouts().implicitlyWait(new Long(1), TimeUnit.MINUTES);
+			driver.manage().timeouts().setScriptTimeout(new Long(1), TimeUnit.MINUTES);
+			
 		} catch (Exception e) {
 			System.out.println("Unable to initialize firefox driver\n" + e);
 		}
