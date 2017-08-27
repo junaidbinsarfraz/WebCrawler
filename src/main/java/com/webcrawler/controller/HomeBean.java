@@ -338,7 +338,12 @@ public class HomeBean implements Serializable {
 			this.error = "Unable to connect to database<br/>";
 		}
 		
+		Integer count = 0;
+		
 		if (runIdentTbls != null && Boolean.FALSE.equals(runIdentTbls.isEmpty())) {
+			
+			runIdentTbl = runIdentTbls.get(0);
+			count ++;
 			
 			for(RunIdentTbl runIdentTblTemp : runIdentTbls) {
 			
@@ -428,8 +433,6 @@ public class HomeBean implements Serializable {
 		this.hasStarted = Boolean.TRUE;
 		this.hasFinished = Boolean.FALSE;
 		
-		Integer count = 0;
-		
 		/*if(this.driver == null) {
 			this.driver = ScreenShotUtil.initFireFox();
 		}*/
@@ -468,7 +471,174 @@ public class HomeBean implements Serializable {
 				Response response = loginForm.response();
 				Request request = loginForm.request();
 				
+				// Duplicate Request Response logging in db
+				
+				/////////////////////
+				
+				// 200 is the HTTP OK status code
+				if (response.statusCode() == 200) {
+					
+					runIdentTbl.setBaseUrl(this.targetUrl);
+					runIdentTbl.setAuthFileLoc(this.userCredentialFilePath);
+					
+					this.runIdentTblHome.attachDirty(runIdentTbl);
+					
+					runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
+					
+					if (runIdentTbls == null && runIdentTbls.isEmpty()) {
+						this.error += "Run Name Not saved in database<br/>";
+						crawlingFinished();
+						
+						return;
+					}
+					
+					runIdentTbl = runIdentTbls.get(0);
+					
+					count ++;
+					
+					// Get Sampler Proxy Controller as XML
+					String jmxHashTree = recordingHandler.stop();
+					String transformedSamplerProxy = "";
+					
+					if(jmxHashTree != null) {
+					
+						BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/httpsamplerproxy-transformer.xslt")));
+						
+						transformedSamplerProxy = XmlParser.parseXmlWithXslTransformer(jmxHashTree, br);
+						
+						try {
+							br.close();
+						} catch(Exception e) {
+							// Do nothing
+						}
+					}
+					
+					this.pagesMapped++;
+					
+					System.out.println("Connected to (GET) : " + urlProperty.getName());
+					
+					RequestResponseTbl requestResponseTbl = new RequestResponseTbl();
+					
+					if (lastHtmlDocument != null) {
+						String title = "";
+
+						Elements elems = lastHtmlDocument.head().getElementsByTag("title");
+
+						for (Element elem : elems) {
+							title += elem.html();
+						}
+
+						requestResponseTbl.setFromPageTitle(title);
+					}
+
+					if (response != null) {
+						requestResponseTbl.setFromPageUrl(response.url().toString());
+					}
+
+					Map<String, String> headers = new HashMap<>(request.headers());
+					
+					headers.putAll(request.cookies());
+					
+					for(KeyVal keyVal : request.data()) {
+						headers.put(keyVal.key(), keyVal.value());
+					}
+					
+					if(urlProperty.getAuthForm() != null && urlProperty.getAuthForm().getData() != null) {
+						requestResponseTbl.setRequestParameters(urlProperty.getAuthForm().getData().toString());
+					}
+					
+					requestResponseTbl.setRequestHeader(headers.toString());
+					requestResponseTbl.setRequestHeader(request.headers().toString());
+					requestResponseTbl.setResponseBody(response.body());
+					requestResponseTbl.setResponseHeader(response.headers().toString());
+					requestResponseTbl.setToPageLevel(urlProperty.getToPageLevel());
+
+					String title = "";
+					
+					// Extract and make title
+					if (lastHtmlDocument != null) {
+
+						Elements elems = lastHtmlDocument.head().getElementsByTag("title");
+
+						for (Element elem : elems) {
+							title += elem.html();
+						}
+
+						requestResponseTbl.setToPageTitle(title);
+					}
+					
+					if(count == 0) {
+						runIdentTbl.setBaseUrl(this.targetUrl);
+						runIdentTbl.setAuthFileLoc(this.userCredentialFilePath);
+						
+						this.runIdentTblHome.attachDirty(runIdentTbl);
+						
+						runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
+						
+						if (runIdentTbls == null && runIdentTbls.isEmpty()) {
+							this.error += "Run Name Not saved in database<br/>";
+							return;
+						}
+						
+						runIdentTbl = runIdentTbls.get(0);
+						
+						count ++;
+					}
+					
+					requestResponseTbl.setToPageUrl(urlProperty.getName());
+					requestResponseTbl.setRunIdentTbl(runIdentTbl);
+					requestResponseTbl.setAuthenticated(Boolean.TRUE.equals(isLoggedIn) ? 1 : 0);
+
+					this.requestResponseTblHome.attachDirty(requestResponseTbl);
+					
+					// Take and save screen shot. Also save Jmeter output
+					try {
+						
+						JmeterTransControllerTbl jmeterTransControllerTbl = new JmeterTransControllerTbl();
+						
+						RequestResponseTbl requestResponseTblLastest = (RequestResponseTbl) this.requestResponseTblHome.findByExample(requestResponseTbl).get(0);
+						
+						jmeterTransControllerTbl.setRequestResponseTbl(requestResponseTblLastest);
+						jmeterTransControllerTbl.setTransContSec(transformedSamplerProxy);
+						
+						if (this.driver != null) {
+							try {
+								
+								this.driver.get(response.url().toString());
+
+								jmeterTransControllerTbl.setScreenShot(
+										((TakesScreenshot) this.driver).getScreenshotAs(OutputType.BYTES));
+							} catch (Exception e) {
+
+							}
+						}
+						
+						this.jmeterTransControllerTblHome.attachDirty(jmeterTransControllerTbl);
+						
+					} catch(Exception e) {
+						
+					}
+					
+				} else {
+					// Because response is not 200
+					this.error += "Unable to login<br/>";
+					crawlingFinished();
+					
+					return;
+				}
+				
+				////////////////////
+				
 				// login
+				
+				// Start JMeter recording
+				try {
+					recordingHandler.stop();
+					this.port = recordingHandler.start(this.port);
+				} catch (Exception e) {
+					// Don't worry if recording not started. Proceed normally
+				}
+				
 				AuthenticationForm authForm = AuthUtil.findAndFillForm(lastHtmlDocument);
 	
 				if (authForm == null) {
@@ -514,24 +684,6 @@ public class HomeBean implements Serializable {
 				
 				// TODO: Check Jmeter and db instructions
 				
-				runIdentTbl.setBaseUrl(this.targetUrl);
-				runIdentTbl.setAuthFileLoc(this.userCredentialFilePath);
-				
-				this.runIdentTblHome.attachDirty(runIdentTbl);
-				
-				runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
-				
-				if (runIdentTbls == null && runIdentTbls.isEmpty()) {
-					this.error += "Run Name Not saved in database<br/>";
-					crawlingFinished();
-					
-					return;
-				}
-				
-				runIdentTbl = runIdentTbls.get(0);
-				
-				count ++;
-				
 				// 200 is the HTTP OK status code
 				if (response.statusCode() == 200) {
 					
@@ -554,7 +706,7 @@ public class HomeBean implements Serializable {
 					
 					this.pagesMapped++;
 					
-					System.out.println("Connected to : " + urlProperty.getName());
+					System.out.println("Connected to (POST) : " + urlProperty.getName());
 					
 					RequestResponseTbl requestResponseTbl = new RequestResponseTbl();
 					
