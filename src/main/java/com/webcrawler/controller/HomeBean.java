@@ -1345,7 +1345,9 @@ public class HomeBean implements Serializable {
 						break;
 					}
 	
-					if (Boolean.FALSE.equals(requestResponseTbl.getId().equals(innerRequestResponseTbl.getId()))) {
+					if (Boolean.FALSE.equals(requestResponseTbl.getId().equals(innerRequestResponseTbl.getId()))
+							&& requestResponseTbl.getAuthenticated() != null && innerRequestResponseTbl.getAuthenticated() != null
+							&& requestResponseTbl.getAuthenticated() - innerRequestResponseTbl.getAuthenticated() == 0) { // Both should have same authenticated value
 	
 						/*Integer distance = CrawlUtil.levenshteinDistance(requestResponseTbl.getResponseBody(), innerRequestResponseTbl.getResponseBody());
 	

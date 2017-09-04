@@ -75,11 +75,11 @@ public class AuthUtil {
 				// Also check for button or link's text if its login or not because it can be register link
 				
 				for(String usernameKey : DataUtil.getUsernameKeys()) {
-					Elements usernameElems = myForm.getElementsByAttributeValue("name", usernameKey);
+					Elements usernameElems = myForm.getElementsByAttributeValueContaining("name", usernameKey);
 					
 					if(usernameElems.size() > 0) {
 						for(String passwordKey : DataUtil.getPasswordKeys()) {
-							Elements passwordElems = myForm.getElementsByAttributeValue("name", passwordKey);
+							Elements passwordElems = myForm.getElementsByAttributeValueContaining("name", passwordKey);
 							
 							if(passwordElems.size() > 0) {
 								// Check for login button or link
@@ -89,8 +89,10 @@ public class AuthUtil {
 								for(String loginKey : DataUtil.getLoginKeys()) {
 									
 									if(loginButton.size() > 0) {
-										if(loginKey.equalsIgnoreCase(loginButton.first().attr("title")) || loginKey.equalsIgnoreCase(loginButton.first().text())
-											|| loginButton.first().html().toLowerCase().contains(loginKey.toLowerCase()) || loginKey.equalsIgnoreCase(loginButton.first().attr("value"))) {
+										if((loginButton.first().attr("title") != null && loginButton.first().attr("title").toLowerCase().contains(loginKey.toLowerCase())) 
+												|| (loginButton.first().text() != null && loginButton.first().text().toLowerCase().contains(loginKey.toLowerCase()))
+												|| (loginButton.first().html().toLowerCase().contains(loginKey.toLowerCase()))
+												|| (loginButton.first().attr("value") != null && loginButton.first().attr("value").contains(loginKey.toLowerCase()))) {
 											// Login button/link exists
 											
 											Elements hiddenElems = myForm.select("input[type=hidden]");
