@@ -207,6 +207,10 @@ public class CrawlUtil {
 		if (actionUrl.startsWith("http://") || actionUrl.startsWith("https://")) {
 			return actionUrl;
 		}
+		
+		if(!actionUrl.startsWith("/") && !actionUrl.equals("./")) {
+			return loginUrl;
+		}
 
 		String domainUrl = loginUrl;
 
@@ -222,7 +226,7 @@ public class CrawlUtil {
 			return domainUrl.endsWith("/") ? domainUrl : domainUrl + "/";
 		}
 
-		return (domainUrl + actionUrl);
+		return domainUrl + actionUrl;
 	}
 
 	/**
