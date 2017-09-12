@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Sep 12, 2017 10:44:29 AM by Hibernate Tools 5.1.0.Alpha1 -->
+<hibernate-mapping>
+    <class name="com.webcrawler.dao.RequestCorrelationTbl" table="request_correlation_tbl" catalog="webcrawler" optimistic-lock="version">
+        <id name="id" type="java.lang.Integer">
+            <column name="Id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="runIdentTbl" class="com.webcrawler.dao.RunIdentTbl" fetch="select">
+            <column name="RunId" />
+        </many-to-one>
+        <property name="foundArgName" type="string">
+            <column name="FoundArgName" length="65535" />
+        </property>
+        <property name="foundArgValue" type="string">
+            <column name="FoundArgValue" length="65535" />
+        </property>
+        <property name="variable" type="string">
+            <column name="Variable" length="65535" />
+        </property>
+        <property name="corrRegex" type="string">
+            <column name="CorrRegex" length="65535" />
+        </property>
+    </class>
+</hibernate-mapping>

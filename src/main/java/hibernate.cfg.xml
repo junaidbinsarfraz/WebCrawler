@@ -18,5 +18,9 @@
         <mapping resource="com/webcrawler/dao/JmeterTransControllerTbl.hbm.xml" />
         <mapping resource="com/webcrawler/dao/RunIdentTbl.hbm.xml" />
         <mapping resource="com/webcrawler/dao/AuthTbl.hbm.xml" />
+        <mapping resource="com/webcrawler/dao/CredsTbl.hbm.xml" />
+        <mapping resource="com/webcrawler/dao/HeaderCorrelationTbl.hbm.xml" />
+        <mapping resource="com/webcrawler/dao/HeaderIgnoreTbl.hbm.xml" />
+        <mapping resource="com/webcrawler/dao/RequestCorrelationTbl.hbm.xml" />
     </session-factory>
 </hibernate-configuration>

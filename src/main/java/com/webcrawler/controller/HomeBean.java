@@ -33,8 +33,14 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.primefaces.context.RequestContext;
 
+import com.webcrawler.dao.CredsTbl;
+import com.webcrawler.dao.CredsTblHome;
+import com.webcrawler.dao.HeaderCorrelationTbl;
+import com.webcrawler.dao.HeaderCorrelationTblHome;
 import com.webcrawler.dao.JmeterTransControllerTbl;
 import com.webcrawler.dao.JmeterTransControllerTblHome;
+import com.webcrawler.dao.RequestCorrelationTbl;
+import com.webcrawler.dao.RequestCorrelationTblHome;
 import com.webcrawler.dao.RequestResponseTbl;
 import com.webcrawler.dao.RequestResponseTblHome;
 import com.webcrawler.dao.RunIdentTbl;
@@ -90,12 +96,20 @@ public class HomeBean implements Serializable {
 	private Boolean hasFinishedRemoval;
 	private Date startTimeRemoval;
 	
+	// Correlation Run variables 
+	private String correlationRunName;
+	private String correlationError;
+	private Boolean hasStartedCorrelation;
+	
 	private WebDriver driver;
 	private RecordingHandler recordingHandler = new RecordingHandler();
 
 	private RunIdentTblHome runIdentTblHome = new RunIdentTblHome();
 	private RequestResponseTblHome requestResponseTblHome = new RequestResponseTblHome();
 	private JmeterTransControllerTblHome jmeterTransControllerTblHome = new JmeterTransControllerTblHome();
+	private CredsTblHome credsTblHome = new CredsTblHome();
+	private HeaderCorrelationTblHome headerCorrelationTblHome = new HeaderCorrelationTblHome();
+	private RequestCorrelationTblHome requestCorrelationTblHome = new RequestCorrelationTblHome();
 	
 	// Local variables
 	private Integer port;
@@ -258,6 +272,30 @@ public class HomeBean implements Serializable {
 
 	public void setStartTimeRemoval(Date startTimeRemoval) {
 		this.startTimeRemoval = startTimeRemoval;
+	}
+
+	public String getCorrelationRunName() {
+		return correlationRunName;
+	}
+
+	public void setCorrelationRunName(String correlationRunName) {
+		this.correlationRunName = correlationRunName;
+	}
+
+	public String getCorrelationError() {
+		return correlationError;
+	}
+
+	public void setCorrelationError(String correlationError) {
+		this.correlationError = correlationError;
+	}
+
+	public Boolean getHasStartedCorrelation() {
+		return hasStartedCorrelation;
+	}
+
+	public void setHasStartedCorrelation(Boolean hasStartedCorrelation) {
+		this.hasStartedCorrelation = hasStartedCorrelation;
 	}
 
 	/**
@@ -807,6 +845,15 @@ public class HomeBean implements Serializable {
 					} catch(Exception e) {
 						
 					}
+					
+					// Save username and password for this run
+					CredsTbl credsTbl = new CredsTbl();
+					
+					credsTbl.setRunIdentTbl(runIdentTbl);
+					credsTbl.setUsername(username);
+					credsTbl.setPassword(password);
+					
+					this.credsTblHome.attachDirty(credsTbl);
 					
 				} else {
 					// Because response is not 200
@@ -1432,6 +1479,67 @@ public class HomeBean implements Serializable {
 			this.pagesMappedRemoval = 0;
 			this.runTimeRemoval = "00:00:00";
 		}
+		
+	}
+	
+	////////////////////////////////////////////// Correlation
+	
+	/**
+	 * The method startCorrelation() is use to start correlation for run name
+	 */
+	public void startCorrelation() {
+		
+		this.correlationError = "";
+		
+		// Validate
+		if(Util.isNullOrEmpty(this.correlationRunName)) {
+			this.correlationError = "Run Name is required";
+			return;
+		}
+		
+		// Check if already run exists
+		RunIdentTbl runIdentTbl = new RunIdentTbl();
+		
+		runIdentTbl.setRunIdentifier(this.correlationRunName);
+		
+		List<RunIdentTbl> runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
+		
+		if(Util.isNullOrEmpty(runIdentTbls)) {
+			this.correlationError = "Run Name doesnot exists";
+			return;
+		}
+		
+		HeaderCorrelationTbl headerCorrelationTbl = new HeaderCorrelationTbl();
+		
+		headerCorrelationTbl.setRunIdentTbl(runIdentTbl);
+		
+		List<HeaderCorrelationTbl> headerCorrelationTbls = this.headerCorrelationTblHome.findByExample(headerCorrelationTbl);
+		
+		if(Util.isNotNullAndEmpty(headerCorrelationTbls)) {
+			this.correlationError = "Run Name is already correlated";
+			return;
+		}
+		
+		RequestCorrelationTbl requestCorrelationTbl = new RequestCorrelationTbl();
+		
+		requestCorrelationTbl.setRunIdentTbl(runIdentTbl);
+		
+		List<RequestCorrelationTbl> requestCorrelationTbls = this.requestCorrelationTblHome.findByExample(requestCorrelationTbl);
+		
+		if(Util.isNotNullAndEmpty(requestCorrelationTbls)) {
+			this.correlationError = "Run Name is already correlated";
+			return;
+		}
+		
+		
+		
+		// Get run name's jmeter values 
+		
+		// Get run name's request response table's request header
+		
+		// Remove duplicate
+		
+		// Put in database
 		
 	}
 
