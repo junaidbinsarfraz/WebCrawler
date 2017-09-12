@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
@@ -396,7 +395,6 @@ public class HomeBean implements Serializable {
 		
 		// Initialize login vars
 		Boolean isLoggedIn = Boolean.FALSE;
-		UrlProperty loginLinkUrlProperty = null;
 		String username = null;
 		String password = null;
 		Map<String, String> authCookies = null;
