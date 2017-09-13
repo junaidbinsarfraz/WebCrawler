@@ -81,13 +81,13 @@ public class XmlParser {
 	 * The method parseXmlWithXslTransformer() is use to transform give xml with
 	 * the XSL expression
 	 * 
-	 * @param jmxHashTree
+	 * @param xml
 	 *            to be transformed
 	 * @param br
 	 *            input XSL expression
 	 * @return transformed xml
 	 */
-	public static String parseXmlWithXslTransformer(String jmxHashTree, BufferedReader br) {
+	public static String parseXmlWithXslTransformer(String xml, BufferedReader br) {
 
 		StreamResult streamResult = new StreamResult();
 
@@ -101,7 +101,7 @@ public class XmlParser {
 
 			streamResult.setOutputStream(out);
 
-			Source text = new StreamSource((InputStream) (new ByteArrayInputStream(jmxHashTree.getBytes())));
+			Source text = new StreamSource((InputStream) (new ByteArrayInputStream(xml.getBytes())));
 			transformer.transform(text, streamResult);
 		} catch (Exception e) {
 			return null;

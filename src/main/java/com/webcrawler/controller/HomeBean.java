@@ -51,7 +51,9 @@ import com.webcrawler.model.AuthenticationForm;
 import com.webcrawler.model.UrlProperty;
 import com.webcrawler.util.AuthUtil;
 import com.webcrawler.util.Constants;
+import com.webcrawler.util.CorrelationUtil;
 import com.webcrawler.util.CrawlUtil;
+import com.webcrawler.util.DataUtil;
 import com.webcrawler.util.DateUtil;
 import com.webcrawler.util.FileUtil;
 import com.webcrawler.util.RequestResponseUtil;
@@ -1531,6 +1533,28 @@ public class HomeBean implements Serializable {
 			return;
 		}
 		
+		Map<String, String> requestCorrelations = new HashMap<>();
+		Map<String, String> headerCorrelations = new HashMap<>();
+		
+		RequestResponseTbl requestResponseTbl = new RequestResponseTbl();
+		
+		requestResponseTbl.setRunIdentTbl(runIdentTbl);
+		
+		List<RequestResponseTbl> requestResponseTbls = this.requestResponseTblHome.findByExample(requestResponseTbl);
+		
+		for(RequestResponseTbl requestResponseTblTemp : requestResponseTbls) {
+			if(requestResponseTblTemp.getJmeterTransControllerTbls() != null && !requestResponseTblTemp.getJmeterTransControllerTbls().isEmpty()) {
+				Iterator it = requestResponseTblTemp.getJmeterTransControllerTbls().iterator();
+				
+				if(it.hasNext()) {
+					JmeterTransControllerTbl jmeterTransControllerTbl = (JmeterTransControllerTbl) it.next();
+					
+					requestCorrelations.putAll(CorrelationUtil.extractArgunemtNameValue(jmeterTransControllerTbl.getTransContSec()));
+				}
+			}
+			
+			headerCorrelations.putAll(CorrelationUtil.extractHeaders(requestResponseTblTemp.getRequestHeader(), DataUtil.getIgnoreHeaderKeys()));
+		}
 		
 		
 		// Get run name's jmeter values 
