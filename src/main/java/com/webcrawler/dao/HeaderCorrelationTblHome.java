@@ -1,6 +1,7 @@
 package com.webcrawler.dao;
 // Generated Sep 12, 2017 10:44:30 AM by Hibernate Tools 5.1.0.Alpha1
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.naming.InitialContext;
 import org.apache.commons.logging.Log;
@@ -11,6 +12,8 @@ import org.hibernate.cache.impl.NoCachingRegionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.criterion.Example;
+
+import com.webcrawler.util.Util;
 
 /**
  * Home object for domain model class HeaderCorrelationTbl.
@@ -150,6 +153,30 @@ public class HeaderCorrelationTblHome {
 			return results;
 		} catch (RuntimeException re) {
 			log.error("find by example failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
+			throw re;
+		}
+	}
+	
+	public List findByRunId(Integer runId) {
+		log.debug("finding findByRunId instance by example");
+		
+		if(Util.isNull(runId)) {
+			return new ArrayList<>();
+		}
+		
+		try {
+			sessionFactory.getCurrentSession().beginTransaction();
+			
+			String query = "select * from header_correlation_tbl where RunId = '" + runId + "'";
+			
+			List results = sessionFactory.getCurrentSession().createSQLQuery(query).addEntity(HeaderCorrelationTbl.class).list();
+			log.debug("find by run id successful, result size: " + results.size());
+			sessionFactory.getCurrentSession().getTransaction().commit();
+			return results;
+		} catch (RuntimeException re) {
+			log.error("find by run id failed", re);
 			sessionFactory.getCurrentSession().clear();
 			sessionFactory.getCurrentSession().flush();
 			throw re;

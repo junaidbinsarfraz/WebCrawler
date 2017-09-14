@@ -151,6 +151,9 @@
 							requiredMessage="Run Name is required"></p:inputText>
 						<br />
 						<br />
+						<p:outputLabel value="#{homeBean.correlationStatus}"></p:outputLabel>
+						<br />
+						<br />
 						<p:commandButton actionListener="#{homeBean.startCorrelation}"
 							disabled="#{homeBean.hasStartedCorrelation}"
 							value="Correlate" process="@form" update="@form"

@@ -159,6 +159,11 @@ public class RequestResponseTblHome {
 	
 	public List<RequestResponseTbl> findByRunId(Integer runId) {
 		log.debug("finding RequestResponseTbl instance by example");
+		
+		if(Util.isNull(runId)) {
+			return new ArrayList<RequestResponseTbl>();
+		}
+		
 		try {
 			sessionFactory.getCurrentSession().beginTransaction();
 

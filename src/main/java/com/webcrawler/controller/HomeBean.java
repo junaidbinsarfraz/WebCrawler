@@ -101,6 +101,7 @@ public class HomeBean implements Serializable {
 	// Correlation Run variables 
 	private String correlationRunName;
 	private String correlationError;
+	private String correlationStatus;
 	private Boolean hasStartedCorrelation;
 	
 	private WebDriver driver;
@@ -290,6 +291,14 @@ public class HomeBean implements Serializable {
 
 	public void setCorrelationError(String correlationError) {
 		this.correlationError = correlationError;
+	}
+
+	public String getCorrelationStatus() {
+		return correlationStatus;
+	}
+
+	public void setCorrelationStatus(String correlationStatus) {
+		this.correlationStatus = correlationStatus;
 	}
 
 	public Boolean getHasStartedCorrelation() {
@@ -1484,7 +1493,7 @@ public class HomeBean implements Serializable {
 		
 	}
 	
-	////////////////////////////////////////////// Correlation
+	////////////////////////////////////////////// Correlation ////////////////////////////////////
 	
 	/**
 	 * The method startCorrelation() is use to start correlation for run name
@@ -1492,6 +1501,7 @@ public class HomeBean implements Serializable {
 	public void startCorrelation() {
 		
 		this.correlationError = "";
+		this.correlationStatus = "";
 		
 		// Validate
 		if(Util.isNullOrEmpty(this.correlationRunName)) {
@@ -1504,29 +1514,23 @@ public class HomeBean implements Serializable {
 		
 		runIdentTbl.setRunIdentifier(this.correlationRunName);
 		
-		List<RunIdentTbl> runIdentTbls = this.runIdentTblHome.findByExample(runIdentTbl);
+		List<RunIdentTbl> runIdentTbls = this.runIdentTblHome.findByRunName(this.correlationRunName);
 		
 		if(Util.isNullOrEmpty(runIdentTbls)) {
 			this.correlationError = "Run Name doesnot exists";
 			return;
 		}
 		
-		HeaderCorrelationTbl headerCorrelationTbl = new HeaderCorrelationTbl();
+		runIdentTbl = runIdentTbls.get(0);
 		
-		headerCorrelationTbl.setRunIdentTbl(runIdentTbl);
-		
-		List<HeaderCorrelationTbl> headerCorrelationTbls = this.headerCorrelationTblHome.findByExample(headerCorrelationTbl);
+		List<HeaderCorrelationTbl> headerCorrelationTbls = this.headerCorrelationTblHome.findByRunId(runIdentTbl.getId());
 		
 		if(Util.isNotNullAndEmpty(headerCorrelationTbls)) {
 			this.correlationError = "Run Name is already correlated";
 			return;
 		}
 		
-		RequestCorrelationTbl requestCorrelationTbl = new RequestCorrelationTbl();
-		
-		requestCorrelationTbl.setRunIdentTbl(runIdentTbl);
-		
-		List<RequestCorrelationTbl> requestCorrelationTbls = this.requestCorrelationTblHome.findByExample(requestCorrelationTbl);
+		List<RequestCorrelationTbl> requestCorrelationTbls = this.requestCorrelationTblHome.findByRunId(runIdentTbl.getId());
 		
 		if(Util.isNotNullAndEmpty(requestCorrelationTbls)) {
 			this.correlationError = "Run Name is already correlated";
@@ -1536,16 +1540,15 @@ public class HomeBean implements Serializable {
 		Map<String, String> requestCorrelations = new HashMap<>();
 		Map<String, String> headerCorrelations = new HashMap<>();
 		
-		RequestResponseTbl requestResponseTbl = new RequestResponseTbl();
+		List<RequestResponseTbl> requestResponseTbls = this.requestResponseTblHome.findByRunId(runIdentTbl.getId());
 		
-		requestResponseTbl.setRunIdentTbl(runIdentTbl);
-		
-		List<RequestResponseTbl> requestResponseTbls = this.requestResponseTblHome.findByExample(requestResponseTbl);
-		
+		// Get run name's request response table's request header
 		for(RequestResponseTbl requestResponseTblTemp : requestResponseTbls) {
 			if(requestResponseTblTemp.getJmeterTransControllerTbls() != null && !requestResponseTblTemp.getJmeterTransControllerTbls().isEmpty()) {
+				
 				Iterator it = requestResponseTblTemp.getJmeterTransControllerTbls().iterator();
 				
+				// Get run name's jmeter values 
 				if(it.hasNext()) {
 					JmeterTransControllerTbl jmeterTransControllerTbl = (JmeterTransControllerTbl) it.next();
 					
@@ -1556,14 +1559,41 @@ public class HomeBean implements Serializable {
 			headerCorrelations.putAll(CorrelationUtil.extractHeaders(requestResponseTblTemp.getRequestHeader(), DataUtil.getIgnoreHeaderKeys()));
 		}
 		
+		Integer requestCorrelationVariable = 1;
 		
-		// Get run name's jmeter values 
+		for(Map.Entry<String, String> requestCorrelation : requestCorrelations.entrySet()) {
+			
+			// Db operation
+			RequestCorrelationTbl requestCorrelationTblTemp = new RequestCorrelationTbl();
+			
+			requestCorrelationTblTemp.setRunIdentTbl(runIdentTbl);
+			requestCorrelationTblTemp.setFoundArgName(requestCorrelation.getKey());
+			requestCorrelationTblTemp.setFoundArgValue(requestCorrelation.getValue());
+			requestCorrelationTblTemp.setVariable("${cID" + String.format("%03d", requestCorrelationVariable++) + "}");
+			
+			// Put in database
+			this.requestCorrelationTblHome.attachDirty(requestCorrelationTblTemp);
+		}
 		
-		// Get run name's request response table's request header
+		Integer headerCorrelationVariable = 1;
 		
-		// Remove duplicate
+		for(Map.Entry<String, String> headerCorrelation : headerCorrelations.entrySet()) {
+			
+			// Remove duplicate
+			if(!requestCorrelations.containsKey(headerCorrelation.getKey())) {
+				HeaderCorrelationTbl headerCorrelationTblTemp = new HeaderCorrelationTbl();
+				
+				headerCorrelationTblTemp.setFoundHeaderName(headerCorrelation.getKey());
+				headerCorrelationTblTemp.setFoundHeaderValue(headerCorrelation.getValue());
+				headerCorrelationTblTemp.setRunIdentTbl(runIdentTbl);
+				headerCorrelationTblTemp.setVariable("${hID" + String.format("%03d", headerCorrelationVariable++) + "}");
+				
+				// Put in database
+				this.headerCorrelationTblHome.attachDirty(headerCorrelationTblTemp);
+			}
+		}
 		
-		// Put in database
+		this.correlationStatus = "Completed";
 		
 	}
 
