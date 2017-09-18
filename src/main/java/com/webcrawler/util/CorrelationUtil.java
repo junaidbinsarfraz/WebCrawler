@@ -27,7 +27,7 @@ public class CorrelationUtil {
 		Pattern argumentNamePattern = Pattern.compile("Prop name=\"Argument.name\">(.*?)</stringProp>");
 		Matcher argumentNameMatcher = argumentNamePattern.matcher(jmeterXmlTree);
 
-		Pattern argumentValuePattern = Pattern.compile("Prop name=\"Argument.value\">(.*?)</stringProp>");
+		Pattern argumentValuePattern = Pattern.compile("Prop name=\"Argument.value\">(.*?)</stringProp>|Prop name=\"Argument.value\"/>");
 		Matcher argumentValueMatcher = argumentValuePattern.matcher(jmeterXmlTree);
 
 		while (argumentNameMatcher.find() && argumentValueMatcher.find()) {
