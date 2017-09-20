@@ -102,7 +102,6 @@ public class HomeBean implements Serializable {
 	private String correlationRunName;
 	private String correlationError;
 	private String correlationStatus;
-	private Boolean hasStartedCorrelation;
 	
 	private WebDriver driver;
 	private RecordingHandler recordingHandler = new RecordingHandler();
@@ -299,14 +298,6 @@ public class HomeBean implements Serializable {
 
 	public void setCorrelationStatus(String correlationStatus) {
 		this.correlationStatus = correlationStatus;
-	}
-
-	public Boolean getHasStartedCorrelation() {
-		return hasStartedCorrelation;
-	}
-
-	public void setHasStartedCorrelation(Boolean hasStartedCorrelation) {
-		this.hasStartedCorrelation = hasStartedCorrelation;
 	}
 
 	/**

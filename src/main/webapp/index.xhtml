@@ -115,7 +115,7 @@
 								<p:commandButton actionListener="#{homeBean.startRemoval}"
 									onclick="startRemoval();" disabled="#{homeBean.hasStartedRemoval}"
 									value="Start" process="@form" update="@form"
-									styleClass="sendBtnRemoval">
+									styleClass="sendBtnRemoval" oncomplete="stopRemoval();">
 								</p:commandButton>
 								<p:commandButton actionListener="#{homeBean.stopRemoval}" value="Stop"
 									oncomplete="stopRemoval();" async="true" process="@form" update="@form">
@@ -155,9 +155,7 @@
 						<br />
 						<br />
 						<p:commandButton actionListener="#{homeBean.startCorrelation}"
-							disabled="#{homeBean.hasStartedCorrelation}"
-							value="Correlate" process="@form" update="@form"
-							styleClass="sendBtnRemoval">
+							value="Correlate" process="@form" update="@form">
 						</p:commandButton>
 					</h:form>
 				</div>
