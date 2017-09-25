@@ -853,7 +853,9 @@ public class HomeBean implements Serializable {
 					
 					credsTbl.setRunIdentTbl(runIdentTbl);
 					credsTbl.setUsername(username);
+					credsTbl.setUsernameVariable("${aUser}");
 					credsTbl.setPassword(password);
+					credsTbl.setPasswordVariable("${aPword}");
 					
 					this.credsTblHome.attachDirty(credsTbl);
 					

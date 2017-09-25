@@ -10,6 +10,8 @@ public class CredsTbl implements java.io.Serializable {
 	private RunIdentTbl runIdentTbl;
 	private String username;
 	private String password;
+	private String usernameVariable;
+	private String passwordVariable;
 
 	public CredsTbl() {
 	}
@@ -50,6 +52,22 @@ public class CredsTbl implements java.io.Serializable {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getUsernameVariable() {
+		return usernameVariable;
+	}
+
+	public void setUsernameVariable(String usernameVariable) {
+		this.usernameVariable = usernameVariable;
+	}
+
+	public String getPasswordVariable() {
+		return passwordVariable;
+	}
+
+	public void setPasswordVariable(String passwordVariable) {
+		this.passwordVariable = passwordVariable;
 	}
 
 }

@@ -17,5 +17,11 @@
         <property name="password" type="string">
             <column name="Password" length="65535" />
         </property>
+        <property name="usernameVariable" type="string">
+            <column name="UsernameVariable" length="65535" />
+        </property>
+        <property name="passwordVariable" type="string">
+            <column name="PasswordVariable" length="65535" />
+        </property>
     </class>
 </hibernate-mapping>

@@ -70,7 +70,8 @@ public class RecordingHandler {
 		proxy = new ProxyControl();
 		proxy.setNonGuiTreeModel(treeModel);
 		proxy.setTarget(treeModel.getNodeOf(threadGroup1));
-		proxy.setGroupingMode(2); // GROUPING_IN_SIMPLE_CONTROLLERS = 2
+//		proxy.setGroupingMode(2); // GROUPING_IN_SIMPLE_CONTROLLERS = 2
+		proxy.setGroupingMode(3); // GROUPING_STORE_FIRST_ONLY = 3
 		proxy.setSamplerTypeName("2"); // SAMPLER_TYPE_HTTP_SAMPLER_HC4 = "2"
 		proxy.setRegexMatch(Boolean.TRUE);
 		proxy.setPort(port); // Global Settings -> Port
