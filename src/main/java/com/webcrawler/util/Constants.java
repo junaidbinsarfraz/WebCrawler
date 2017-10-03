@@ -11,4 +11,7 @@ public interface Constants {
 	
 	String FIREFOX_PATH = "E:\\Softwares\\FirefoxPortable\\App\\Firefox64\\firefox.exe";
 	String GECKODRIVER_PATH = "E:\\Softwares\\geckodriver\\geckodriver.exe";
+	
+	String USERNAME_NICKNAME = "${aUser}";
+	String PASSWORD_NICKNAME = "${aPword}";
 }

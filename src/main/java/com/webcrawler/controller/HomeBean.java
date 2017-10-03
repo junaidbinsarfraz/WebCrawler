@@ -820,6 +820,19 @@ public class HomeBean implements Serializable {
 
 					this.requestResponseTblHome.attachDirty(requestResponseTbl);
 					
+					// Save username and password for this run
+					CredsTbl credsTbl = new CredsTbl();
+					
+					credsTbl.setRunIdentTbl(runIdentTbl);
+					credsTbl.setUsername(username);
+					credsTbl.setUsernameVariable(Constants.USERNAME_NICKNAME);
+					credsTbl.setPassword(password);
+					credsTbl.setPasswordVariable(Constants.PASSWORD_NICKNAME);
+					
+					this.credsTblHome.attachDirty(credsTbl);
+					
+					// TODO: Update transformedSamplerProxy and add request parameters
+					
 					// Take and save screen shot. Also save Jmeter output
 					try {
 						
@@ -847,17 +860,6 @@ public class HomeBean implements Serializable {
 					} catch(Exception e) {
 						
 					}
-					
-					// Save username and password for this run
-					CredsTbl credsTbl = new CredsTbl();
-					
-					credsTbl.setRunIdentTbl(runIdentTbl);
-					credsTbl.setUsername(username);
-					credsTbl.setUsernameVariable("${aUser}");
-					credsTbl.setPassword(password);
-					credsTbl.setPasswordVariable("${aPword}");
-					
-					this.credsTblHome.attachDirty(credsTbl);
 					
 				} else {
 					// Because response is not 200
@@ -1099,6 +1101,8 @@ public class HomeBean implements Serializable {
 					requestResponseTbl.setAuthenticated(Boolean.TRUE.equals(isLoggedIn) ? 1 : 0);
 
 					this.requestResponseTblHome.attachDirty(requestResponseTbl);
+					
+					// TODO: Change transformedSamplerProxy with request headers
 					
 					// Take and save screen shot. Also save Jmeter output
 					try {
@@ -1532,6 +1536,7 @@ public class HomeBean implements Serializable {
 		
 		Map<String, String> requestCorrelations = new HashMap<>();
 		Map<String, String> headerCorrelations = new HashMap<>();
+		Map<String, String> filteredHeaderCorrelations = new HashMap<>();
 		
 		List<RequestResponseTbl> requestResponseTbls = this.requestResponseTblHome.findByRunId(runIdentTbl.getId());
 		
@@ -1574,6 +1579,9 @@ public class HomeBean implements Serializable {
 			
 			// Remove duplicate
 			if(!requestCorrelations.containsKey(headerCorrelation.getKey())) {
+				
+				filteredHeaderCorrelations.put(headerCorrelation.getKey(), headerCorrelation.getValue());
+				
 				HeaderCorrelationTbl headerCorrelationTblTemp = new HeaderCorrelationTbl();
 				
 				headerCorrelationTblTemp.setFoundHeaderName(headerCorrelation.getKey());
@@ -1585,6 +1593,38 @@ public class HomeBean implements Serializable {
 				this.headerCorrelationTblHome.attachDirty(headerCorrelationTblTemp);
 			}
 		}
+		
+		for(RequestResponseTbl requestResponseTblTemp : requestResponseTbls) {
+			if(requestResponseTblTemp.getJmeterTransControllerTbls() != null && !requestResponseTblTemp.getJmeterTransControllerTbls().isEmpty()
+					&& (requestResponseTblTemp.getAuthenticated() == 1)) {
+				
+				Iterator it = requestResponseTblTemp.getJmeterTransControllerTbls().iterator();
+				
+				// Get run name's jmeter values 
+				if(it.hasNext()) {
+					JmeterTransControllerTbl jmeterTransControllerTbl = (JmeterTransControllerTbl) it.next();
+					
+					if(Util.isNotNullAndEmpty(requestResponseTblTemp.getRequestParameters())) {
+						// update jmx value with header Correlation values
+						jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), filteredHeaderCorrelations));
+					} else {
+						// TODO: update jmx value with request Correlation values
+						List<CredsTbl> credsTbls = credsTblHome.findByRunId(runIdentTbl.getId());
+						
+						// update jmx parameter values with request correlation values
+						if(Util.isNotNullAndEmpty(credsTbls)) {
+							jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestArgumentXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), requestCorrelations, credsTbls.get(0).getUsername(), credsTbls.get(0).getPassword()));
+						}
+						
+					}
+					
+					this.jmeterTransControllerTblHome.attachDirty(jmeterTransControllerTbl);
+					
+				}
+			}
+			
+		}
+		
 		
 		this.correlationStatus = "Completed";
 		

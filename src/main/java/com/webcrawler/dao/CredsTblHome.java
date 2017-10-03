@@ -1,8 +1,9 @@
 package com.webcrawler.dao;
 // Generated Sep 12, 2017 10:44:30 AM by Hibernate Tools 5.1.0.Alpha1
 
+import java.util.ArrayList;
 import java.util.List;
-import javax.naming.InitialContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.LockMode;
@@ -11,6 +12,8 @@ import org.hibernate.cache.impl.NoCachingRegionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.criterion.Example;
+
+import com.webcrawler.util.Util;
 
 /**
  * Home object for domain model class CredsTbl.
@@ -143,6 +146,30 @@ public class CredsTblHome {
 		try {
 			sessionFactory.getCurrentSession().beginTransaction();
 			List results = sessionFactory.getCurrentSession().createCriteria("com.webcrawler.dao.CredsTbl").add(Example.create(instance)).list();
+			log.debug("find by example successful, result size: " + results.size());
+			sessionFactory.getCurrentSession().getTransaction().commit();
+			return results;
+		} catch (RuntimeException re) {
+			log.error("find by example failed", re);
+			sessionFactory.getCurrentSession().clear();
+			sessionFactory.getCurrentSession().flush();
+			throw re;
+		}
+	}
+	
+	public List<CredsTbl> findByRunId(Integer runId) {
+		log.debug("finding CredsTbl instance by example");
+		
+		if(Util.isNull(runId)) {
+			return new ArrayList<CredsTbl>();
+		}
+		
+		try {
+			sessionFactory.getCurrentSession().beginTransaction();
+
+			List<CredsTbl> results = sessionFactory.getCurrentSession()
+					.createSQLQuery("select * from creds_tbl c where c.RunId = " + runId).addEntity(CredsTbl.class).list();
+
 			log.debug("find by example successful, result size: " + results.size());
 			sessionFactory.getCurrentSession().getTransaction().commit();
 			return results;
