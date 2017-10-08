@@ -1537,6 +1537,7 @@ public class HomeBean implements Serializable {
 		Map<String, String> requestCorrelations = new HashMap<>();
 		Map<String, String> headerCorrelations = new HashMap<>();
 		Map<String, String> filteredHeaderCorrelations = new HashMap<>();
+		Map<String, String> filteredRequestCorrelations = new HashMap<>();
 		
 		List<RequestResponseTbl> requestResponseTbls = this.requestResponseTblHome.findByRunId(runIdentTbl.getId());
 		
@@ -1569,6 +1570,8 @@ public class HomeBean implements Serializable {
 			requestCorrelationTblTemp.setFoundArgValue(requestCorrelation.getValue());
 			requestCorrelationTblTemp.setVariable("${cID" + String.format("%03d", requestCorrelationVariable++) + "}");
 			
+			filteredRequestCorrelations.put(requestCorrelation.getKey(), requestCorrelationTblTemp.getVariable());
+			
 			// Put in database
 			this.requestCorrelationTblHome.attachDirty(requestCorrelationTblTemp);
 		}
@@ -1580,7 +1583,7 @@ public class HomeBean implements Serializable {
 			// Remove duplicate
 			if(!requestCorrelations.containsKey(headerCorrelation.getKey())) {
 				
-				filteredHeaderCorrelations.put(headerCorrelation.getKey(), headerCorrelation.getValue());
+//				filteredHeaderCorrelations.put(headerCorrelation.getKey(), headerCorrelation.getValue());
 				
 				HeaderCorrelationTbl headerCorrelationTblTemp = new HeaderCorrelationTbl();
 				
@@ -1588,6 +1591,8 @@ public class HomeBean implements Serializable {
 				headerCorrelationTblTemp.setFoundHeaderValue(headerCorrelation.getValue());
 				headerCorrelationTblTemp.setRunIdentTbl(runIdentTbl);
 				headerCorrelationTblTemp.setVariable("${hID" + String.format("%03d", headerCorrelationVariable++) + "}");
+				
+				filteredHeaderCorrelations.put(headerCorrelation.getKey(), headerCorrelationTblTemp.getVariable());
 				
 				// Put in database
 				this.headerCorrelationTblHome.attachDirty(headerCorrelationTblTemp);
@@ -1604,7 +1609,7 @@ public class HomeBean implements Serializable {
 				if(it.hasNext()) {
 					JmeterTransControllerTbl jmeterTransControllerTbl = (JmeterTransControllerTbl) it.next();
 					
-					if(Util.isNotNullAndEmpty(requestResponseTblTemp.getRequestParameters())) {
+					if(Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters())) {
 						// update jmx value with header Correlation values
 						jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), filteredHeaderCorrelations));
 					} else {
@@ -1613,7 +1618,7 @@ public class HomeBean implements Serializable {
 						
 						// update jmx parameter values with request correlation values
 						if(Util.isNotNullAndEmpty(credsTbls)) {
-							jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestArgumentXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), requestCorrelations, credsTbls.get(0).getUsername(), credsTbls.get(0).getPassword()));
+							jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestArgumentXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), filteredRequestCorrelations, credsTbls.get(0).getUsername(), credsTbls.get(0).getPassword()));
 						}
 						
 					}

@@ -154,8 +154,30 @@ public class XmlParser {
 					} else {
 						argumentValueNode.setTextContent(values.get(key));
 					}
+					
+//					argumentValueNode.setTextContent(values.get(key));
 				}
 			}
+			
+//			XPathExpression exprUsername = xpath.compile("//stringProp[@name=\"Argument.value\" and text()=\"" + username + "\"]");
+//			
+//			XPathExpression exprPassowrd = xpath.compile("//stringProp[@name=\"Argument.value\" and text()=\"" + password + "\"]");
+//			
+//			NodeList argumentNodes = (NodeList) exprUsername.evaluate(doc, XPathConstants.NODESET);
+//			
+//			Node argumentValueNode = argumentNodes.item(0);
+//			
+//			if(argumentValueNode != null) {
+//				argumentValueNode.setTextContent(Constants.USERNAME_NICKNAME);
+//			}
+//			
+//			argumentNodes = (NodeList) exprPassowrd.evaluate(doc, XPathConstants.NODESET);
+//			
+//			argumentValueNode = argumentNodes.item(0);
+//			
+//			if(argumentValueNode != null) {
+//				argumentValueNode.setTextContent(Constants.PASSWORD_NICKNAME);
+//			}
 			
 			TransformerFactory tf = TransformerFactory.newInstance();
 			Transformer transformer = tf.newTransformer();
@@ -178,7 +200,9 @@ public class XmlParser {
 	
 	// After Authentication
 	public static String parseRequestHeaderXmlAndUpdateValues(String xml, Map<String, String> values) {
-
+		
+		xml = "<HTTPSamplerProxy>" + xml + "</HTTPSamplerProxy>"; // To make it well formed xml
+		
 		try {
 
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -242,8 +266,14 @@ public class XmlParser {
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 			StringWriter writer = new StringWriter();
 			transformer.transform(new DOMSource(doc), new StreamResult(writer));
+			
+			String updatedXml = writer.getBuffer().toString();
 
-			return writer.getBuffer().toString();
+			updatedXml = updatedXml.replaceFirst("<HTTPSamplerProxy>", "");
+			
+			updatedXml = replaceLast(updatedXml , "</HTTPSamplerProxy>", "");
+
+			return updatedXml;
 
 		} catch (Exception e) {
 			return null;
