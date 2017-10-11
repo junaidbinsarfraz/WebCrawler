@@ -182,6 +182,8 @@ public class XmlParser {
 			TransformerFactory tf = TransformerFactory.newInstance();
 			Transformer transformer = tf.newTransformer();
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			
 			StringWriter writer = new StringWriter();
 			transformer.transform(new DOMSource(doc), new StreamResult(writer));
 
@@ -264,6 +266,8 @@ public class XmlParser {
 			TransformerFactory tf = TransformerFactory.newInstance();
 			Transformer transformer = tf.newTransformer();
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			
 			StringWriter writer = new StringWriter();
 			transformer.transform(new DOMSource(doc), new StreamResult(writer));
 			
