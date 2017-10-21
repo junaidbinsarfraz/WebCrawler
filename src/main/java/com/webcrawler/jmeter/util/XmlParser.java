@@ -144,18 +144,21 @@ public class XmlParser {
 				
 				NodeList argumentNodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
 				
-				Node argumentValueNode = argumentNodes.item(0);
-				
-				if(argumentValueNode != null) {
-					if(username.equals(argumentValueNode.getTextContent())) {
-						argumentValueNode.setTextContent(Constants.USERNAME_NICKNAME);
-					} else if(password.equals(argumentValueNode.getTextContent())) {
-						argumentValueNode.setTextContent(Constants.PASSWORD_NICKNAME);
-					} else {
-						argumentValueNode.setTextContent(values.get(key));
-					}
+				for(int i = 0; i < argumentNodes.getLength(); i++) {
 					
-//					argumentValueNode.setTextContent(values.get(key));
+					Node argumentValueNode = argumentNodes.item(i);
+					
+					if(argumentValueNode != null) {
+						if(username.equals(argumentValueNode.getTextContent())) {
+							argumentValueNode.setTextContent(Constants.USERNAME_NICKNAME);
+						} else if(password.equals(argumentValueNode.getTextContent())) {
+							argumentValueNode.setTextContent(Constants.PASSWORD_NICKNAME);
+						} else {
+							argumentValueNode.setTextContent(values.get(key));
+						}
+						
+//						argumentValueNode.setTextContent(values.get(key));
+					}
 				}
 			}
 			
