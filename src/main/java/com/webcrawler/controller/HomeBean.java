@@ -32,6 +32,7 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.primefaces.context.RequestContext;
+import org.w3c.dom.Node;
 
 import com.webcrawler.dao.CredsTbl;
 import com.webcrawler.dao.CredsTblHome;
@@ -1591,6 +1592,7 @@ public class HomeBean implements Serializable {
 				headerCorrelationTblTemp.setFoundHeaderValue(headerCorrelation.getValue());
 				headerCorrelationTblTemp.setRunIdentTbl(runIdentTbl);
 				headerCorrelationTblTemp.setVariable("${hID" + String.format("%03d", headerCorrelationVariable++) + "}");
+				headerCorrelationTblTemp.setCorrRegex(headerCorrelation.getKey() + Constants.CORR_REGEX);
 				
 				filteredHeaderCorrelations.put(headerCorrelation.getKey(), headerCorrelationTblTemp.getVariable());
 				
@@ -1598,6 +1600,8 @@ public class HomeBean implements Serializable {
 				this.headerCorrelationTblHome.attachDirty(headerCorrelationTblTemp);
 			}
 		}
+		
+		List<Node> regexExtractors = XmlParser.createRegexExtractors(filteredHeaderCorrelations);
 		
 		for(RequestResponseTbl requestResponseTblTemp : requestResponseTbls) {
 			if(requestResponseTblTemp.getJmeterTransControllerTbls() != null && !requestResponseTblTemp.getJmeterTransControllerTbls().isEmpty()
@@ -1611,7 +1615,7 @@ public class HomeBean implements Serializable {
 					
 					if(Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters())) {
 						// update jmx value with header Correlation values
-						jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), filteredHeaderCorrelations));
+						jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), filteredHeaderCorrelations, regexExtractors));
 					} else {
 						// TODO: update jmx value with request Correlation values
 						List<CredsTbl> credsTbls = credsTblHome.findByRunId(runIdentTbl.getId());

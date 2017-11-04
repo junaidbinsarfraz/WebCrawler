@@ -7,7 +7,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -204,7 +207,7 @@ public class XmlParser {
 	}
 	
 	// After Authentication
-	public static String parseRequestHeaderXmlAndUpdateValues(String xml, Map<String, String> values) {
+	public static String parseRequestHeaderXmlAndUpdateValues(String xml, Map<String, String> values, List<Node> regexExtractors) {
 		
 		xml = "<HTTPSamplerProxy>" + xml + "</HTTPSamplerProxy>"; // To make it well formed xml
 		
@@ -265,7 +268,20 @@ public class XmlParser {
 
 				collectionPropNode.appendChild(elementPropNode);
 			}
-
+			
+			Node hashTreeNode = doc.createElement("hashTree");
+			
+			Node dummyHTTPSamplerProxyNode = doc.getFirstChild();
+			
+			dummyHTTPSamplerProxyNode.appendChild(hashTreeNode);
+			
+			for(Node regexExtractor : regexExtractors) {
+				
+				dummyHTTPSamplerProxyNode.appendChild(regexExtractor);
+				
+				dummyHTTPSamplerProxyNode.appendChild(hashTreeNode);
+			}
+			
 			TransformerFactory tf = TransformerFactory.newInstance();
 			Transformer transformer = tf.newTransformer();
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
@@ -285,6 +301,121 @@ public class XmlParser {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+	
+	public static List<Node> createRegexExtractors(Map<String, String> requestHeaders) {
+		List<Node> regexExtractors = new ArrayList<>();
+		
+		try {
+			
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+			Document doc = docBuilder.newDocument();
+			
+			for(String key : requestHeaders.keySet()) {
+				String value = requestHeaders.get(key);
+				
+				regexExtractors.add(createRegexExtractor(key, value));
+			}
+			
+		} catch (Exception e) {
+			
+		}
+		
+		return regexExtractors;
+	}
+	
+	private static Node createRegexExtractor(String regex, String refname) {
+		
+		Node regexExtractorNode = null;
+		
+		try {
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+			Document doc = docBuilder.newDocument();
+			
+			Map<String, String> attrMap = new HashMap<>();
+			
+			attrMap.put("name", "RegexExtractor.useHeaders");
+			
+			Node userHeadersNode = createTextNodeWithAttributes(doc, "stringProp", "true", attrMap);
+			
+			attrMap = new HashMap<>();
+			
+			attrMap.put("name", "RegexExtractor.refname");
+			
+			refname = refname.replace("$", "");
+			refname = refname.replace("{", "");
+			refname = refname.replace("}", "");
+			
+			Node rfnameNode = createTextNodeWithAttributes(doc, "stringProp", refname, attrMap);
+			
+			attrMap = new HashMap<>();
+			
+			attrMap.put("name", "RegexExtractor.regex");
+			
+			Node regexNode = createTextNodeWithAttributes(doc, "stringProp", regex + Constants.CORR_REGEX, attrMap);
+			
+			attrMap = new HashMap<>();
+			
+			attrMap.put("name", "RegexExtractor.template");
+			
+			Node templateNode = createTextNodeWithAttributes(doc, "stringProp", "$1$", attrMap);
+			
+			attrMap = new HashMap<>();
+			
+			attrMap.put("name", "RegexExtractor.default");
+			
+			Node defaultNode = createTextNodeWithAttributes(doc, "stringProp", "1", attrMap);
+			
+			attrMap = new HashMap<>();
+			
+			attrMap.put("name", "RegexExtractor.match_number");
+			
+			Node matchNumberNode = createTextNodeWithAttributes(doc, "stringProp", "0", attrMap);
+			
+			attrMap = new HashMap<>();
+			
+			attrMap.put("name", "Scope.variable");
+			
+			Node variableNode = createTextNodeWithAttributes(doc, "stringProp", "", attrMap);
+			
+			regexExtractorNode = doc.createElement("RegexExtractor");
+			
+			Attr guiclassAttr = doc.createAttribute("guiclass");
+
+			guiclassAttr.setNodeValue("RegexExtractorGui");
+			
+			Attr testclassAttr = doc.createAttribute("testclass");
+
+			testclassAttr.setNodeValue("RegexExtractor");
+			
+			Attr testnameAttr = doc.createAttribute("testname");
+
+			testnameAttr.setNodeValue("Regular Expression Extractor");
+			
+			Attr enabledAttr = doc.createAttribute("enabled");
+
+			enabledAttr.setNodeValue("true");
+
+			regexExtractorNode.getAttributes().setNamedItem(guiclassAttr);
+			regexExtractorNode.getAttributes().setNamedItem(testclassAttr);
+			regexExtractorNode.getAttributes().setNamedItem(testnameAttr);
+			regexExtractorNode.getAttributes().setNamedItem(enabledAttr);
+			
+			regexExtractorNode.appendChild(userHeadersNode);
+			regexExtractorNode.appendChild(rfnameNode);
+			regexExtractorNode.appendChild(regexNode);
+			regexExtractorNode.appendChild(templateNode);
+			regexExtractorNode.appendChild(defaultNode);
+			regexExtractorNode.appendChild(matchNumberNode);
+			regexExtractorNode.appendChild(variableNode);
+			
+		} catch (Exception e) {
+			return null;
+		}
+		
+		return regexExtractorNode;
 	}
 
 	private static Node createTextNodeWithAttributes(Document doc, String tagName, String tagValue,
