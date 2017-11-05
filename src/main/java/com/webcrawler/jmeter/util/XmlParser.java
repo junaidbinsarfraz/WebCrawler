@@ -269,15 +269,19 @@ public class XmlParser {
 				collectionPropNode.appendChild(elementPropNode);
 			}
 			
-			Node hashTreeNode = doc.createElement("hashTree");
-			
 			Node dummyHTTPSamplerProxyNode = doc.getFirstChild();
 			
-			dummyHTTPSamplerProxyNode.appendChild(hashTreeNode);
+			Node hashTreeNode = doc.createElement("hashTree");
+			
+//			dummyHTTPSamplerProxyNode.appendChild(hashTreeNode);
 			
 			for(Node regexExtractor : regexExtractors) {
 				
-				dummyHTTPSamplerProxyNode.appendChild(regexExtractor);
+				Node regexExtractorImportedNode = doc.importNode(regexExtractor, Boolean.TRUE);
+				
+				dummyHTTPSamplerProxyNode.appendChild(regexExtractorImportedNode);
+				
+				hashTreeNode = doc.createElement("hashTree");
 				
 				dummyHTTPSamplerProxyNode.appendChild(hashTreeNode);
 			}
