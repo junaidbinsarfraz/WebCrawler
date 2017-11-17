@@ -76,8 +76,8 @@ public class RecordingHandler {
 		proxy.setRegexMatch(Boolean.TRUE);
 		proxy.setPort(port); // Global Settings -> Port
 		proxy.setCaptureHttpHeaders(Boolean.TRUE);
-//		proxy.setSamplerFollowRedirects(Boolean.TRUE);
-		proxy.setSamplerRedirectAutomatically(Boolean.TRUE);
+		proxy.setSamplerFollowRedirects(Boolean.TRUE);
+//		proxy.setSamplerRedirectAutomatically(Boolean.TRUE);
 		proxy.setSamplerDownloadImages(Boolean.TRUE);
 
 		treeModel.addComponent(proxy, (JMeterTreeNode) root.getChildAt(1));
