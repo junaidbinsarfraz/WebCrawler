@@ -574,22 +574,30 @@ public class HomeBean implements Serializable {
 						requestResponseTbl.setFromPageUrl(response.url().toString());
 					}
 
-					Map<String, String> headers = new HashMap<>(request.headers());
+					Map<String, String> requestHeaders = new HashMap<>(request.headers());
 					
-					headers.putAll(request.cookies());
+					requestHeaders.putAll(request.cookies());
 					
 					for(KeyVal keyVal : request.data()) {
-						headers.put(keyVal.key(), keyVal.value());
+						requestHeaders.put(keyVal.key(), keyVal.value());
 					}
+					
+					Map<String, String> responseHeaders = new HashMap<>(request.headers());
+					
+					if(Util.isNotNull(request.cookies())) {
+						responseHeaders.putAll(response.cookies());
+					}
+					
+					responseHeaders.putAll(response.headers());
 					
 					if(urlProperty.getAuthForm() != null && urlProperty.getAuthForm().getData() != null) {
 						requestResponseTbl.setRequestParameters(urlProperty.getAuthForm().getData().toString());
 					}
 					
-					requestResponseTbl.setRequestHeader(headers.toString());
+					requestResponseTbl.setRequestHeader(requestHeaders.toString());
 					requestResponseTbl.setRequestHeader(request.headers().toString());
 					requestResponseTbl.setResponseBody(response.body());
-					requestResponseTbl.setResponseHeader(response.headers().toString());
+					requestResponseTbl.setResponseHeader(responseHeaders.toString());
 					requestResponseTbl.setToPageLevel(urlProperty.getToPageLevel());
 
 					String title = "";
@@ -777,10 +785,18 @@ public class HomeBean implements Serializable {
 						requestResponseTbl.setRequestParameters(urlProperty.getAuthForm().getData().toString());
 					}
 					
+					Map<String, String> responseHeaders = new HashMap<>(request.headers());
+					
+					if(Util.isNotNull(request.cookies())) {
+						responseHeaders.putAll(response.cookies());
+					}
+					
+					responseHeaders.putAll(response.headers());
+					
 					requestResponseTbl.setRequestHeader(headers.toString());
 					requestResponseTbl.setRequestHeader(request.headers().toString());
 					requestResponseTbl.setResponseBody(response.body());
-					requestResponseTbl.setResponseHeader(response.headers().toString());
+					requestResponseTbl.setResponseHeader(responseHeaders.toString());
 					requestResponseTbl.setToPageLevel(urlProperty.getToPageLevel());
 
 					String title = "";
@@ -1020,18 +1036,26 @@ public class HomeBean implements Serializable {
 						// Do nothing
 					}
 
-					Map<String, String> headers = new HashMap<>(request.headers());
+					Map<String, String> requestHeaders = new HashMap<>(request.headers());
 					
-					headers.putAll(request.cookies());
+					requestHeaders.putAll(request.cookies());
 					
 					for(KeyVal keyVal : request.data()) {
-						headers.put(keyVal.key(), keyVal.value());
+						requestHeaders.put(keyVal.key(), keyVal.value());
 					}
 					
-					requestResponseTbl.setRequestHeader(headers.toString());
+					Map<String, String> responseHeaders = new HashMap<>(request.headers());
+					
+					if(Util.isNotNull(request.cookies())) {
+						responseHeaders.putAll(response.cookies());
+					}
+					
+					responseHeaders.putAll(response.headers());
+					
+					requestResponseTbl.setRequestHeader(requestHeaders.toString());
 //					requestResponseTbl.setPageTransitionIterationNumber(iterationNumer);
 					requestResponseTbl.setResponseBody(response.body());
-					requestResponseTbl.setResponseHeader(response.headers().toString());
+					requestResponseTbl.setResponseHeader(responseHeaders.toString());
 					requestResponseTbl.setToPageLevel(urlProperty.getToPageLevel());
 
 					UrlProperty matchedUrlProperty = null;
@@ -1537,8 +1561,10 @@ public class HomeBean implements Serializable {
 		
 		Map<String, String> requestCorrelations = new HashMap<>();
 		Map<String, String> headerCorrelations = new HashMap<>();
+		Map<String, String> responseHeaderCorrelations = new HashMap<>();
 		Map<String, String> filteredHeaderCorrelations = new HashMap<>();
 		Map<String, String> filteredRequestCorrelations = new HashMap<>();
+		Map<String, String> filteredResponseHeaderCorrelations = new HashMap<>();
 		
 		List<RequestResponseTbl> requestResponseTbls = this.requestResponseTblHome.findByRunId(runIdentTbl.getId());
 		
@@ -1557,6 +1583,7 @@ public class HomeBean implements Serializable {
 			}
 			
 			headerCorrelations.putAll(CorrelationUtil.extractHeaders(requestResponseTblTemp.getRequestHeader(), DataUtil.getIgnoreHeaderKeys()));
+			responseHeaderCorrelations.putAll(CorrelationUtil.extractHeaders(requestResponseTblTemp.getResponseHeader(), DataUtil.getIgnoreHeaderKeys()));
 		}
 		
 		Integer requestCorrelationVariable = 1;
@@ -1596,12 +1623,17 @@ public class HomeBean implements Serializable {
 				
 				filteredHeaderCorrelations.put(headerCorrelation.getKey(), headerCorrelationTblTemp.getVariable());
 				
+				if(responseHeaderCorrelations.containsKey(headerCorrelationTblTemp.getFoundHeaderName())) {
+					filteredResponseHeaderCorrelations.put(headerCorrelationTblTemp.getFoundHeaderName(), headerCorrelationTblTemp.getVariable());
+				}
+				
 				// Put in database
 				this.headerCorrelationTblHome.attachDirty(headerCorrelationTblTemp);
 			}
 		}
 		
-		List<Node> regexExtractors = XmlParser.createRegexExtractors(filteredHeaderCorrelations);
+//		List<Node> regexExtractors = XmlParser.createRegexExtractors(filteredHeaderCorrelations);
+//		List<Node> regexExtractors = XmlParser.createRegexExtractors(filteredResponseHeaderCorrelations);
 		
 		for(RequestResponseTbl requestResponseTblTemp : requestResponseTbls) {
 			if(requestResponseTblTemp.getJmeterTransControllerTbls() != null && !requestResponseTblTemp.getJmeterTransControllerTbls().isEmpty()
@@ -1611,12 +1643,25 @@ public class HomeBean implements Serializable {
 				
 				// Get run name's jmeter values 
 				if(it.hasNext()) {
+					
+					Map<String, String> tempResponseHeaders = CorrelationUtil.extractHeaders(requestResponseTblTemp.getResponseHeader(), DataUtil.getIgnoreHeaderKeys());
+					Map<String, String> finalResponseHeaders = new HashMap<>();
+					
+					for(Map.Entry<String, String> responseHeader : filteredResponseHeaderCorrelations.entrySet()) {
+						if(tempResponseHeaders.containsKey(responseHeader.getKey())) {
+							finalResponseHeaders.put(responseHeader.getKey(), responseHeader.getValue());
+						}
+					}
+					
+					List<Node> regexExtractors = XmlParser.createRegexExtractors(finalResponseHeaders);
+					
 					JmeterTransControllerTbl jmeterTransControllerTbl = (JmeterTransControllerTbl) it.next();
 					
+					// update jmx value with header Correlation values
+					jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), 
+							Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters()) ? filteredHeaderCorrelations : new HashMap<String, String>(), regexExtractors));
+					
 					if(Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters())) {
-						// update jmx value with header Correlation values
-						jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), filteredHeaderCorrelations, regexExtractors));
-					} else {
 						// TODO: update jmx value with request Correlation values
 						List<CredsTbl> credsTbls = credsTblHome.findByRunId(runIdentTbl.getId());
 						
