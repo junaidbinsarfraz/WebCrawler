@@ -376,7 +376,7 @@ public class XmlParser {
 			
 			attrMap.put("name", "RegexExtractor.match_number");
 			
-			Node matchNumberNode = createTextNodeWithAttributes(doc, "stringProp", "0", attrMap);
+			Node matchNumberNode = createTextNodeWithAttributes(doc, "stringProp", "1", attrMap);
 			
 			attrMap = new HashMap<>();
 			

@@ -15,5 +15,5 @@ public interface Constants {
 	String USERNAME_NICKNAME = "${aUser}";
 	String PASSWORD_NICKNAME = "${aPword}";
 	
-	String CORR_REGEX = "=(.+?);";
+	String CORR_REGEX = "=(.+?),";
 }
