@@ -23,5 +23,6 @@
         <mapping resource="com/webcrawler/dao/HeaderIgnoreTbl.hbm.xml" />
         <mapping resource="com/webcrawler/dao/RequestCorrelationTbl.hbm.xml" />
         <mapping resource="com/webcrawler/dao/KnownExtractorsTbl.hbm.xml" />
+        <mapping resource="com/webcrawler/dao/PageCategoryTbl.hbm.xml" />
     </session-factory>
 </hibernate-configuration>

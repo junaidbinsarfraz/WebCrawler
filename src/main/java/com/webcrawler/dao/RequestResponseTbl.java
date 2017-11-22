@@ -18,6 +18,7 @@ public class RequestResponseTbl implements java.io.Serializable {
 	private Integer authenticated;
 	private String toPageTitle;
 	private String toPageUrl;
+	private String toPageCategory;
 	private Integer pageTransitionIterationNumber;
 	private String requestHeader;
 	private String requestParameters;
@@ -115,6 +116,14 @@ public class RequestResponseTbl implements java.io.Serializable {
 
 	public void setToPageUrl(String toPageUrl) {
 		this.toPageUrl = toPageUrl;
+	}
+
+	public String getToPageCategory() {
+		return toPageCategory;
+	}
+
+	public void setToPageCategory(String toPageCategory) {
+		this.toPageCategory = toPageCategory;
 	}
 
 	public Integer getPageTransitionIterationNumber() {

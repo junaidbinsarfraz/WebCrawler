@@ -32,6 +32,9 @@
         <property name="toPageUrl" type="string">
             <column name="ToPageURL" length="65535" />
         </property>
+        <property name="toPageCategory" type="string">
+            <column name="ToPageCategory" length="65535" />
+        </property>
         <!-- <property name="pageTransitionIterationNumber" type="java.lang.Integer">
             <column name="PageTransitionIterationNumber" />
         </property> -->
