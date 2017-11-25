@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import org.jsoup.Connection;
 import org.jsoup.Connection.KeyVal;
 import org.jsoup.Connection.Request;
 import org.jsoup.Connection.Response;
+import org.jsoup.Jsoup;
 import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -40,6 +42,8 @@ import com.webcrawler.dao.HeaderCorrelationTbl;
 import com.webcrawler.dao.HeaderCorrelationTblHome;
 import com.webcrawler.dao.JmeterTransControllerTbl;
 import com.webcrawler.dao.JmeterTransControllerTblHome;
+import com.webcrawler.dao.KnownExtractorsTbl;
+import com.webcrawler.dao.PageCategoryTbl;
 import com.webcrawler.dao.RequestCorrelationTbl;
 import com.webcrawler.dao.RequestCorrelationTblHome;
 import com.webcrawler.dao.RequestResponseTbl;
@@ -56,6 +60,7 @@ import com.webcrawler.util.CorrelationUtil;
 import com.webcrawler.util.CrawlUtil;
 import com.webcrawler.util.DataUtil;
 import com.webcrawler.util.DateUtil;
+import com.webcrawler.util.DocumentParser;
 import com.webcrawler.util.FileUtil;
 import com.webcrawler.util.RequestResponseUtil;
 import com.webcrawler.util.ScreenShotUtil;
@@ -1564,6 +1569,7 @@ public class HomeBean implements Serializable {
 		Map<String, String> responseHeaderCorrelations = new HashMap<>();
 		Map<String, String> filteredHeaderCorrelations = new HashMap<>();
 		Map<String, String> filteredRequestCorrelations = new HashMap<>();
+		Map<String, RequestCorrelationTbl> filteredRequestCorrelationObjects = new HashMap<>();
 		Map<String, String> filteredResponseHeaderCorrelations = new HashMap<>();
 		
 		List<RequestResponseTbl> requestResponseTbls = this.requestResponseTblHome.findByRunId(runIdentTbl.getId());
@@ -1584,6 +1590,22 @@ public class HomeBean implements Serializable {
 			
 			headerCorrelations.putAll(CorrelationUtil.extractHeaders(requestResponseTblTemp.getRequestHeader(), DataUtil.getIgnoreHeaderKeys()));
 			responseHeaderCorrelations.putAll(CorrelationUtil.extractHeaders(requestResponseTblTemp.getResponseHeader(), DataUtil.getIgnoreHeaderKeys()));
+			
+			// Set toPageCategory
+			requestResponseTblTemp.setToPageCategory(Constants.UNCATEGORIZE_TO_PAGE_CATEGORY_TEXT);
+			
+			if(Util.isNotNullAndEmpty(requestResponseTblTemp.getToPageTitle())) {
+				for(PageCategoryTbl pageCategoryTbl : DataUtil.getPageCategories()) {
+					if(Util.isNotNullAndEmpty(pageCategoryTbl.getKeyword()) && 
+							requestResponseTblTemp.getToPageTitle().toLowerCase().contains(pageCategoryTbl.getKeyword().toLowerCase())) {
+						requestResponseTblTemp.setToPageCategory(pageCategoryTbl.getCategory());
+						break;
+					}
+				}
+			}
+			
+			this.requestResponseTblHome.attachDirty(requestResponseTblTemp);
+			
 		}
 		
 		Integer requestCorrelationVariable = 1;
@@ -1597,8 +1619,17 @@ public class HomeBean implements Serializable {
 			requestCorrelationTblTemp.setFoundArgName(requestCorrelation.getKey());
 			requestCorrelationTblTemp.setFoundArgValue(requestCorrelation.getValue());
 			requestCorrelationTblTemp.setVariable("${cID" + String.format("%03d", requestCorrelationVariable++) + "}");
+			requestCorrelationTblTemp.setCorrRegex(requestCorrelationTblTemp.getFoundArgName() + Constants.REQUEST_PARAM_CORR_REGEX);
 			
-			filteredRequestCorrelations.put(requestCorrelation.getKey(), requestCorrelationTblTemp.getVariable());
+			for(KnownExtractorsTbl knownExtractorsTbl : DataUtil.getKnownExtractors()) {
+				if(Util.isNotNullAndEmpty(knownExtractorsTbl.getKnownValue()) 
+						&& knownExtractorsTbl.getKnownValue().equalsIgnoreCase(requestCorrelationTblTemp.getFoundArgName())) {
+					requestCorrelationTblTemp.setCorrRegex(knownExtractorsTbl.getExtractor());
+				}
+			}
+			
+			filteredRequestCorrelations.put(requestCorrelationTblTemp.getFoundArgName(), requestCorrelationTblTemp.getVariable());
+			filteredRequestCorrelationObjects.put(requestCorrelationTblTemp.getFoundArgName(), requestCorrelationTblTemp);
 			
 			// Put in database
 			this.requestCorrelationTblHome.attachDirty(requestCorrelationTblTemp);
@@ -1636,49 +1667,72 @@ public class HomeBean implements Serializable {
 //		List<Node> regexExtractors = XmlParser.createRegexExtractors(filteredResponseHeaderCorrelations);
 		
 		for(RequestResponseTbl requestResponseTblTemp : requestResponseTbls) {
-			if(requestResponseTblTemp.getJmeterTransControllerTbls() != null && !requestResponseTblTemp.getJmeterTransControllerTbls().isEmpty()
-					&& (requestResponseTblTemp.getAuthenticated() == 1)) {
-				
+			if(requestResponseTblTemp.getJmeterTransControllerTbls() != null && !requestResponseTblTemp.getJmeterTransControllerTbls().isEmpty()) {
 				Iterator it = requestResponseTblTemp.getJmeterTransControllerTbls().iterator();
 				
 				// Get run name's jmeter values 
 				if(it.hasNext()) {
 					
-					Map<String, String> tempResponseHeaders = CorrelationUtil.extractHeaders(requestResponseTblTemp.getResponseHeader(), DataUtil.getIgnoreHeaderKeys());
-					Map<String, String> finalResponseHeaders = new HashMap<>();
-					
-					for(Map.Entry<String, String> responseHeader : filteredResponseHeaderCorrelations.entrySet()) {
-						if(tempResponseHeaders.containsKey(responseHeader.getKey())) {
-							finalResponseHeaders.put(responseHeader.getKey(), responseHeader.getValue());
-						}
-					}
-					
-					List<Node> regexExtractors = XmlParser.createRegexExtractors(finalResponseHeaders);
-					
 					JmeterTransControllerTbl jmeterTransControllerTbl = (JmeterTransControllerTbl) it.next();
 					
-					// update jmx value with header Correlation values
-					jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), 
-							Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters()) ? filteredHeaderCorrelations : new HashMap<String, String>(), regexExtractors));
-					
-					if(Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters())) {
-						// TODO: update jmx value with request Correlation values
-						List<CredsTbl> credsTbls = credsTblHome.findByRunId(runIdentTbl.getId());
+					if((requestResponseTblTemp.getAuthenticated() == 1)) {
 						
-						// update jmx parameter values with request correlation values
-						if(Util.isNotNullAndEmpty(credsTbls)) {
-							jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestArgumentXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), filteredRequestCorrelations, credsTbls.get(0).getUsername(), credsTbls.get(0).getPassword()));
+						Map<String, String> tempResponseHeaders = CorrelationUtil.extractHeaders(requestResponseTblTemp.getResponseHeader(), DataUtil.getIgnoreHeaderKeys());
+						Map<String, String> finalResponseHeaders = new HashMap<>();
+						
+						for(Map.Entry<String, String> responseHeader : filteredResponseHeaderCorrelations.entrySet()) {
+							if(tempResponseHeaders.containsKey(responseHeader.getKey())) {
+								finalResponseHeaders.put(responseHeader.getKey() + Constants.CORR_REGEX, responseHeader.getValue());
+							}
 						}
 						
+						List<Node> regexExtractors = XmlParser.createRegexExtractors(finalResponseHeaders, Boolean.TRUE);
+						
+						// update jmx value with header Correlation values
+						jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), 
+								Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters()) ? filteredHeaderCorrelations : new HashMap<String, String>(), regexExtractors));
+						
+						if(Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters())) {
+							// TODO: update jmx value with request Correlation values
+							List<CredsTbl> credsTbls = credsTblHome.findByRunId(runIdentTbl.getId());
+							
+							// update jmx parameter values with request correlation values
+							if(Util.isNotNullAndEmpty(credsTbls)) {
+								jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestArgumentXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), filteredRequestCorrelations, credsTbls.get(0).getUsername(), credsTbls.get(0).getPassword()));
+							}
+							
+						}
 					}
 					
-					this.jmeterTransControllerTblHome.attachDirty(jmeterTransControllerTbl);
+					// IT7R5
+					String docString = requestResponseTblTemp.getResponseBody();
 					
+					try {
+						Document doc = Jsoup.parse(docString);
+						
+						List<String> hiddenInputNames = DocumentParser.getHiddenInputName(doc);
+						Map<String, String> foundFilteredRequestCorrelations = new HashMap<>();
+						
+						for(String hiddenInputName : hiddenInputNames) {
+							if(Util.isNotNullAndEmpty(hiddenInputName) && filteredRequestCorrelationObjects.containsKey(hiddenInputName)) {
+								RequestCorrelationTbl foundRequestCorrelationTbl = filteredRequestCorrelationObjects.get(hiddenInputName);
+								foundFilteredRequestCorrelations.put(foundRequestCorrelationTbl.getCorrRegex(), foundRequestCorrelationTbl.getVariable());
+							}
+						}
+						
+						List<Node> regexExtractors = XmlParser.createRegexExtractors(foundFilteredRequestCorrelations, Boolean.FALSE);
+						
+						jmeterTransControllerTbl.setTransContSec(XmlParser.addRequestParametersAsRegexExtractors(jmeterTransControllerTbl.getTransContSec(), regexExtractors));
+						
+					} catch (Exception e) {
+					}
+					
+					
+					this.jmeterTransControllerTblHome.attachDirty(jmeterTransControllerTbl);
+				
 				}
 			}
-			
 		}
-		
 		
 		this.correlationStatus = "Completed";
 		

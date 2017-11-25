@@ -160,7 +160,7 @@ public class KnownExtractorsTblHome {
 		try {
 			sessionFactory.getCurrentSession().beginTransaction();
 
-			String query = "select * from header_ignore_tbl";
+			String query = "select * from known_extractors_tbl";
 			
 			List results = sessionFactory.getCurrentSession().createSQLQuery(query).addEntity(KnownExtractorsTbl.class).list();
 			sessionFactory.getCurrentSession().getTransaction().commit();

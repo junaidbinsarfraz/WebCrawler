@@ -4,9 +4,11 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -15,10 +17,14 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
@@ -33,7 +39,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import com.webcrawler.dao.RequestCorrelationTbl;
 import com.webcrawler.util.Constants;
 
 /**
@@ -130,13 +138,10 @@ public class XmlParser {
 	// On Authentication
 	public static String parseRequestArgumentXmlAndUpdateValues(String xml, Map<String, String> values, String username, String password) {
 		
-		xml = "<HTTPSamplerProxy>" + xml + "</HTTPSamplerProxy>"; // To make it well formed xml
-		
 		try {
+			xml = "<HTTPSamplerProxy>" + xml + "</HTTPSamplerProxy>"; // To make it well formed xml
 
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-			Document doc = docBuilder.parse(new InputSource(new ByteArrayInputStream(xml.getBytes("utf-8"))));
+			Document doc = buildXml(xml);
 
 			XPathFactory xPathfactory = XPathFactory.newInstance();
 			XPath xpath = xPathfactory.newXPath();
@@ -185,15 +190,7 @@ public class XmlParser {
 //				argumentValueNode.setTextContent(Constants.PASSWORD_NICKNAME);
 //			}
 			
-			TransformerFactory tf = TransformerFactory.newInstance();
-			Transformer transformer = tf.newTransformer();
-			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			
-			StringWriter writer = new StringWriter();
-			transformer.transform(new DOMSource(doc), new StreamResult(writer));
-
-			String updatedXml = writer.getBuffer().toString();
+			String updatedXml = transformXml(doc);
 
 			updatedXml = updatedXml.replaceFirst("<HTTPSamplerProxy>", "");
 			
@@ -205,6 +202,53 @@ public class XmlParser {
 			return null;
 		}
 	}
+
+	private static Document buildXml(String xml)
+			throws ParserConfigurationException, SAXException, IOException, UnsupportedEncodingException {
+		
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+		Document doc = docBuilder.parse(new InputSource(new ByteArrayInputStream(xml.getBytes("utf-8"))));
+		
+		return doc;
+	}
+	
+	public static String addRequestParametersAsRegexExtractors(String xml, List<Node> regexExtractors) {
+		try {
+			
+			xml = "<HTTPSamplerProxy>" + xml + "</HTTPSamplerProxy>"; // To make it well formed xml
+
+			Document doc = buildXml(xml);
+
+			appendExtractors(regexExtractors, doc);
+			
+			String updatedXml = transformXml(doc);
+
+			updatedXml = updatedXml.replaceFirst("<HTTPSamplerProxy>", "");
+			
+			updatedXml = replaceLast(updatedXml , "</HTTPSamplerProxy>", "");
+			
+			return updatedXml;
+			
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	private static String transformXml(Document doc)
+			throws TransformerFactoryConfigurationError, TransformerConfigurationException, TransformerException {
+		
+		TransformerFactory tf = TransformerFactory.newInstance();
+		Transformer transformer = tf.newTransformer();
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		
+		StringWriter writer = new StringWriter();
+		transformer.transform(new DOMSource(doc), new StreamResult(writer));
+
+		String updatedXml = writer.getBuffer().toString();
+		return updatedXml;
+	}
 	
 	// After Authentication
 	public static String parseRequestHeaderXmlAndUpdateValues(String xml, Map<String, String> values, List<Node> regexExtractors) {
@@ -213,9 +257,7 @@ public class XmlParser {
 		
 		try {
 
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-			Document doc = docBuilder.parse(new InputSource(new ByteArrayInputStream(xml.getBytes("utf-8"))));
+			Document doc = buildXml(xml);
 
 			XPathFactory xPathfactory = XPathFactory.newInstance();
 			XPath xpath = xPathfactory.newXPath();
@@ -269,32 +311,9 @@ public class XmlParser {
 				collectionPropNode.appendChild(elementPropNode);
 			}
 			
-			Node dummyHTTPSamplerProxyNode = doc.getFirstChild();
+			appendExtractors(regexExtractors, doc);
 			
-			Node hashTreeNode = doc.createElement("hashTree");
-			
-//			dummyHTTPSamplerProxyNode.appendChild(hashTreeNode);
-			
-			for(Node regexExtractor : regexExtractors) {
-				
-				Node regexExtractorImportedNode = doc.importNode(regexExtractor, Boolean.TRUE);
-				
-				dummyHTTPSamplerProxyNode.appendChild(regexExtractorImportedNode);
-				
-				hashTreeNode = doc.createElement("hashTree");
-				
-				dummyHTTPSamplerProxyNode.appendChild(hashTreeNode);
-			}
-			
-			TransformerFactory tf = TransformerFactory.newInstance();
-			Transformer transformer = tf.newTransformer();
-			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			
-			StringWriter writer = new StringWriter();
-			transformer.transform(new DOMSource(doc), new StreamResult(writer));
-			
-			String updatedXml = writer.getBuffer().toString();
+			String updatedXml = transformXml(doc);
 
 			updatedXml = updatedXml.replaceFirst("<HTTPSamplerProxy>", "");
 			
@@ -306,20 +325,40 @@ public class XmlParser {
 			return null;
 		}
 	}
+
+	private static void appendExtractors(List<Node> regexExtractors, Document doc) {
+		Node dummyHTTPSamplerProxyNode = doc.getFirstChild();
+		
+		Node hashTreeNode = doc.createElement("hashTree");
+		
+//			dummyHTTPSamplerProxyNode.appendChild(hashTreeNode);
+		
+		for(Node regexExtractor : regexExtractors) {
+			
+			Node regexExtractorImportedNode = doc.importNode(regexExtractor, Boolean.TRUE);
+			
+			dummyHTTPSamplerProxyNode.appendChild(regexExtractorImportedNode);
+			
+			hashTreeNode = doc.createElement("hashTree");
+			
+			dummyHTTPSamplerProxyNode.appendChild(hashTreeNode);
+		}
+	}
 	
-	public static List<Node> createRegexExtractors(Map<String, String> requestHeaders) {
+	public static List<Node> createRegexExtractors(Map<String, String> corrRegexAndVariables, Boolean isRequestHeaderValues) {
 		List<Node> regexExtractors = new ArrayList<>();
 		
 		try {
 			
+			// TODO: Remove these 3 unsed lines
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			Document doc = docBuilder.newDocument();
 			
-			for(String key : requestHeaders.keySet()) {
-				String value = requestHeaders.get(key);
+			for(String key : corrRegexAndVariables.keySet()) {
+				String value = corrRegexAndVariables.get(key);
 				
-				regexExtractors.add(createRegexExtractor(key, value));
+				regexExtractors.add(createRegexExtractor(key, value, isRequestHeaderValues));
 			}
 			
 		} catch (Exception e) {
@@ -329,7 +368,7 @@ public class XmlParser {
 		return regexExtractors;
 	}
 	
-	private static Node createRegexExtractor(String regex, String refname) {
+	private static Node createRegexExtractor(String regex, String refname, Boolean isRequestHeaderValues) {
 		
 		Node regexExtractorNode = null;
 		
@@ -342,7 +381,7 @@ public class XmlParser {
 			
 			attrMap.put("name", "RegexExtractor.useHeaders");
 			
-			Node userHeadersNode = createTextNodeWithAttributes(doc, "stringProp", "true", attrMap);
+			Node userHeadersNode = createTextNodeWithAttributes(doc, "stringProp", Boolean.TRUE.equals(isRequestHeaderValues) ? "true" : "false", attrMap);
 			
 			attrMap = new HashMap<>();
 			
@@ -358,7 +397,7 @@ public class XmlParser {
 			
 			attrMap.put("name", "RegexExtractor.regex");
 			
-			Node regexNode = createTextNodeWithAttributes(doc, "stringProp", regex + Constants.CORR_REGEX, attrMap);
+			Node regexNode = createTextNodeWithAttributes(doc, "stringProp", regex, attrMap);
 			
 			attrMap = new HashMap<>();
 			
@@ -370,7 +409,7 @@ public class XmlParser {
 			
 			attrMap.put("name", "RegexExtractor.default");
 			
-			Node defaultNode = createTextNodeWithAttributes(doc, "stringProp", "1", attrMap);
+			Node defaultNode = createTextNodeWithAttributes(doc, "stringProp", Boolean.TRUE.equals(isRequestHeaderValues) ? "1" : "notfound", attrMap);
 			
 			attrMap = new HashMap<>();
 			
@@ -382,7 +421,7 @@ public class XmlParser {
 			
 			attrMap.put("name", "Scope.variable");
 			
-			Node variableNode = createTextNodeWithAttributes(doc, "stringProp", "", attrMap);
+			Node variableNode = createTextNodeWithAttributes(doc, "stringProp", Boolean.TRUE.equals(isRequestHeaderValues) ? "" : "all", attrMap);
 			
 			regexExtractorNode = doc.createElement("RegexExtractor");
 			

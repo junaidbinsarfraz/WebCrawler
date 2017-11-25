@@ -160,7 +160,7 @@ public class PageCategoryTblHome {
 		try {
 			sessionFactory.getCurrentSession().beginTransaction();
 
-			String query = "select * from header_ignore_tbl";
+			String query = "select * from page_category_tbl";
 			
 			List results = sessionFactory.getCurrentSession().createSQLQuery(query).addEntity(PageCategoryTbl.class).list();
 			sessionFactory.getCurrentSession().getTransaction().commit();

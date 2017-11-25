@@ -16,4 +16,7 @@ public interface Constants {
 	String PASSWORD_NICKNAME = "${aPword}";
 	
 	String CORR_REGEX = "=(.+?),";
+	String REQUEST_PARAM_CORR_REGEX = "=&quot;(.+?)&quot;;";
+	
+	String UNCATEGORIZE_TO_PAGE_CATEGORY_TEXT = "Uncategorized";
 }
