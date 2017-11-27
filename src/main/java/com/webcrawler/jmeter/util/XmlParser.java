@@ -41,7 +41,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.webcrawler.dao.RequestCorrelationTbl;
 import com.webcrawler.util.Constants;
 
 /**
@@ -51,6 +50,7 @@ import com.webcrawler.util.Constants;
  */
 public class XmlParser {
 
+	// TODO: Check and remove this function
 	/**
 	 * The method parseXmlWithGivenXPathExp() method is use to parse xml with
 	 * give XPath expression
@@ -126,13 +126,13 @@ public class XmlParser {
 
 			streamResult.setOutputStream(out);
 
-			Source text = new StreamSource((InputStream) (new ByteArrayInputStream(xml.getBytes())));
+			Source text = new StreamSource((InputStream) (new ByteArrayInputStream(xml.replaceAll("&", "&amp;").getBytes())));
 			transformer.transform(text, streamResult);
 		} catch (Exception e) {
 			return null;
 		}
 
-		return streamResult.getOutputStream().toString();
+		return streamResult.getOutputStream().toString().replaceAll("&amp;", "&");
 	}
 	
 	// On Authentication
@@ -208,7 +208,7 @@ public class XmlParser {
 		
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-		Document doc = docBuilder.parse(new InputSource(new ByteArrayInputStream(xml.getBytes("utf-8"))));
+		Document doc = docBuilder.parse(new InputSource(new ByteArrayInputStream(xml.replaceAll("&", "&amp;").getBytes("utf-8"))));
 		
 		return doc;
 	}
@@ -246,7 +246,7 @@ public class XmlParser {
 		StringWriter writer = new StringWriter();
 		transformer.transform(new DOMSource(doc), new StreamResult(writer));
 
-		String updatedXml = writer.getBuffer().toString();
+		String updatedXml = writer.getBuffer().toString().replaceAll("&amp;", "&");
 		return updatedXml;
 	}
 	

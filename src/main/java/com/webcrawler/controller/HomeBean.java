@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -1692,7 +1691,7 @@ public class HomeBean implements Serializable {
 						jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), 
 								Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters()) ? filteredHeaderCorrelations : new HashMap<String, String>(), regexExtractors));
 						
-						if(Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters())) {
+						if(Util.isNotNullAndEmpty(requestResponseTblTemp.getRequestParameters())) {
 							// TODO: update jmx value with request Correlation values
 							List<CredsTbl> credsTbls = credsTblHome.findByRunId(runIdentTbl.getId());
 							
