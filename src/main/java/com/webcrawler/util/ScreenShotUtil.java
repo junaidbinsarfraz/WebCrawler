@@ -68,6 +68,14 @@ public class ScreenShotUtil {
 		}
 	}
 
+	/**
+	 * The method processIsRunning() is use to check if firefox-screen-shot
+	 * process is running
+	 * 
+	 * @param process
+	 *            to be checked
+	 * @return true if process is running
+	 */
 	private static boolean processIsRunning(String process) {
 		boolean processIsRunning = false;
 		String line;

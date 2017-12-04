@@ -776,4 +776,8 @@ public final class Util {
 			return false;
 		}
 	}
+	
+	public static String replaceLast(String text, String regex, String replacement) {
+        return text.replaceFirst("(?s)(.*)" + regex, "$1" + replacement);
+    }
 }

@@ -19,7 +19,7 @@ import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.collections.HashTree;
 import org.apache.jorphan.collections.ListedHashTree;
 
-import com.webcrawler.jmeter.util.Constants;
+import com.webcrawler.util.Constants;
 
 /**
  * The class RecordingHandler is use to Handle all the JMeter recording
@@ -90,17 +90,6 @@ public class RecordingHandler {
 	 */
 	public Integer start(Integer port) {
 		try {
-
-			/*
-			 * if(Boolean.FALSE.equals(isAvaiable(port))) { // Get new port
-			 * ServerSocket socket = new ServerSocket(0);
-			 * 
-			 * port = socket.getLocalPort();
-			 * 
-			 * socket.close();
-			 * 
-			 * this.proxy.setPort(port); }
-			 */
 			this.proxy.startProxy();
 		} catch (Exception e) {
 			try {
@@ -157,12 +146,18 @@ public class RecordingHandler {
 		for (Object o : new LinkedList<>(tree.list())) {
 			JMeterTreeNode item = (JMeterTreeNode) o;
 			convertSubTree(tree.getTree(item));
-			TestElement testElement = item.getTestElement(); // requires
-																// JMeterTreeNode
+			TestElement testElement = item.getTestElement(); // requires JMeterTreeNode
 			tree.replaceKey(item, testElement);
 		}
 	}
 
+	/**
+	 * The method isAvaiable() is use to check if port is available to listen
+	 * 
+	 * @param port
+	 *            to be checked
+	 * @return true is port is listening else false
+	 */
 	private static Boolean isAvaiable(Integer port) {
 		boolean portTaken = false;
 		ServerSocket socket = null;
@@ -184,6 +179,11 @@ public class RecordingHandler {
 		return portTaken;
 	}
 
+	/**
+	 * The method getFreePort() is use to get random free port
+	 * 
+	 * @return free port
+	 */
 	public static Integer getFreePort() {
 		ServerSocket socket = null;
 		

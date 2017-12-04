@@ -1,14 +1,10 @@
-package com.webcrawler.jmeter.util;
+package com.webcrawler.parser;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -17,15 +13,10 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.xpath.XPath;
@@ -33,15 +24,14 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import com.webcrawler.util.Constants;
+import com.webcrawler.util.Util;
+import com.webcrawler.util.XmlUtil;
 
 /**
  * The class XmlParser is use to parse the xml to get desire data or sub-xml
@@ -49,58 +39,6 @@ import com.webcrawler.util.Constants;
  * @author Junaid
  */
 public class XmlParser {
-
-	// TODO: Check and remove this function
-	/**
-	 * The method parseXmlWithGivenXPathExp() method is use to parse xml with
-	 * give XPath expression
-	 * 
-	 * @param xmlFile
-	 *            contains the XML
-	 * @param xpathExp
-	 *            XPATH expression
-	 * @return parsed xml
-	 */
-	public static String parseXmlWithGivenXPathExp(File xmlFile, String xpathExp) {
-
-		String parsedXml = "";
-
-		try {
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder = factory.newDocumentBuilder();
-
-			ByteArrayInputStream byteArray = new ByteArrayInputStream(FileUtils.readFileToByteArray(xmlFile));
-
-			Document doc = builder.parse(byteArray);
-
-			// XPath
-			/*
-			 * XPath xpath = XPathFactory.newInstance().newXPath();
-			 * XPathExpression expr = xpath.compile(xpathExp); Object exprResult
-			 * = expr.evaluate(doc, XPathConstants.NODESET); NodeList nodeList =
-			 * (NodeList) exprResult;
-			 * 
-			 * System.out.println(nodeList.getLength());
-			 * System.out.println(nodeList.toString());
-			 */
-
-			// TODO: XSLT
-			/*
-			 * TransformerFactory transformerFactory =
-			 * TransformerFactory.newInstance(); Source xslt = new
-			 * StreamSource(new File("httpsamplerproxy-transformer.xslt"));
-			 * Transformer transformer =
-			 * transformerFactory.newTransformer(xslt);
-			 * 
-			 * Source text = new StreamSource(xmlFile);
-			 * transformer.transform(text, new StreamResult(arg0));
-			 */
-		} catch (Exception e) {
-			return null;
-		}
-
-		return parsedXml;
-	}
 
 	/**
 	 * The method parseXmlWithXslTransformer() is use to transform give xml with
@@ -136,12 +74,27 @@ public class XmlParser {
 	}
 	
 	// On Authentication
+	/**
+	 * The method parseRequestArgumentXmlAndUpdateValues() is use to parse xml
+	 * and replace keys' values (change from old value with new one), username
+	 * and password
+	 * 
+	 * @param xml
+	 *            JMX to be parsed
+	 * @param values
+	 *            Map contains keys and values
+	 * @param username
+	 *            to be changed with USERNAME_NICKNAME
+	 * @param password
+	 *            to be changed with PASSWORD_NICKNAME
+	 * @return xml string
+	 */
 	public static String parseRequestArgumentXmlAndUpdateValues(String xml, Map<String, String> values, String username, String password) {
 		
 		try {
 			xml = "<HTTPSamplerProxy>" + xml + "</HTTPSamplerProxy>"; // To make it well formed xml
 
-			Document doc = buildXml(xml);
+			Document doc = XmlUtil.buildXml(xml);
 
 			XPathFactory xPathfactory = XPathFactory.newInstance();
 			XPath xpath = xPathfactory.newXPath();
@@ -164,37 +117,15 @@ public class XmlParser {
 						} else {
 							argumentValueNode.setTextContent(values.get(key));
 						}
-						
-//						argumentValueNode.setTextContent(values.get(key));
 					}
 				}
 			}
 			
-//			XPathExpression exprUsername = xpath.compile("//stringProp[@name=\"Argument.value\" and text()=\"" + username + "\"]");
-//			
-//			XPathExpression exprPassowrd = xpath.compile("//stringProp[@name=\"Argument.value\" and text()=\"" + password + "\"]");
-//			
-//			NodeList argumentNodes = (NodeList) exprUsername.evaluate(doc, XPathConstants.NODESET);
-//			
-//			Node argumentValueNode = argumentNodes.item(0);
-//			
-//			if(argumentValueNode != null) {
-//				argumentValueNode.setTextContent(Constants.USERNAME_NICKNAME);
-//			}
-//			
-//			argumentNodes = (NodeList) exprPassowrd.evaluate(doc, XPathConstants.NODESET);
-//			
-//			argumentValueNode = argumentNodes.item(0);
-//			
-//			if(argumentValueNode != null) {
-//				argumentValueNode.setTextContent(Constants.PASSWORD_NICKNAME);
-//			}
-			
-			String updatedXml = transformXml(doc);
+			String updatedXml = XmlUtil.transformXml(doc);
 
 			updatedXml = updatedXml.replaceFirst("<HTTPSamplerProxy>", "");
 			
-			updatedXml = replaceLast(updatedXml , "</HTTPSamplerProxy>", "");
+			updatedXml = Util.replaceLast(updatedXml , "</HTTPSamplerProxy>", "");
 			
 			return updatedXml;
 			
@@ -203,30 +134,30 @@ public class XmlParser {
 		}
 	}
 
-	private static Document buildXml(String xml)
-			throws ParserConfigurationException, SAXException, IOException, UnsupportedEncodingException {
-		
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-		Document doc = docBuilder.parse(new InputSource(new ByteArrayInputStream(xml.replaceAll("&", "&amp;").getBytes("utf-8"))));
-		
-		return doc;
-	}
-	
+	/**
+	 * The method addRequestParametersAsRegexExtractors() is use to append
+	 * regexExtrators at the end of xml
+	 * 
+	 * @param xml
+	 *            where regexExtractors will be appended
+	 * @param regexExtractors
+	 *            Map containing keys values to be appended
+	 * @return xml appended with regexExtractors
+	 */
 	public static String addRequestParametersAsRegexExtractors(String xml, List<Node> regexExtractors) {
 		try {
 			
 			xml = "<HTTPSamplerProxy>" + xml + "</HTTPSamplerProxy>"; // To make it well formed xml
 
-			Document doc = buildXml(xml);
+			Document doc = XmlUtil.buildXml(xml);
 
 			appendExtractors(regexExtractors, doc);
 			
-			String updatedXml = transformXml(doc);
+			String updatedXml = XmlUtil.transformXml(doc);
 
 			updatedXml = updatedXml.replaceFirst("<HTTPSamplerProxy>", "");
 			
-			updatedXml = replaceLast(updatedXml , "</HTTPSamplerProxy>", "");
+			updatedXml = Util.replaceLast(updatedXml , "</HTTPSamplerProxy>", "");
 			
 			return updatedXml;
 			
@@ -235,29 +166,26 @@ public class XmlParser {
 		}
 	}
 
-	private static String transformXml(Document doc)
-			throws TransformerFactoryConfigurationError, TransformerConfigurationException, TransformerException {
-		
-		TransformerFactory tf = TransformerFactory.newInstance();
-		Transformer transformer = tf.newTransformer();
-		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		
-		StringWriter writer = new StringWriter();
-		transformer.transform(new DOMSource(doc), new StreamResult(writer));
-
-		String updatedXml = writer.getBuffer().toString().replaceAll("&amp;", "&");
-		return updatedXml;
-	}
-	
 	// After Authentication
+	/**
+	 * The method parseRequestHeaderXmlAndUpdateValues() is use to parse xml,
+	 * update request headers with values and append regexExtractors
+	 * 
+	 * @param xml
+	 *            to be parsed
+	 * @param values
+	 *            Map containing keys values to be changed
+	 * @param regexExtractors
+	 *            To be appended
+	 * @return updated xml
+	 */
 	public static String parseRequestHeaderXmlAndUpdateValues(String xml, Map<String, String> values, List<Node> regexExtractors) {
 		
 		xml = "<HTTPSamplerProxy>" + xml + "</HTTPSamplerProxy>"; // To make it well formed xml
 		
 		try {
 
-			Document doc = buildXml(xml);
+			Document doc = XmlUtil.buildXml(xml);
 
 			XPathFactory xPathfactory = XPathFactory.newInstance();
 			XPath xpath = xPathfactory.newXPath();
@@ -313,11 +241,11 @@ public class XmlParser {
 			
 			appendExtractors(regexExtractors, doc);
 			
-			String updatedXml = transformXml(doc);
+			String updatedXml = XmlUtil.transformXml(doc);
 
 			updatedXml = updatedXml.replaceFirst("<HTTPSamplerProxy>", "");
 			
-			updatedXml = replaceLast(updatedXml , "</HTTPSamplerProxy>", "");
+			updatedXml = Util.replaceLast(updatedXml , "</HTTPSamplerProxy>", "");
 
 			return updatedXml;
 
@@ -326,12 +254,19 @@ public class XmlParser {
 		}
 	}
 
+	/**
+	 * The method appendExtractors() is use to append regexExtractors at the end
+	 * of doc
+	 * 
+	 * @param regexExtractors
+	 *            to be appended
+	 * @param doc
+	 *            to be parsed
+	 */
 	private static void appendExtractors(List<Node> regexExtractors, Document doc) {
 		Node dummyHTTPSamplerProxyNode = doc.getFirstChild();
 		
 		Node hashTreeNode = doc.createElement("hashTree");
-		
-//			dummyHTTPSamplerProxyNode.appendChild(hashTreeNode);
 		
 		for(Node regexExtractor : regexExtractors) {
 			
@@ -345,6 +280,16 @@ public class XmlParser {
 		}
 	}
 	
+	/**
+	 * The method createRegexExtractors() is use to create regexExtractors from
+	 * given corrRegexAndVariables
+	 * 
+	 * @param corrRegexAndVariables
+	 *            to be used to create regexExtractors
+	 * @param isRequestHeaderValues
+	 *            true while creating corrRegexExtractors from request headers
+	 * @return list of regex extractors
+	 */
 	public static List<Node> createRegexExtractors(Map<String, String> corrRegexAndVariables, Boolean isRequestHeaderValues) {
 		List<Node> regexExtractors = new ArrayList<>();
 		
@@ -368,6 +313,18 @@ public class XmlParser {
 		return regexExtractors;
 	}
 	
+	/**
+	 * The method createRegexExtractor() is use to create one regexExtractor
+	 * Node with given regex, refname and isRequestHeaderValues
+	 * 
+	 * @param regex
+	 *            regex
+	 * @param refname
+	 *            reference name
+	 * @param isRequestHeaderValues
+	 *            true while creating corrRegexExtractors from request headers
+	 * @return regex extractors
+	 */
 	private static Node createRegexExtractor(String regex, String refname, Boolean isRequestHeaderValues) {
 		
 		Node regexExtractorNode = null;
@@ -461,6 +418,20 @@ public class XmlParser {
 		return regexExtractorNode;
 	}
 
+	/**
+	 * The method createTextNodeWithAttributes() is use to create text node with
+	 * attribute
+	 * 
+	 * @param doc
+	 *            to be parsed
+	 * @param tagName
+	 *            tag name
+	 * @param tagValue
+	 *            tag value
+	 * @param attrMap
+	 *            attribute map
+	 * @return text node
+	 */
 	private static Node createTextNodeWithAttributes(Document doc, String tagName, String tagValue,
 			Map<String, String> attrMap) {
 
@@ -484,8 +455,4 @@ public class XmlParser {
 		return node;
 	}
 	
-	private static String replaceLast(String text, String regex, String replacement) {
-        return text.replaceFirst("(?s)(.*)" + regex, "$1" + replacement);
-    }
-
 }

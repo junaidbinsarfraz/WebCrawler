@@ -19,4 +19,8 @@ public interface Constants {
 	String REQUEST_PARAM_CORR_REGEX = "=&quot;(.+?)&quot;;";
 	
 	String UNCATEGORIZE_TO_PAGE_CATEGORY_TEXT = "Uncategorized";
+	
+	String JMETER_HOME = "E://Softwares//apache-jmeter-3.2";
+//	String JMETER_HOME = "D://Junaid//apache-jmeter-3.2";
+	Integer JEMTER_PORT = 8888;
 }

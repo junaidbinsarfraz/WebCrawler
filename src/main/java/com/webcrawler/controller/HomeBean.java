@@ -50,16 +50,16 @@ import com.webcrawler.dao.RequestResponseTblHome;
 import com.webcrawler.dao.RunIdentTbl;
 import com.webcrawler.dao.RunIdentTblHome;
 import com.webcrawler.jmeter.handler.RecordingHandler;
-import com.webcrawler.jmeter.util.XmlParser;
 import com.webcrawler.model.AuthenticationForm;
 import com.webcrawler.model.UrlProperty;
+import com.webcrawler.parser.DocumentParser;
+import com.webcrawler.parser.XmlParser;
 import com.webcrawler.util.AuthUtil;
 import com.webcrawler.util.Constants;
 import com.webcrawler.util.CorrelationUtil;
 import com.webcrawler.util.CrawlUtil;
 import com.webcrawler.util.DataUtil;
 import com.webcrawler.util.DateUtil;
-import com.webcrawler.util.DocumentParser;
 import com.webcrawler.util.FileUtil;
 import com.webcrawler.util.RequestResponseUtil;
 import com.webcrawler.util.ScreenShotUtil;
@@ -484,7 +484,7 @@ public class HomeBean implements Serializable {
 		
 		Integer freePort = RecordingHandler.getFreePort();
 		
-		this.port = freePort != null ? freePort : com.webcrawler.jmeter.util.Constants.PORT;
+		this.port = freePort != null ? freePort : Constants.JEMTER_PORT;
 		
 		// Initialize JMeter
 		try {

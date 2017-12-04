@@ -12,6 +12,12 @@ import com.webcrawler.dao.KnownExtractorsTblHome;
 import com.webcrawler.dao.PageCategoryTbl;
 import com.webcrawler.dao.PageCategoryTblHome;
 
+/**
+ * The class DataUtil contains data that will be initialize only once at the
+ * start and hold data till end
+ * 
+ * @author Junaid
+ */
 public final class DataUtil {
 	
 	private static List<String> usernameKeys = new ArrayList<>();
@@ -26,6 +32,9 @@ public final class DataUtil {
 		loadData();
 	}
 	
+	/**
+	 * The method loadData() is use to load Data from the database at the start
+	 */
 	public static void loadData() {
 		// Fetch values from dao
 		AuthTblHome authTblHome = new AuthTblHome();

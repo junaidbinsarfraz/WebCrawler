@@ -8,14 +8,34 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
+/**
+ * The class FileUtil is use to manipulate file
+ * 
+ * @author Junaid
+ */
 public class FileUtil {
 	
+	/**
+	 * The method isFileExists() is use to check if file exists
+	 * 
+	 * @param filePath
+	 *            file path
+	 * @return true if File Exists
+	 */
 	public static Boolean isFileExists(String filePath) {
 		File f = new File(filePath);
 		
 		return (f.exists() && !f.isDirectory());
 	}
 	
+	/**
+	 * The method extractUsernamePassword() is use to extract Username and
+	 * Password from the given file with filePath
+	 * 
+	 * @param filePath
+	 *            file
+	 * @return username and password
+	 */
 	public static Map<String, String> extractUsernamePassword(String filePath) {
 		Map<String, String> usernamePassword = new HashMap<>();
 		

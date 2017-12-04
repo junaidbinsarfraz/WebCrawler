@@ -19,6 +19,20 @@ import com.webcrawler.model.UrlProperty;
  */
 public class RequestResponseUtil {
 
+	/**
+	 * The method makeRequest() is use make http request to the given url with
+	 * auth cookies on proxy.
+	 * 
+	 * @param urlProperty
+	 *            has url
+	 * @param port
+	 *            port number use for proxy
+	 * @param forLogin
+	 *            true if try to login
+	 * @param authCookies
+	 *            authentication cookies
+	 * @return connection made
+	 */
 	public static Connection makeRequest(UrlProperty urlProperty, Integer port, Boolean forLogin, Map<String, String> authCookies) {
 
 		Response lastResponse = urlProperty.getLastReponse();
@@ -68,6 +82,14 @@ public class RequestResponseUtil {
 		return connection;
 	}
 
+	/**
+	 * The method HttpURLConnection() is use to make Http Connection with given
+	 * url
+	 * 
+	 * @param urlProperty
+	 *            contain url
+	 * @return Http URL Connection
+	 */
 	public static HttpURLConnection makeProxyRequest(UrlProperty urlProperty) {
 		Response lastResponse = urlProperty.getLastReponse();
 
