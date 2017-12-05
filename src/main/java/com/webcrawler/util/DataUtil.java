@@ -3,6 +3,7 @@ package com.webcrawler.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.webcrawler.common.util.Util;
 import com.webcrawler.dao.AuthTbl;
 import com.webcrawler.dao.AuthTblHome;
 import com.webcrawler.dao.HeaderIgnoreTbl;

@@ -13,7 +13,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.criterion.Example;
 
-import com.webcrawler.util.Util;
+import com.webcrawler.common.util.Util;
 
 /**
  * Home object for domain model class RequestCorrelationTbl.

@@ -29,8 +29,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.webcrawler.common.util.Util;
 import com.webcrawler.util.Constants;
-import com.webcrawler.util.Util;
 import com.webcrawler.util.XmlUtil;
 
 /**

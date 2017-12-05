@@ -1,4 +1,4 @@
-package com.webcrawler.util;
+package com.webcrawler.common.util;
 
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;

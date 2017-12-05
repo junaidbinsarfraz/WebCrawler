@@ -1,4 +1,4 @@
-package com.webcrawler.util;
+package com.webcrawler.common.util;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;

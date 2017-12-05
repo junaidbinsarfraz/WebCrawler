@@ -10,6 +10,7 @@ import org.jsoup.Connection;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 
+import com.webcrawler.common.util.Util;
 import com.webcrawler.model.UrlProperty;
 
 /**

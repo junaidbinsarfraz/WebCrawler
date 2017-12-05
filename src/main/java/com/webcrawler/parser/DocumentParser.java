@@ -8,7 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.webcrawler.util.Util;
+import com.webcrawler.common.util.Util;
 
 /**
  * The class DocumentParser is use to Parse Document

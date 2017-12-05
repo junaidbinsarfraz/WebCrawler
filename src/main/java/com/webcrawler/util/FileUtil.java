@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
+import com.webcrawler.common.util.Util;
+
 /**
  * The class FileUtil is use to manipulate file
  * 

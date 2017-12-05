@@ -35,6 +35,8 @@ import org.openqa.selenium.WebDriver;
 import org.primefaces.context.RequestContext;
 import org.w3c.dom.Node;
 
+import com.webcrawler.common.util.DateUtil;
+import com.webcrawler.common.util.Util;
 import com.webcrawler.dao.CredsTbl;
 import com.webcrawler.dao.CredsTblHome;
 import com.webcrawler.dao.HeaderCorrelationTbl;
@@ -59,11 +61,9 @@ import com.webcrawler.util.Constants;
 import com.webcrawler.util.CorrelationUtil;
 import com.webcrawler.util.CrawlUtil;
 import com.webcrawler.util.DataUtil;
-import com.webcrawler.util.DateUtil;
 import com.webcrawler.util.FileUtil;
 import com.webcrawler.util.RequestResponseUtil;
 import com.webcrawler.util.ScreenShotUtil;
-import com.webcrawler.util.Util;
 
 import crawlercommons.robots.BaseRobotRules;
 
@@ -76,7 +76,6 @@ import crawlercommons.robots.BaseRobotRules;
  * @author Junaid
  */
 @ManagedBean(name = "homeBean")
-// @ViewScoped
 @SessionScoped
 public class HomeBean implements Serializable {
 
@@ -1310,31 +1309,6 @@ public class HomeBean implements Serializable {
 
 	}
 
-	/**
-	 * The method getMatchedUrlPropertiesByTitle() is use to check if whose page
-	 * titles are matched with the give title
-	 * 
-	 * @param urlProperties
-	 *            queue of UrlProperties
-	 * @param title
-	 *            to be checked
-	 * @return UrlProperty that is mached else null
-	 */
-	private UrlProperty getMatchedUrlPropertiesByTitle(Queue<UrlProperty> urlProperties, String title) {
-
-		UrlProperty matchedUrlProperty = null;
-
-		if (Util.isNotNullAndEmpty(title)) {
-			for (UrlProperty urlProperty : urlProperties) {
-				if (title.equalsIgnoreCase(urlProperty.getLastTitle())) {
-					matchedUrlProperty = urlProperty;
-				}
-			}
-		}
-
-		return matchedUrlProperty;
-	}
-	
 	/////////// Duplicate Removal /////////////
 	
 	/**

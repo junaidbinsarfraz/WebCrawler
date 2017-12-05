@@ -7,6 +7,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.webcrawler.common.util.Util;
 import com.webcrawler.model.AuthenticationForm;
 
 /**
