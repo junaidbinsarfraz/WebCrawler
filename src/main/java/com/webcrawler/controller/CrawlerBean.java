@@ -3,14 +3,14 @@ package com.webcrawler.controller;
 import java.util.Date;
 
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.faces.bean.ViewScoped;
 
 import org.openqa.selenium.WebDriver;
 
 import com.webcrawler.jmeter.handler.RecordingHandler;
 
 @ManagedBean(name = "crawlerBean")
-@SessionScoped
+@ViewScoped
 public class CrawlerBean extends CrawlerController {
 
 	private String error;

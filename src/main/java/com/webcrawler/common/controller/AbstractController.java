@@ -24,11 +24,14 @@ import com.webcrawler.common.dao.DaoManager;
 import com.webcrawler.common.model.StatusMessage;
 import com.webcrawler.common.util.DateUtil;
 import com.webcrawler.common.util.Util;
+import com.webcrawler.controller.CorrelationBean;
 import com.webcrawler.controller.CrawlerBean;
 import com.webcrawler.controller.DuplicateRemovalBean;
 import com.webcrawler.controller.SessionBean;
 import com.webcrawler.dao.CredsTblHome;
+import com.webcrawler.dao.HeaderCorrelationTblHome;
 import com.webcrawler.dao.JmeterTransControllerTblHome;
+import com.webcrawler.dao.RequestCorrelationTblHome;
 import com.webcrawler.dao.RequestResponseTblHome;
 import com.webcrawler.dao.RunIdentTblHome;
 import com.webcrawler.validation.ErrorMessage;
@@ -642,6 +645,15 @@ public abstract class AbstractController {
 	protected DuplicateRemovalBean getDuplicateRemovalBean() {
 		return (DuplicateRemovalBean) getControllerObject("duplicateRemovalBean", DuplicateRemovalBean.class);
 	}
+	
+	/**
+	 * The getCorrelationBean() method is used to get CorrelationBean instance.
+	 *
+	 * @return CorrelationBean object
+	 */
+	protected CorrelationBean getCorrelationBean() {
+		return (CorrelationBean) getControllerObject("correlationBean", CorrelationBean.class);
+	}
 
 	protected RunIdentTblHome getRunIdentTblHome() {
 		return DaoManager.getInstance().getDao(RunIdentTblHome.class);
@@ -657,6 +669,14 @@ public abstract class AbstractController {
 	
 	protected CredsTblHome getCredsTblHome() {
 		return DaoManager.getInstance().getDao(CredsTblHome.class);
+	}
+	
+	protected HeaderCorrelationTblHome getHeaderCorrelationTblHome() {
+		return DaoManager.getInstance().getDao(HeaderCorrelationTblHome.class);
+	}
+	
+	protected RequestCorrelationTblHome getRequestCorrelationTblHome() {
+		return DaoManager.getInstance().getDao(RequestCorrelationTblHome.class);
 	}
 
 }

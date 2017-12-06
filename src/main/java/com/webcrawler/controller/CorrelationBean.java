@@ -1,14 +1,15 @@
 package com.webcrawler.controller;
 
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ViewScoped;
+
+@ManagedBean(name = "correlationBean")
+@ViewScoped
 public class CorrelationBean extends CorrelationController {
 	
 	private String correlationRunName;
 	private String correlationError;
 	private String correlationStatus;
-	
-	public void clean() {
-		
-	}
 
 	public String getCorrelationRunName() {
 		return correlationRunName;
@@ -32,6 +33,13 @@ public class CorrelationBean extends CorrelationController {
 
 	public void setCorrelationStatus(String correlationStatus) {
 		this.correlationStatus = correlationStatus;
+	}
+	
+	public void clean() {
+		this.getValidationErrors().clear();
+		
+		this.correlationError = "";
+		this.correlationStatus = "";
 	}
 	
 }

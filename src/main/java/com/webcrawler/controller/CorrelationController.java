@@ -37,40 +37,39 @@ public class CorrelationController extends AbstractController {
 	 */
 	public void startCorrelation() {
 		
-		this.correlationError = "";
-		this.correlationStatus = "";
+		CorrelationBean correlationBean = getCorrelationBean();
 		
 		// Validate
-		if(Util.isNullOrEmpty(this.correlationRunName)) {
-			this.correlationError = "Run Name is required";
+		if(Util.isNullOrEmpty(correlationBean.getCorrelationRunName())) {
+			correlationBean.setCorrelationError("Run Name is required");
 			return;
 		}
 		
 		// Check if already run exists
 		RunIdentTbl runIdentTbl = new RunIdentTbl();
 		
-		runIdentTbl.setRunIdentifier(this.correlationRunName);
+		runIdentTbl.setRunIdentifier(correlationBean.getCorrelationRunName());
 		
-		List<RunIdentTbl> runIdentTbls = this.runIdentTblHome.findByRunName(this.correlationRunName);
+		List<RunIdentTbl> runIdentTbls = getRunIdentTblHome().findByRunName(correlationBean.getCorrelationRunName());
 		
 		if(Util.isNullOrEmpty(runIdentTbls)) {
-			this.correlationError = "Run Name doesnot exists";
+			correlationBean.setCorrelationError("Run Name doesnot exists");
 			return;
 		}
 		
 		runIdentTbl = runIdentTbls.get(0);
 		
-		List<HeaderCorrelationTbl> headerCorrelationTbls = this.headerCorrelationTblHome.findByRunId(runIdentTbl.getId());
+		List<HeaderCorrelationTbl> headerCorrelationTbls = getHeaderCorrelationTblHome().findByRunId(runIdentTbl.getId());
 		
 		if(Util.isNotNullAndEmpty(headerCorrelationTbls)) {
-			this.correlationError = "Run Name is already correlated";
+			correlationBean.setCorrelationError("Run Name is already correlated");
 			return;
 		}
 		
-		List<RequestCorrelationTbl> requestCorrelationTbls = this.requestCorrelationTblHome.findByRunId(runIdentTbl.getId());
+		List<RequestCorrelationTbl> requestCorrelationTbls = getRequestCorrelationTblHome().findByRunId(runIdentTbl.getId());
 		
 		if(Util.isNotNullAndEmpty(requestCorrelationTbls)) {
-			this.correlationError = "Run Name is already correlated";
+			correlationBean.setCorrelationError("Run Name is already correlated");
 			return;
 		}
 		
@@ -82,7 +81,7 @@ public class CorrelationController extends AbstractController {
 		Map<String, RequestCorrelationTbl> filteredRequestCorrelationObjects = new HashMap<>();
 		Map<String, String> filteredResponseHeaderCorrelations = new HashMap<>();
 		
-		List<RequestResponseTbl> requestResponseTbls = this.requestResponseTblHome.findByRunId(runIdentTbl.getId());
+		List<RequestResponseTbl> requestResponseTbls = getRequestResponseTblHome().findByRunId(runIdentTbl.getId());
 		
 		// Get run name's request response table's request header
 		for(RequestResponseTbl requestResponseTblTemp : requestResponseTbls) {
@@ -114,7 +113,7 @@ public class CorrelationController extends AbstractController {
 				}
 			}
 			
-			this.requestResponseTblHome.attachDirty(requestResponseTblTemp);
+			getRequestResponseTblHome().attachDirty(requestResponseTblTemp);
 			
 		}
 		
@@ -142,7 +141,7 @@ public class CorrelationController extends AbstractController {
 			filteredRequestCorrelationObjects.put(requestCorrelationTblTemp.getFoundArgName(), requestCorrelationTblTemp);
 			
 			// Put in database
-			this.requestCorrelationTblHome.attachDirty(requestCorrelationTblTemp);
+			getRequestCorrelationTblHome().attachDirty(requestCorrelationTblTemp);
 		}
 		
 		Integer headerCorrelationVariable = 1;
@@ -151,8 +150,6 @@ public class CorrelationController extends AbstractController {
 			
 			// Remove duplicate
 			if(!requestCorrelations.containsKey(headerCorrelation.getKey())) {
-				
-//				filteredHeaderCorrelations.put(headerCorrelation.getKey(), headerCorrelation.getValue());
 				
 				HeaderCorrelationTbl headerCorrelationTblTemp = new HeaderCorrelationTbl();
 				
@@ -169,12 +166,9 @@ public class CorrelationController extends AbstractController {
 				}
 				
 				// Put in database
-				this.headerCorrelationTblHome.attachDirty(headerCorrelationTblTemp);
+				getHeaderCorrelationTblHome().attachDirty(headerCorrelationTblTemp);
 			}
 		}
-		
-//		List<Node> regexExtractors = XmlParser.createRegexExtractors(filteredHeaderCorrelations);
-//		List<Node> regexExtractors = XmlParser.createRegexExtractors(filteredResponseHeaderCorrelations);
 		
 		for(RequestResponseTbl requestResponseTblTemp : requestResponseTbls) {
 			if(requestResponseTblTemp.getJmeterTransControllerTbls() != null && !requestResponseTblTemp.getJmeterTransControllerTbls().isEmpty()) {
@@ -204,7 +198,7 @@ public class CorrelationController extends AbstractController {
 						
 						if(Util.isNotNullAndEmpty(requestResponseTblTemp.getRequestParameters())) {
 							// TODO: update jmx value with request Correlation values
-							List<CredsTbl> credsTbls = credsTblHome.findByRunId(runIdentTbl.getId());
+							List<CredsTbl> credsTbls = getCredsTblHome().findByRunId(runIdentTbl.getId());
 							
 							// update jmx parameter values with request correlation values
 							if(Util.isNotNullAndEmpty(credsTbls)) {
@@ -237,15 +231,12 @@ public class CorrelationController extends AbstractController {
 					} catch (Exception e) {
 					}
 					
-					
-					this.jmeterTransControllerTblHome.attachDirty(jmeterTransControllerTbl);
-				
+					getJmeterTransControllerTblHome().attachDirty(jmeterTransControllerTbl);
 				}
 			}
 		}
 		
-		this.correlationStatus = "Completed";
-		
+		correlationBean.setCorrelationStatus("Completed");
 	}
 	
 }

@@ -178,6 +178,7 @@ public class CrawlerController extends AbstractController {
 		String password = null;
 		Map<String, String> authCookies = null;
 		
+		// TODO: Refactor, Move 
 		// Check login credentials 
 		if(Boolean.TRUE.equals(crawlerBean.getAssociateUserCredentials())) {
 			Map<String, String> usernamePasswordMap = FileUtil.extractUsernamePassword(crawlerBean.getUserCredentialFilePath());
@@ -555,9 +556,9 @@ public class CrawlerController extends AbstractController {
 						runIdentTbl.setBaseUrl(crawlerBean.getTargetUrl());
 						runIdentTbl.setAuthFileLoc(crawlerBean.getUserCredentialFilePath());
 						
-						crawlerBean.getRunIdentTblHome().attachDirty(runIdentTbl);
+						getRunIdentTblHome().attachDirty(runIdentTbl);
 						
-						runIdentTbls = crawlerBean.getRunIdentTblHome().findByExample(runIdentTbl);
+						runIdentTbls = getRunIdentTblHome().findByExample(runIdentTbl);
 						
 						if (runIdentTbls == null && runIdentTbls.isEmpty()) {
 							crawlerBean.setError(crawlerBean.getError() + "Run Name Not saved in database<br/>");
@@ -573,7 +574,7 @@ public class CrawlerController extends AbstractController {
 					requestResponseTbl.setRunIdentTbl(runIdentTbl);
 					requestResponseTbl.setAuthenticated(Boolean.TRUE.equals(isLoggedIn) ? 1 : 0);
 
-					crawlerBean.getRequestResponseTblHome().attachDirty(requestResponseTbl);
+					getRequestResponseTblHome().attachDirty(requestResponseTbl);
 					
 					// Save username and password for this run
 					CredsTbl credsTbl = new CredsTbl();
@@ -979,6 +980,14 @@ public class CrawlerController extends AbstractController {
 		}
 		
 		crawlingFinished();
+	}
+	
+	private void crawl() {
+		
+		// Check for login
+		
+		// 
+		
 	}
 	
 	private void crawlingFinished() {
