@@ -23,4 +23,6 @@ public interface Constants {
 	String JMETER_HOME = "E://Softwares//apache-jmeter-3.2";
 //	String JMETER_HOME = "D://Junaid//apache-jmeter-3.2";
 	Integer JEMTER_PORT = 8888;
+	
+	Integer PERCENTAGE_VALUE = 99;
 }

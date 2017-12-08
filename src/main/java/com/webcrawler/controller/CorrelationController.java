@@ -1,5 +1,6 @@
 package com.webcrawler.controller;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -72,6 +73,71 @@ public class CorrelationController extends AbstractController {
 			correlationBean.setCorrelationError("Run Name is already correlated");
 			return;
 		}
+		
+		Integer percentageValue = Constants.PERCENTAGE_VALUE;
+		
+		////////////////////////// Removal Starts
+		
+		for(RunIdentTbl runIdentTbl1 : runIdentTbls) {
+			runIdentTbl = runIdentTbl1;
+			
+			runIdentTbl.setPercent(percentageValue);
+			
+			getRunIdentTblHome().attachDirty(runIdentTbl);
+			
+			runIdentTbl = getRunIdentTblHome().findById(runIdentTbl.getId());
+			
+			// Start doing removals
+			RequestResponseTbl dummyRequestResponseTbl = new RequestResponseTbl();
+			
+			dummyRequestResponseTbl.setRunIdentTbl(runIdentTbl);
+			
+			// Get all parsed pages
+			List<RequestResponseTbl> requestResponseTbls = getRequestResponseTblHome().findByRunId(runIdentTbl.getId());
+			
+			// Then apply bout-force algorithm
+			for (Iterator<RequestResponseTbl> iterator = requestResponseTbls.iterator(); iterator.hasNext();) {
+				
+				RequestResponseTbl requestResponseTbl = iterator.next();
+				
+				inner: for (RequestResponseTbl innerRequestResponseTbl : requestResponseTbls) {
+					
+					if (Boolean.FALSE.equals(requestResponseTbl.getId().equals(innerRequestResponseTbl.getId()))
+							&& requestResponseTbl.getAuthenticated() != null && innerRequestResponseTbl.getAuthenticated() != null
+							&& requestResponseTbl.getAuthenticated() - innerRequestResponseTbl.getAuthenticated() == 0) { // Both should have same authenticated value
+	
+						/*Integer distance = CrawlUtil.levenshteinDistance(requestResponseTbl.getResponseBody(), innerRequestResponseTbl.getResponseBody());
+	
+						Double percentage = 100 - (((double) distance)
+								/ (Math.max(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length()))) * 100;*/
+						
+						if(requestResponseTbl.getToPageTitle().equalsIgnoreCase(innerRequestResponseTbl.getToPageTitle()) || 
+								requestResponseTbl.getToPageUrl().equalsIgnoreCase(innerRequestResponseTbl.getToPageUrl())) {
+						
+							Double percentage = 100 - (( (double)Math.max(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length())
+									- (double)Math.min(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length()))
+									/ ((requestResponseTbl.getResponseBody().length() + innerRequestResponseTbl.getResponseBody().length()) / 2)) * 100;
+		
+							if (percentage != null && percentage.intValue() > percentageValue) {
+		
+								// Remove from database
+								getRequestResponseTblHome().delete(requestResponseTbl);
+								iterator.remove();
+								break inner;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		runIdentTbl.setCleansed(Boolean.FALSE.equals(Boolean.TRUE));
+		
+		getRunIdentTblHome().attachDirty(runIdentTbl);
+		
+		///////////////////////////// Removal Ends
+		
+		runIdentTbl = (RunIdentTbl) getRunIdentTblHome().findByRunName(correlationBean.getCorrelationRunName()).get(0);
 		
 		Map<String, String> requestCorrelations = new HashMap<>();
 		Map<String, String> headerCorrelations = new HashMap<>();

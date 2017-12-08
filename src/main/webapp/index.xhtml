@@ -25,50 +25,50 @@
 			<div class="center-all" style="width: 50%; padding-bottom: 5%; float: left">
 				<h:form>
 					<h2>Web Crawler</h2>
-					<p:outputLabel value="#{homeBean.error}" style="color: red;"
+					<p:outputLabel value="#{crawlerBean.error}" style="color: red;"
 						styleClass="error" escape="false" id="errors"></p:outputLabel>
 					<br />
 					<label>Target URL</label>
 					<br />
-					<p:inputText value="#{homeBean.targetUrl}"
+					<p:inputText value="#{crawlerBean.targetUrl}"
 						requiredMessage="Target Url is required"></p:inputText>
 					<br />
 					<br />
 					<label>Run Name</label>
 					<br />
-					<p:inputText value="#{homeBean.runName}"
+					<p:inputText value="#{crawlerBean.runName}"
 						requiredMessage="Run Name is required"></p:inputText>
 					<br />
 					<br />
 					<label>Download Images?</label>
 					<br />
-					<p:selectBooleanCheckbox value="#{homeBean.downloadImages}" />
+					<p:selectBooleanCheckbox value="#{crawlerBean.downloadImages}" />
 					<br />
 					<br />
 					<label>Associate user credentials?</label> 
-					<p:selectBooleanCheckbox value="#{homeBean.associateUserCredentials}" >
+					<p:selectBooleanCheckbox value="#{crawlerBean.associateUserCredentials}" >
 						<p:ajax event="change" update="userCredentialFilePathField loginPageUrl" /> 
 					</p:selectBooleanCheckbox>
 					<br />
 					<br />
 					<label>Credential File Path</label>
 					<br />
-					<p:inputText id="userCredentialFilePathField" value="#{homeBean.userCredentialFilePath}" disabled="#{!homeBean.associateUserCredentials}"></p:inputText>
+					<p:inputText id="userCredentialFilePathField" value="#{crawlerBean.userCredentialFilePath}" disabled="#{!crawlerBean.associateUserCredentials}"></p:inputText>
 					<br />
 					<br />
 					<label>Login Page Url</label>
 					<br />
-					<p:inputText id="loginPageUrl" value="#{homeBean.loginPageUrl}" disabled="#{!homeBean.associateUserCredentials}"></p:inputText>
+					<p:inputText id="loginPageUrl" value="#{crawlerBean.loginPageUrl}" disabled="#{!crawlerBean.associateUserCredentials}"></p:inputText>
 					<br />
 					<br />
 					<h:panelGroup id="btns">
 						<h:panelGrid columns="2">
-							<p:commandButton actionListener="#{homeBean.start}"
-								onclick="start();" disabled="#{homeBean.hasStarted}"
+							<p:commandButton actionListener="#{crawlerController.start}"
+								onclick="start();" disabled="#{crawlerBean.hasStarted}"
 								value="Start" process="@form" update="@form"
 								styleClass="sendBtn">
 							</p:commandButton>
-							<p:commandButton actionListener="#{homeBean.stop}" value="Stop"
+							<p:commandButton actionListener="#{crawlerController.stop}" value="Stop"
 								oncomplete="stop();" async="true" process="@form" update="@form">
 							</p:commandButton>
 						</h:panelGrid>
@@ -78,13 +78,13 @@
 					<h:panelGroup id="updates">
 						<h:panelGrid columns="2">
 							<label>Run Time: </label>
-							<p:outputLabel value="#{homeBean.runTime}"></p:outputLabel>
+							<p:outputLabel value="#{crawlerBean.runTime}"></p:outputLabel>
 							<label>Pages Mapped: </label>
-							<p:outputLabel value="#{homeBean.pagesMapped}"></p:outputLabel>
+							<p:outputLabel value="#{crawlerBean.pagesMapped}"></p:outputLabel>
 						</h:panelGrid>
 					</h:panelGroup>
 
-					<p:poll interval="1" listener="#{homeBean.fetchUpdates}"
+					<p:poll interval="1" listener="#{crawlerController.fetchUpdates}"
 						autoStart="false" async="true" update="updates btns errors"
 						widgetVar="poll" onerror="error();" />
 
@@ -94,67 +94,20 @@
 			<div class="center-all" style="width: 50%; padding-bottom: 5%; float: left">
 				<div>
 					<h:form>
-						<h2>Duplicates Removal</h2>
-						<p:outputLabel value="#{homeBean.duplicateError}" style="color: red;"
-							styleClass="errorRemoval" escape="false" id="errors"></p:outputLabel>
-						<br />
-						<label>Removal From Run Name</label>
-						<br />
-						<p:inputText value="#{homeBean.removalRunName}"
-							requiredMessage="Run Name is required"></p:inputText>
-						<br />
-						<br />
-						<label>% matches</label>
-						<br />
-						<p:inputText value="#{homeBean.percentage}"
-							requiredMessage="Percentage Matches is required"></p:inputText>
-						<br />
-						<br />
-						<h:panelGroup id="btns">
-							<h:panelGrid columns="2">
-								<p:commandButton actionListener="#{homeBean.startRemoval}"
-									onclick="startRemoval();" disabled="#{homeBean.hasStartedRemoval}"
-									value="Start" process="@form" update="@form"
-									styleClass="sendBtnRemoval" oncomplete="stopRemoval();">
-								</p:commandButton>
-								<p:commandButton actionListener="#{homeBean.stopRemoval}" value="Stop"
-									oncomplete="stopRemoval();" async="true" process="@form" update="@form">
-								</p:commandButton>
-							</h:panelGrid>
-						</h:panelGroup>
-						<br />
-	
-						<h:panelGroup id="updates">
-							<h:panelGrid columns="2">
-								<label>Run Time: </label>
-								<p:outputLabel value="#{homeBean.runTimeRemoval}"></p:outputLabel>
-								<label>Pages Removed: </label>
-								<p:outputLabel value="#{homeBean.pagesMappedRemoval}"></p:outputLabel>
-							</h:panelGrid>
-						</h:panelGroup>
-	
-						<p:poll interval="1" listener="#{homeBean.fetchUpdatesRemoval}"
-							autoStart="false" async="true" update="updates btns errors"
-							widgetVar="pollRemoval" onerror="errorRemoval();" />
-	
-					</h:form>
-				</div>
-				<div style="margin-top: 20px;">
-					<h:form>
 						<h2>Correlation Run</h2>
-						<p:outputLabel value="#{homeBean.correlationError}" style="color: red;"
+						<p:outputLabel value="#{correlationBean.correlationError}" style="color: red;"
 							styleClass="errorRemoval" escape="false" id="errors"></p:outputLabel>
 						<br />
 						<label>Run Name</label>
 						<br />
-						<p:inputText value="#{homeBean.correlationRunName}"
+						<p:inputText value="#{correlationBean.correlationRunName}"
 							requiredMessage="Run Name is required"></p:inputText>
 						<br />
 						<br />
-						<p:outputLabel value="#{homeBean.correlationStatus}"></p:outputLabel>
+						<p:outputLabel value="#{correlationBean.correlationStatus}"></p:outputLabel>
 						<br />
 						<br />
-						<p:commandButton actionListener="#{homeBean.startCorrelation}"
+						<p:commandButton actionListener="#{correlationController.startCorrelation}"
 							value="Correlate" process="@form" update="@form">
 						</p:commandButton>
 					</h:form>
