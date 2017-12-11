@@ -1,5 +1,6 @@
 package com.webcrawler.controller;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.faces.bean.ManagedBean;
@@ -11,7 +12,7 @@ import com.webcrawler.jmeter.handler.RecordingHandler;
 
 @ManagedBean(name = "crawlerBean")
 @ViewScoped
-public class CrawlerBean extends CrawlerController {
+public class CrawlerBean extends CrawlerController implements Serializable {
 
 	private String error;
 	private String targetUrl;

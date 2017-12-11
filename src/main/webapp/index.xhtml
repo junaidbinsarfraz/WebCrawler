@@ -47,18 +47,20 @@
 					<br />
 					<label>Associate user credentials?</label> 
 					<p:selectBooleanCheckbox value="#{crawlerBean.associateUserCredentials}" >
-						<p:ajax event="change" update="userCredentialFilePathField loginPageUrl" /> 
+						<p:ajax event="change" update="userCredentialFilePathField loginPageUrl" />
 					</p:selectBooleanCheckbox>
 					<br />
 					<br />
 					<label>Credential File Path</label>
 					<br />
-					<p:inputText id="userCredentialFilePathField" value="#{crawlerBean.userCredentialFilePath}" disabled="#{!crawlerBean.associateUserCredentials}"></p:inputText>
+					<p:inputText id="userCredentialFilePathField" value="#{crawlerBean.userCredentialFilePath}" 
+						disabled="#{!crawlerBean.associateUserCredentials and facesContext.currentPhaseId.ordinal eq 6}"></p:inputText>
 					<br />
 					<br />
 					<label>Login Page Url</label>
 					<br />
-					<p:inputText id="loginPageUrl" value="#{crawlerBean.loginPageUrl}" disabled="#{!crawlerBean.associateUserCredentials}"></p:inputText>
+					<p:inputText id="loginPageUrl" value="#{crawlerBean.loginPageUrl}" 
+						disabled="#{!crawlerBean.associateUserCredentials and facesContext.currentPhaseId.ordinal eq 6}"></p:inputText>
 					<br />
 					<br />
 					<h:panelGroup id="btns">

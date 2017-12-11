@@ -12,15 +12,15 @@ import java.util.Queue;
 import java.util.Set;
 
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
+import javax.faces.view.ViewScoped;
 
 import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.jsoup.Connection;
-import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.Connection.KeyVal;
 import org.jsoup.Connection.Request;
 import org.jsoup.Connection.Response;
+import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -51,7 +51,7 @@ import com.webcrawler.util.ScreenShotUtil;
 import crawlercommons.robots.BaseRobotRules;
 
 @ManagedBean(name = "crawlerController")
-@RequestScoped
+@ViewScoped
 public class CrawlerController extends AbstractController {
 	
 	/**

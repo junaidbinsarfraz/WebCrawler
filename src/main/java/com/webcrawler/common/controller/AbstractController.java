@@ -2,7 +2,6 @@ package com.webcrawler.common.controller;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -18,15 +17,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.math3.stat.descriptive.summary.Product;
-
-import com.webcrawler.common.dao.DaoManager;
 import com.webcrawler.common.model.StatusMessage;
 import com.webcrawler.common.util.DateUtil;
 import com.webcrawler.common.util.Util;
 import com.webcrawler.controller.CorrelationBean;
 import com.webcrawler.controller.CrawlerBean;
-import com.webcrawler.controller.DuplicateRemovalBean;
 import com.webcrawler.controller.SessionBean;
 import com.webcrawler.dao.CredsTblHome;
 import com.webcrawler.dao.HeaderCorrelationTblHome;
@@ -42,10 +37,12 @@ public abstract class AbstractController {
 	protected ValidationErrors validationErrors = new ValidationErrors();
 	protected ValidationErrors validationWarnings = new ValidationErrors();
 
-	private Integer selectedProductCategoryId = -1;
-	private Integer selectedProductId = -1;
-	private Integer selectedStoreId = -1;
-	private List<Product> products = new ArrayList<Product>();
+	private static RunIdentTblHome runIdentTblHome = new RunIdentTblHome();
+	private static RequestResponseTblHome requestResponseTblHome = new RequestResponseTblHome();
+	private static JmeterTransControllerTblHome jmeterTransControllerTblHome = new JmeterTransControllerTblHome();
+	private static CredsTblHome credsTblHome = new CredsTblHome();
+	private static HeaderCorrelationTblHome headerCorrelationTblHome = new HeaderCorrelationTblHome();
+	private static RequestCorrelationTblHome requestCorrelationTblHome = new RequestCorrelationTblHome();
 	
 	/**
 	 * Default constructor.
@@ -638,15 +635,6 @@ public abstract class AbstractController {
 	}
 	
 	/**
-	 * The getDuplicateRemovalBean() method is used to get DuplicateRemovalBean instance.
-	 *
-	 * @return DuplicateRemovalBean object
-	 */
-	protected DuplicateRemovalBean getDuplicateRemovalBean() {
-		return (DuplicateRemovalBean) getControllerObject("duplicateRemovalBean", DuplicateRemovalBean.class);
-	}
-	
-	/**
 	 * The getCorrelationBean() method is used to get CorrelationBean instance.
 	 *
 	 * @return CorrelationBean object
@@ -655,28 +643,29 @@ public abstract class AbstractController {
 		return (CorrelationBean) getControllerObject("correlationBean", CorrelationBean.class);
 	}
 
+	// TODO: Change all dao get method to get dao using DAOManager
 	protected RunIdentTblHome getRunIdentTblHome() {
-		return DaoManager.getInstance().getDao(RunIdentTblHome.class);
+		return this.runIdentTblHome;
 	}
 	
 	protected RequestResponseTblHome getRequestResponseTblHome() {
-		return DaoManager.getInstance().getDao(RequestResponseTblHome.class);
+		return this.requestResponseTblHome;
 	}
 	
 	protected JmeterTransControllerTblHome getJmeterTransControllerTblHome() {
-		return DaoManager.getInstance().getDao(JmeterTransControllerTblHome.class);
+		return this.jmeterTransControllerTblHome;
 	}
 	
 	protected CredsTblHome getCredsTblHome() {
-		return DaoManager.getInstance().getDao(CredsTblHome.class);
+		return this.credsTblHome;
 	}
 	
 	protected HeaderCorrelationTblHome getHeaderCorrelationTblHome() {
-		return DaoManager.getInstance().getDao(HeaderCorrelationTblHome.class);
+		return this.headerCorrelationTblHome;
 	}
 	
 	protected RequestCorrelationTblHome getRequestCorrelationTblHome() {
-		return DaoManager.getInstance().getDao(RequestCorrelationTblHome.class);
+		return this.requestCorrelationTblHome;
 	}
 
 }
