@@ -238,12 +238,14 @@ public class CrawlerController extends AbstractController {
 
 		// Crawl infinitely 
 		crawl(crawlerBean);
+		
+		crawlingFinished();
 	}
 
 	private void login(CrawlerBean crawlerBean, String username, String password) {
 		
 		// Do login
-		if(Boolean.TRUE.equals(crawlerBean.getAssociateUserCredentials())) {
+		if(Boolean.TRUE.equals(crawlerBean.getAssociateUserCredentials()) && Boolean.TRUE.equals(crawlerBean.getHasStarted())) {
 			
 			// Start JMeter recording
 			try {
@@ -651,8 +653,8 @@ public class CrawlerController extends AbstractController {
 		
 		// Start web crawling here
 		while (Boolean.TRUE.equals(crawlerBean.getHasStarted()) && Boolean.FALSE.equals(urlProperties.isEmpty())
-				&& (Boolean.FALSE.equals(Boolean.TRUE.equals(crawlerBean.getAssociateUserCredentials())) || 
-						(Boolean.TRUE.equals(Boolean.TRUE.equals(crawlerBean.getAssociateUserCredentials())) && pageTraversed < 100))) {
+				&& (Boolean.FALSE.equals(crawlerBean.getAssociateUserCredentials()) || 
+						(Boolean.TRUE.equals(this.isLoggedIn) || pageTraversed < Constants.PAGES_CRAWL_BEFORE_AUTHENTICATION))) {
 			// Start JMeter recording
 			try {
 				crawlerBean.getRecordingHandler().stop();

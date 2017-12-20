@@ -9,8 +9,11 @@ public interface Constants {
 //	String FIREFOX_PATH = "D:\\Junaid\\No Need\\FirefoxPortable\\App\\Firefox64\\firefox.exe";
 //	String GECKODRIVER_PATH = "D:\\Junaid\\geckodriver\\geckodriver.exe";
 	
-	String FIREFOX_PATH = "D:\\FirefoxPortable\\FirefoxPortable.exe";
-	String GECKODRIVER_PATH = "D:\\geckodriver\\geckodriver.exe";
+//	String FIREFOX_PATH = "D:\\FirefoxPortable\\FirefoxPortable.exe";
+//	String GECKODRIVER_PATH = "D:\\geckodriver\\geckodriver.exe";
+	
+	String FIREFOX_PATH = "E:\\Softwares\\FirefoxPortable\\App\\Firefox64\\firefox.exe";
+	String GECKODRIVER_PATH = "E:\\Softwares\\geckodriver\\geckodriver.exe";
 	
 	String USERNAME_NICKNAME = "${aUser}";
 	String PASSWORD_NICKNAME = "${aPword}";
@@ -20,9 +23,11 @@ public interface Constants {
 	
 	String UNCATEGORIZE_TO_PAGE_CATEGORY_TEXT = "Uncategorized";
 	
-	String JMETER_HOME = "D://apache-jmeter-3.2";
+//	String JMETER_HOME = "D://apache-jmeter-3.2";
 //	String JMETER_HOME = "D://Junaid//apache-jmeter-3.2";
+	String JMETER_HOME = "E://Softwares//apache-jmeter-3.2";
 	Integer JEMTER_PORT = 8888;
 	
 	Integer PERCENTAGE_VALUE = 99;
+	Integer PAGES_CRAWL_BEFORE_AUTHENTICATION = 100;
 }
