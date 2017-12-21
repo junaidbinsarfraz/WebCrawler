@@ -266,18 +266,22 @@ public class XmlParser {
 	private static void appendExtractors(List<Node> regexExtractors, Document doc) {
 		Node dummyHTTPSamplerProxyNode = doc.getFirstChild();
 		
+		Node rootHashTreeNode = doc.createElement("hashTree");
+		
 		Node hashTreeNode = doc.createElement("hashTree");
 		
 		for(Node regexExtractor : regexExtractors) {
 			
 			Node regexExtractorImportedNode = doc.importNode(regexExtractor, Boolean.TRUE);
 			
-			dummyHTTPSamplerProxyNode.appendChild(regexExtractorImportedNode);
+			rootHashTreeNode.appendChild(regexExtractorImportedNode);
 			
 			hashTreeNode = doc.createElement("hashTree");
 			
-			dummyHTTPSamplerProxyNode.appendChild(hashTreeNode);
+			rootHashTreeNode.appendChild(hashTreeNode);
 		}
+		
+		dummyHTTPSamplerProxyNode.appendChild(rootHashTreeNode);
 	}
 	
 	/**
@@ -294,11 +298,6 @@ public class XmlParser {
 		List<Node> regexExtractors = new ArrayList<>();
 		
 		try {
-			
-			// TODO: Remove these 3 unsed lines
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-			Document doc = docBuilder.newDocument();
 			
 			for(String key : corrRegexAndVariables.keySet()) {
 				String value = corrRegexAndVariables.get(key);

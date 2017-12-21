@@ -29,5 +29,5 @@ public interface Constants {
 	Integer JEMTER_PORT = 8888;
 	
 	Integer PERCENTAGE_VALUE = 99;
-	Integer PAGES_CRAWL_BEFORE_AUTHENTICATION = 100;
+	Integer PAGES_CRAWL_BEFORE_AUTHENTICATION = 5;
 }
