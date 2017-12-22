@@ -135,7 +135,7 @@ public class XmlParser {
 	}
 
 	/**
-	 * The method addRequestParametersAsRegexExtractors() is use to append
+	 * The method appendRegexExtractorsToXml() is use to append
 	 * regexExtrators at the end of xml
 	 * 
 	 * @param xml
@@ -144,7 +144,7 @@ public class XmlParser {
 	 *            Map containing keys values to be appended
 	 * @return xml appended with regexExtractors
 	 */
-	public static String addRequestParametersAsRegexExtractors(String xml, List<Node> regexExtractors) {
+	public static String appendRegexExtractorsToXml(String xml, List<Node> regexExtractors) {
 		try {
 			
 			xml = "<HTTPSamplerProxy>" + xml + "</HTTPSamplerProxy>"; // To make it well formed xml
@@ -154,6 +154,8 @@ public class XmlParser {
 			appendExtractors(regexExtractors, doc);
 			
 			String updatedXml = XmlUtil.transformXml(doc);
+			
+//			updatedXml.replaceAll("<stringProp name=\"RegexExtractor.default\"/>", "<stringProp name=\"RegexExtractor.default\"></stringProp>");
 
 			updatedXml = updatedXml.replaceFirst("<HTTPSamplerProxy>", "");
 			
@@ -179,7 +181,7 @@ public class XmlParser {
 	 *            To be appended
 	 * @return updated xml
 	 */
-	public static String parseRequestHeaderXmlAndUpdateValues(String xml, Map<String, String> values, List<Node> regexExtractors) {
+	public static String parseRequestHeaderXmlAndUpdateValues(String xml, Map<String, String> values) {
 		
 		xml = "<HTTPSamplerProxy>" + xml + "</HTTPSamplerProxy>"; // To make it well formed xml
 		
@@ -239,7 +241,7 @@ public class XmlParser {
 				collectionPropNode.appendChild(elementPropNode);
 			}
 			
-			appendExtractors(regexExtractors, doc);
+//			appendExtractors(regexExtractors, doc);
 			
 			String updatedXml = XmlUtil.transformXml(doc);
 
@@ -365,7 +367,7 @@ public class XmlParser {
 			
 			attrMap.put("name", "RegexExtractor.default");
 			
-			Node defaultNode = createTextNodeWithAttributes(doc, "stringProp", Boolean.TRUE.equals(isRequestHeaderValues) ? "1" : "notfound", attrMap);
+			Node defaultNode = createTextNodeWithAttributes(doc, "stringProp", "", attrMap);
 			
 			attrMap = new HashMap<>();
 			

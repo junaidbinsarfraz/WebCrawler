@@ -1,5 +1,6 @@
 package com.webcrawler.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -139,6 +140,7 @@ public class CorrelationController extends AbstractController {
 		runIdentTbl = (RunIdentTbl) getRunIdentTblHome().findByRunName(correlationBean.getCorrelationRunName()).get(0);
 		
 		Map<String, String> requestCorrelations = new HashMap<>();
+		Map<String, String> requestExtendedCorrelations = new HashMap<>();
 		Map<String, String> headerCorrelations = new HashMap<>();
 		Map<String, String> responseHeaderCorrelations = new HashMap<>();
 		Map<String, String> filteredHeaderCorrelations = new HashMap<>();
@@ -159,6 +161,13 @@ public class CorrelationController extends AbstractController {
 					JmeterTransControllerTbl jmeterTransControllerTbl = (JmeterTransControllerTbl) it.next();
 					
 					requestCorrelations.putAll(CorrelationUtil.extractArgunemtNameValue(jmeterTransControllerTbl.getTransContSec()));
+					
+					for(String key : requestCorrelations.keySet()) {
+						String extendedFoundArgValue = requestResponseTblTemp.getResponseBody().substring(requestResponseTblTemp.getResponseBody().indexOf(key), 
+								requestResponseTblTemp.getResponseBody().indexOf(key) + Constants.NUMBER_OF_EXTENDED_ARG_VALUE_CHARCTERS);
+						
+						requestExtendedCorrelations.put(key, extendedFoundArgValue);
+					}
 				}
 			}
 			
@@ -244,6 +253,8 @@ public class CorrelationController extends AbstractController {
 					
 					JmeterTransControllerTbl jmeterTransControllerTbl = (JmeterTransControllerTbl) it.next();
 					
+					List<Node> regexExtractors = new ArrayList<>();
+					
 					if((requestResponseTblTemp.getAuthenticated() == 1)) {
 						
 						Map<String, String> tempResponseHeaders = CorrelationUtil.extractHeaders(requestResponseTblTemp.getResponseHeader(), DataUtil.getIgnoreHeaderKeys());
@@ -255,11 +266,11 @@ public class CorrelationController extends AbstractController {
 							}
 						}
 						
-						List<Node> regexExtractors = XmlParser.createRegexExtractors(finalResponseHeaders, Boolean.TRUE);
+						regexExtractors.addAll(XmlParser.createRegexExtractors(finalResponseHeaders, Boolean.TRUE));
 						
 						// update jmx value with header Correlation values
 						jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), 
-								Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters()) ? filteredHeaderCorrelations : new HashMap<String, String>(), regexExtractors));
+								Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters()) ? filteredHeaderCorrelations : new HashMap<String, String>()));
 						
 						if(Util.isNotNullAndEmpty(requestResponseTblTemp.getRequestParameters())) {
 							// TODO: update jmx value with request Correlation values
@@ -289,9 +300,9 @@ public class CorrelationController extends AbstractController {
 							}
 						}
 						
-						List<Node> regexExtractors = XmlParser.createRegexExtractors(foundFilteredRequestCorrelations, Boolean.FALSE);
+						regexExtractors.addAll(XmlParser.createRegexExtractors(foundFilteredRequestCorrelations, Boolean.FALSE));
 						
-						jmeterTransControllerTbl.setTransContSec(XmlParser.addRequestParametersAsRegexExtractors(jmeterTransControllerTbl.getTransContSec(), regexExtractors));
+						jmeterTransControllerTbl.setTransContSec(XmlParser.appendRegexExtractorsToXml(jmeterTransControllerTbl.getTransContSec(), regexExtractors));
 						
 					} catch (Exception e) {
 					}
