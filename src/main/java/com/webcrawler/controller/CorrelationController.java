@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
@@ -18,7 +19,6 @@ import com.webcrawler.common.util.Util;
 import com.webcrawler.dao.CredsTbl;
 import com.webcrawler.dao.HeaderCorrelationTbl;
 import com.webcrawler.dao.JmeterTransControllerTbl;
-import com.webcrawler.dao.KnownExtractorsTbl;
 import com.webcrawler.dao.PageCategoryTbl;
 import com.webcrawler.dao.RequestCorrelationTbl;
 import com.webcrawler.dao.RequestResponseTbl;
@@ -162,11 +162,50 @@ public class CorrelationController extends AbstractController {
 					
 					requestCorrelations.putAll(CorrelationUtil.extractArgunemtNameValue(jmeterTransControllerTbl.getTransContSec()));
 					
-					for(String key : requestCorrelations.keySet()) {
-						String extendedFoundArgValue = requestResponseTblTemp.getResponseBody().substring(requestResponseTblTemp.getResponseBody().indexOf(key), 
-								requestResponseTblTemp.getResponseBody().indexOf(key) + Constants.NUMBER_OF_EXTENDED_ARG_VALUE_CHARCTERS);
+					List<String> toBeRemovedKeys = new ArrayList<>();
+					
+					String responseBody = requestResponseTblTemp.getResponseBody();
+					
+					Map<String, String> hiddenInputs = DocumentParser.getHiddenInputs(responseBody, requestCorrelations.keySet().stream().collect(Collectors.toList()));
+							
+					for(Iterator<Map.Entry<String, String>> iterator = requestCorrelations.entrySet().iterator();
+							iterator.hasNext();) {
 						
-						requestExtendedCorrelations.put(key, extendedFoundArgValue);
+						String key = iterator.next().getKey();
+						
+						try {
+							
+							String hiddenInput = hiddenInputs.get(key);
+							
+							if(Util.isNotNullAndEmpty(hiddenInput)) {
+								
+								Integer hiddenInputIndex = responseBody.indexOf(hiddenInput);
+								
+								while(hiddenInputIndex == -1) {
+									hiddenInput = hiddenInput.substring(0, hiddenInput.length() -1);
+									
+									hiddenInputIndex = responseBody.indexOf(hiddenInput);
+								}
+								
+								Integer indexOfKey = responseBody.indexOf(key, hiddenInputIndex);
+								
+								String extendedFoundArgValue = responseBody.substring(indexOfKey, indexOfKey + Constants.NUMBER_OF_EXTENDED_ARG_VALUE_CHARCTERS);
+								
+								if (Util.isNotNullAndEmpty(extendedFoundArgValue)
+										&& extendedFoundArgValue.contains(Constants.CORR_REGEX_EXTENDED_ARG_VALUE_INDICATOR)) {
+									
+									requestExtendedCorrelations.put(key, extendedFoundArgValue);
+								} else {
+									toBeRemovedKeys.add(key);
+								}
+							}
+						} catch (Exception e) {
+							
+						}
+					}
+					
+					for(String key : toBeRemovedKeys) {
+						requestCorrelations.remove(key);
 					}
 				}
 			}
@@ -188,12 +227,17 @@ public class CorrelationController extends AbstractController {
 			}
 			
 			getRequestResponseTblHome().attachDirty(requestResponseTblTemp);
-			
 		}
 		
 		Integer requestCorrelationVariable = 1;
 		
 		for(Map.Entry<String, String> requestCorrelation : requestCorrelations.entrySet()) {
+			
+			String requestExtendedCorrelationValue = requestExtendedCorrelations.get(requestCorrelation.getKey());
+			
+			if(Util.isNullOrEmpty(requestExtendedCorrelationValue)) {
+				continue;
+			}
 			
 			// Db operation
 			RequestCorrelationTbl requestCorrelationTblTemp = new RequestCorrelationTbl();
@@ -202,14 +246,14 @@ public class CorrelationController extends AbstractController {
 			requestCorrelationTblTemp.setFoundArgName(requestCorrelation.getKey());
 			requestCorrelationTblTemp.setFoundArgValue(requestCorrelation.getValue());
 			requestCorrelationTblTemp.setVariable("${cID" + String.format("%03d", requestCorrelationVariable++) + "}");
-			requestCorrelationTblTemp.setCorrRegex(requestCorrelationTblTemp.getFoundArgName() + Constants.REQUEST_PARAM_CORR_REGEX);
+//			requestCorrelationTblTemp.setCorrRegex(requestCorrelationTblTemp.getFoundArgName() + Constants.REQUEST_PARAM_CORR_REGEX);
+			requestCorrelationTblTemp.setFoundArgValueExtended(requestExtendedCorrelationValue);
 			
-			for(KnownExtractorsTbl knownExtractorsTbl : DataUtil.getKnownExtractors()) {
-				if(Util.isNotNullAndEmpty(knownExtractorsTbl.getKnownValue()) 
-						&& knownExtractorsTbl.getKnownValue().equalsIgnoreCase(requestCorrelationTblTemp.getFoundArgName())) {
-					requestCorrelationTblTemp.setCorrRegex(knownExtractorsTbl.getExtractor());
-				}
-			}
+			String separatingString = requestExtendedCorrelationValue.substring(requestExtendedCorrelationValue.indexOf(" "), 
+					requestExtendedCorrelationValue.indexOf(Constants.CORR_REGEX_EXTENDED_ARG_VALUE_INDICATOR));
+			
+			requestCorrelationTblTemp.setCorrRegex(requestCorrelationTblTemp.getFoundArgName() + separatingString 
+					+  Constants.CORR_REGEX_EXTENDED_ARG_VALUE_INDICATOR + Constants.REQUEST_PARAM_CORR_REGEX);
 			
 			filteredRequestCorrelations.put(requestCorrelationTblTemp.getFoundArgName(), requestCorrelationTblTemp.getVariable());
 			filteredRequestCorrelationObjects.put(requestCorrelationTblTemp.getFoundArgName(), requestCorrelationTblTemp);
@@ -280,7 +324,6 @@ public class CorrelationController extends AbstractController {
 							if(Util.isNotNullAndEmpty(credsTbls)) {
 								jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestArgumentXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), filteredRequestCorrelations, credsTbls.get(0).getUsername(), credsTbls.get(0).getPassword()));
 							}
-							
 						}
 					}
 					
@@ -314,5 +357,4 @@ public class CorrelationController extends AbstractController {
 		
 		correlationBean.setCorrelationStatus("Completed");
 	}
-	
 }

@@ -10,16 +10,18 @@ public class RequestCorrelationTbl implements java.io.Serializable {
 	private RunIdentTbl runIdentTbl;
 	private String foundArgName;
 	private String foundArgValue;
+	private String foundArgValueExtended;
 	private String variable;
 	private String corrRegex;
 
 	public RequestCorrelationTbl() {
 	}
 
-	public RequestCorrelationTbl(RunIdentTbl runIdentTbl, String foundArgName, String foundArgValue, String variable, String corrRegex) {
+	public RequestCorrelationTbl(RunIdentTbl runIdentTbl, String foundArgName, String foundArgValue, String foundArgValueExtended, String variable, String corrRegex) {
 		this.runIdentTbl = runIdentTbl;
 		this.foundArgName = foundArgName;
 		this.foundArgValue = foundArgValue;
+		this.setFoundArgValueExtended(foundArgValueExtended);
 		this.variable = variable;
 		this.corrRegex = corrRegex;
 	}
@@ -54,6 +56,14 @@ public class RequestCorrelationTbl implements java.io.Serializable {
 
 	public void setFoundArgValue(String foundArgValue) {
 		this.foundArgValue = foundArgValue;
+	}
+
+	public String getFoundArgValueExtended() {
+		return foundArgValueExtended;
+	}
+
+	public void setFoundArgValueExtended(String foundArgValueExtended) {
+		this.foundArgValueExtended = foundArgValueExtended;
 	}
 
 	public String getVariable() {

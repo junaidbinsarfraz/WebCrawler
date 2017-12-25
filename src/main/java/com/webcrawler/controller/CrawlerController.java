@@ -992,7 +992,5 @@ public class CrawlerController extends AbstractController {
 			crawlerBean.setPagesMapped(0);
 			crawlerBean.setRunTime("00:00:00");
 		}
-
 	}
-	
 }

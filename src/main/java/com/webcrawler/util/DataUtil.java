@@ -8,8 +8,6 @@ import com.webcrawler.dao.AuthTbl;
 import com.webcrawler.dao.AuthTblHome;
 import com.webcrawler.dao.HeaderIgnoreTbl;
 import com.webcrawler.dao.HeaderIgnoreTblHome;
-import com.webcrawler.dao.KnownExtractorsTbl;
-import com.webcrawler.dao.KnownExtractorsTblHome;
 import com.webcrawler.dao.PageCategoryTbl;
 import com.webcrawler.dao.PageCategoryTblHome;
 
@@ -26,7 +24,6 @@ public final class DataUtil {
 	private static List<String> loginKeys = new ArrayList<>();
 	private static List<String> logoutKeys = new ArrayList<>();
 	private static List<String> ignoreHeaderKeys = new ArrayList<>();
-	private static List<KnownExtractorsTbl> knownExtractors = new ArrayList<>();
 	private static List<PageCategoryTbl> pageCategories = new ArrayList<>();
 	
 	static {
@@ -65,10 +62,6 @@ public final class DataUtil {
 			 ignoreHeaderKeys.add(headerIgnoreTbl.getIgnoreHeader());
 		 }
 		 
-		 KnownExtractorsTblHome knownExtractorsTblHome = new KnownExtractorsTblHome();
-		 
-		 knownExtractors = knownExtractorsTblHome.getAll();
-		 
 		 PageCategoryTblHome PageCategoryTblHome = new PageCategoryTblHome();
 		 
 		 pageCategories = PageCategoryTblHome.getAll();
@@ -92,10 +85,6 @@ public final class DataUtil {
 	
 	public static List<String> getIgnoreHeaderKeys() {
 		return ignoreHeaderKeys;
-	}
-
-	public static List<KnownExtractorsTbl> getKnownExtractors() {
-		return knownExtractors;
 	}
 
 	public static List<PageCategoryTbl> getPageCategories() {

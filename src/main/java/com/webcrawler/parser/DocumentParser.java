@@ -1,7 +1,9 @@
 package com.webcrawler.parser;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -64,6 +66,42 @@ public class DocumentParser {
 		}
 		
 		return doc;
+	}
+	
+	/**
+	 * The method getHiddenInputs() is use to get all hidden inputs as html
+	 * 
+	 * @param documentString
+	 *            to be parsed
+	 * @param keys
+	 *            hidden input names
+	 * @return map of hidden input names and hidden inputs
+	 */
+	public static Map<String, String> getHiddenInputs(String documentString, List<String> keys) {
+		
+		Map<String, String> hiddenInputs = new LinkedHashMap<>();
+		
+		try {
+			
+			Document document = Jsoup.parse(documentString);
+			
+			Elements inputElems = document.select("input[type=hidden]");
+			
+			for(Element elem : inputElems) {
+				String nameAttr = elem.attr("name");
+				
+				for(String key : keys) {
+					if(key.equals(nameAttr)) {
+						hiddenInputs.put(key, elem.outerHtml());
+					}
+				}
+			}
+			
+		} catch (Exception e) {
+			
+		}
+		
+		return hiddenInputs;
 	}
 	
 }

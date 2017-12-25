@@ -776,7 +776,18 @@ public final class Util {
 			return false;
 		}
 	}
-	
+
+	/**
+	 * The method replaceLast() is use to replace the last found regex in the
+	 * string with replacement
+	 * 
+	 * @param text
+	 *            string
+	 * @param regex
+	 *            to be replaced
+	 * @param replacement
+	 * @return replaced text
+	 */
 	public static String replaceLast(String text, String regex, String replacement) {
         return text.replaceFirst("(?s)(.*)" + regex, "$1" + replacement);
     }

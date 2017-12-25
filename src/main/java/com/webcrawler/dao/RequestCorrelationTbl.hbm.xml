@@ -17,6 +17,9 @@
         <property name="foundArgValue" type="string">
             <column name="FoundArgValue" length="65535" />
         </property>
+        <property name="foundArgValueExtended" type="string">
+            <column name="FoundArgValueExtended" length="65535" />
+        </property>
         <property name="variable" type="string">
             <column name="Variable" length="65535" />
         </property>
