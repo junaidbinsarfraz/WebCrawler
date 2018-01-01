@@ -189,6 +189,8 @@ public class CorrelationController extends AbstractController {
 								
 								Integer indexOfKey = responseBody.indexOf(key, hiddenInputIndex);
 								
+								indexOfKey += key.length();
+								
 								String extendedFoundArgValue = responseBody.substring(indexOfKey, indexOfKey + Constants.NUMBER_OF_EXTENDED_ARG_VALUE_CHARCTERS);
 								
 								if (Util.isNotNullAndEmpty(extendedFoundArgValue)
@@ -322,7 +324,15 @@ public class CorrelationController extends AbstractController {
 							
 							// update jmx parameter values with request correlation values
 							if(Util.isNotNullAndEmpty(credsTbls)) {
-								jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestArgumentXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), filteredRequestCorrelations, credsTbls.get(0).getUsername(), credsTbls.get(0).getPassword()));
+								CredsTbl credsTbl = credsTbls.get(0);
+								
+								String username = credsTbl.getUsername();
+								String password = credsTbl.getPassword();
+								
+								filteredRequestCorrelations.put(username, credsTbl.getUsernameVariable());
+								filteredRequestCorrelations.put(password, credsTbl.getPasswordVariable());
+								
+								jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestArgumentXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), filteredRequestCorrelations, username, password));
 							}
 						}
 					}
