@@ -1,11 +1,15 @@
 package com.webcrawler.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.webcrawler.common.util.Util;
 import com.webcrawler.dao.AuthTbl;
 import com.webcrawler.dao.AuthTblHome;
+import com.webcrawler.dao.EncoderTbl;
+import com.webcrawler.dao.EncoderTblHome;
 import com.webcrawler.dao.HeaderIgnoreTbl;
 import com.webcrawler.dao.HeaderIgnoreTblHome;
 import com.webcrawler.dao.PageCategoryTbl;
@@ -25,6 +29,7 @@ public final class DataUtil {
 	private static List<String> logoutKeys = new ArrayList<>();
 	private static List<String> ignoreHeaderKeys = new ArrayList<>();
 	private static List<PageCategoryTbl> pageCategories = new ArrayList<>();
+	private static Map<String, String> encoders = new HashMap<>();
 	
 	static {
 		loadData();
@@ -65,6 +70,14 @@ public final class DataUtil {
 		 PageCategoryTblHome PageCategoryTblHome = new PageCategoryTblHome();
 		 
 		 pageCategories = PageCategoryTblHome.getAll();
+		 
+		 EncoderTblHome encoderTblHome = new EncoderTblHome();
+		 
+		 List<EncoderTbl> encoders = encoderTblHome.getAll();
+		 
+		 for(EncoderTbl encoder : encoders) {
+			 DataUtil.encoders.put(encoder.getCharacter(), encoder.getEncoded());
+		 }
 	}
 
 	public static List<String> getUsernameKeys() {
@@ -89,6 +102,10 @@ public final class DataUtil {
 
 	public static List<PageCategoryTbl> getPageCategories() {
 		return pageCategories;
+	}
+
+	public static Map<String, String> getEncoders() {
+		return encoders;
 	}
 
 }
