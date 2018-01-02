@@ -254,8 +254,14 @@ public class CorrelationController extends AbstractController {
 			String separatingString = requestExtendedCorrelationValue.substring(requestExtendedCorrelationValue.indexOf(" "), 
 					requestExtendedCorrelationValue.indexOf(Constants.CORR_REGEX_EXTENDED_ARG_VALUE_INDICATOR));
 			
-			requestCorrelationTblTemp.setCorrRegex(requestCorrelationTblTemp.getFoundArgName() + separatingString 
-					+  Constants.CORR_REGEX_EXTENDED_ARG_VALUE_INDICATOR + Constants.REQUEST_PARAM_CORR_REGEX);
+			String corrRegex = requestCorrelationTblTemp.getFoundArgName() + separatingString 
+					+  Constants.CORR_REGEX_EXTENDED_ARG_VALUE_INDICATOR + Constants.REQUEST_PARAM_CORR_REGEX;
+			
+			for(String encoderKey : DataUtil.getEncoders().keySet()) {
+				corrRegex = corrRegex.replaceAll(encoderKey, DataUtil.getEncoders().get(encoderKey));
+			}
+			
+			requestCorrelationTblTemp.setCorrRegex(corrRegex);
 			
 			filteredRequestCorrelations.put(requestCorrelationTblTemp.getFoundArgName(), requestCorrelationTblTemp.getVariable());
 			filteredRequestCorrelationObjects.put(requestCorrelationTblTemp.getFoundArgName(), requestCorrelationTblTemp);
@@ -329,8 +335,12 @@ public class CorrelationController extends AbstractController {
 								String username = credsTbl.getUsername();
 								String password = credsTbl.getPassword();
 								
-								filteredRequestCorrelations.put(username, credsTbl.getUsernameVariable());
-								filteredRequestCorrelations.put(password, credsTbl.getPasswordVariable());
+								// Put username and password into the filteredRequestCorrelations so that it can be correlated
+								for(String key : requestCorrelations.keySet()) {
+									if(username.equals(requestCorrelations.get(key)) || password.equals(requestCorrelations.get(key))) {
+										filteredRequestCorrelations.put(key, requestCorrelations.get(key));
+									}
+								}
 								
 								jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestArgumentXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), filteredRequestCorrelations, username, password));
 							}
