@@ -254,7 +254,7 @@ public class CorrelationController extends AbstractController {
 			String separatingString = requestExtendedCorrelationValue.substring(requestExtendedCorrelationValue.indexOf(" "), 
 					requestExtendedCorrelationValue.indexOf(Constants.CORR_REGEX_EXTENDED_ARG_VALUE_INDICATOR));
 			
-			String corrRegex = requestCorrelationTblTemp.getFoundArgName() + separatingString 
+			String corrRegex = requestCorrelationTblTemp.getFoundArgName() + "\"" + separatingString 
 					+  Constants.CORR_REGEX_EXTENDED_ARG_VALUE_INDICATOR + Constants.REQUEST_PARAM_CORR_REGEX;
 			
 			for(String encoderKey : DataUtil.getEncoders().keySet()) {
