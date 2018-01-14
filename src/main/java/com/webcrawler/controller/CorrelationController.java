@@ -314,7 +314,7 @@ public class CorrelationController extends AbstractController {
 						
 						for(Map.Entry<String, String> responseHeader : filteredResponseHeaderCorrelations.entrySet()) {
 							if(tempResponseHeaders.containsKey(responseHeader.getKey())) {
-								finalResponseHeaders.put(responseHeader.getKey() + Constants.CORR_REGEX, responseHeader.getValue());
+								finalResponseHeaders.put(responseHeader.getKey(), responseHeader.getValue());
 							}
 						}
 						
@@ -322,7 +322,8 @@ public class CorrelationController extends AbstractController {
 						
 						// update jmx value with header Correlation values
 						jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), 
-								Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters()) ? filteredHeaderCorrelations : new HashMap<String, String>()));
+								(Util.isNotNullAndEmpty(requestResponseTblTemp.getRequestHeader()) && Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters())) 
+									? filteredHeaderCorrelations : new HashMap<String, String>()));
 						
 						if(Util.isNotNullAndEmpty(requestResponseTblTemp.getRequestParameters())) {
 							// TODO: update jmx value with request Correlation values

@@ -70,8 +70,11 @@ public class RequestResponseUtil {
 				cookieString += cookie.getKey() + "=" + cookie.getValue() + "; ";
 			}
 
-			/*if (!cookieString.isEmpty()) {
+			/*if (!cookieString.isEmpty() && authCookies != null && Boolean.FALSE.equals(forLogin)) {
 				connection.request().header("Cookie", cookieString);
+				connection.header("Cookie", cookieString);
+				connection.request().header("Set-Cookie", cookieString);
+				connection.header("Set-Cookie", cookieString);
 			}*/
 		}
 		

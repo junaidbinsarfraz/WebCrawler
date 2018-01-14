@@ -355,7 +355,7 @@ public class XmlParser {
 			
 			attrMap.put("name", "RegexExtractor.regex");
 			
-			Node regexNode = createTextNodeWithAttributes(doc, "stringProp", regex, attrMap);
+			Node regexNode = createTextNodeWithAttributes(doc, "stringProp", Boolean.TRUE.equals(isRequestHeaderValues) ? regex + Constants.CORR_REGEX : regex, attrMap);
 			
 			attrMap = new HashMap<>();
 			
