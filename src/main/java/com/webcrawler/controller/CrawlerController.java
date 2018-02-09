@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,9 @@ import com.webcrawler.model.UrlProperty;
 import com.webcrawler.parser.XmlParser;
 import com.webcrawler.util.AuthUtil;
 import com.webcrawler.util.Constants;
+import com.webcrawler.util.CorrelationUtil;
 import com.webcrawler.util.CrawlUtil;
+import com.webcrawler.util.DataUtil;
 import com.webcrawler.util.FileUtil;
 import com.webcrawler.util.RequestResponseUtil;
 import com.webcrawler.util.ScreenShotUtil;
@@ -399,8 +402,11 @@ public class CrawlerController extends AbstractController {
 						
 						RequestResponseTbl requestResponseTblLastest = (RequestResponseTbl) getRequestResponseTblHome().findByExample(requestResponseTbl).get(0);
 						
+						Map<String, String> headers = new LinkedHashMap(CorrelationUtil.extractHeaders(requestHeaders.toString(), DataUtil.getIgnoreHeaderKeys()));
+						
 						jmeterTransControllerTbl.setRequestResponseTbl(requestResponseTblLastest);
-						jmeterTransControllerTbl.setTransContSec(transformedSamplerProxy);
+						jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(transformedSamplerProxy, headers));
+//						jmeterTransControllerTbl.setTransContSec(transformedSamplerProxy);
 						
 						if (crawlerBean.getDriver() != null) {
 							try {
@@ -608,8 +614,11 @@ public class CrawlerController extends AbstractController {
 						
 						RequestResponseTbl requestResponseTblLastest = (RequestResponseTbl) crawlerBean.getRequestResponseTblHome().findByExample(requestResponseTbl).get(0);
 						
+						Map<String, String> filteredHeaders = new LinkedHashMap(CorrelationUtil.extractHeaders(headers.toString(), DataUtil.getIgnoreHeaderKeys()));
+						
 						jmeterTransControllerTbl.setRequestResponseTbl(requestResponseTblLastest);
-						jmeterTransControllerTbl.setTransContSec(transformedSamplerProxy);
+						jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(transformedSamplerProxy, filteredHeaders));
+//						jmeterTransControllerTbl.setTransContSec(transformedSamplerProxy);
 						
 						if (crawlerBean.getDriver() != null) {
 							try {
@@ -836,8 +845,11 @@ public class CrawlerController extends AbstractController {
 						
 						RequestResponseTbl requestResponseTblLastest = (RequestResponseTbl) getRequestResponseTblHome().findByExample(requestResponseTbl).get(0);
 						
+						Map<String, String> headers = new LinkedHashMap(CorrelationUtil.extractHeaders(responseHeaders.toString(), DataUtil.getIgnoreHeaderKeys()));
+						
 						jmeterTransControllerTbl.setRequestResponseTbl(requestResponseTblLastest);
-						jmeterTransControllerTbl.setTransContSec(transformedSamplerProxy);
+						jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(transformedSamplerProxy, headers));
+//						jmeterTransControllerTbl.setTransContSec(transformedSamplerProxy);
 						
 						if (crawlerBean.getDriver() != null) {
 							try {

@@ -321,9 +321,9 @@ public class CorrelationController extends AbstractController {
 						regexExtractors.addAll(XmlParser.createRegexExtractors(finalResponseHeaders, Boolean.TRUE));
 						
 						// update jmx value with header Correlation values
-						jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), 
+						/*jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), 
 								(Util.isNotNullAndEmpty(requestResponseTblTemp.getRequestHeader()) && Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters())) 
-									? filteredHeaderCorrelations : new HashMap<String, String>()));
+									? filteredHeaderCorrelations : new HashMap<String, String>()));*/
 						
 						if(Util.isNotNullAndEmpty(requestResponseTblTemp.getRequestParameters())) {
 							// TODO: update jmx value with request Correlation values
@@ -347,6 +347,10 @@ public class CorrelationController extends AbstractController {
 							}
 						}
 					}
+					
+					jmeterTransControllerTbl.setTransContSec(XmlParser.updateRequestHeaderValues(jmeterTransControllerTbl.getTransContSec(), 
+							(Util.isNotNullAndEmpty(requestResponseTblTemp.getRequestHeader()) && Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters())) 
+								? filteredHeaderCorrelations : new HashMap<String, String>()));
 					
 					// IT7R5
 					String docString = requestResponseTblTemp.getResponseBody();

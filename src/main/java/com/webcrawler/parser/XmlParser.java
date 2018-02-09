@@ -168,17 +168,14 @@ public class XmlParser {
 		}
 	}
 
-	// After Authentication
 	/**
 	 * The method parseRequestHeaderXmlAndUpdateValues() is use to parse xml,
-	 * update request headers with values and append regexExtractors
+	 * update request headers with values
 	 * 
 	 * @param xml
 	 *            to be parsed
 	 * @param values
 	 *            Map containing keys values to be changed
-	 * @param regexExtractors
-	 *            To be appended
 	 * @return updated xml
 	 */
 	public static String parseRequestHeaderXmlAndUpdateValues(String xml, Map<String, String> values) {
@@ -239,6 +236,102 @@ public class XmlParser {
 				elementPropNode.appendChild(stringPropHeaderValueNode);
 
 				collectionPropNode.appendChild(elementPropNode);
+			}
+			
+//			appendExtractors(regexExtractors, doc);
+			
+			String updatedXml = XmlUtil.transformXml(doc);
+
+			updatedXml = updatedXml.replaceFirst("<HTTPSamplerProxy>", "");
+			
+			updatedXml = Util.replaceLast(updatedXml , "</HTTPSamplerProxy>", "");
+
+			return updatedXml;
+
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * The method updateRequestHeaderValues() is use to parse xml,
+	 * update request headers values 
+	 * 
+	 * @param xml
+	 *            to be parsed
+	 * @param values
+	 *            Map containing keys values to be changed
+	 * @return updated xml
+	 */
+	public static String updateRequestHeaderValues(String xml, Map<String, String> values) {
+		
+		xml = "<HTTPSamplerProxy>" + xml + "</HTTPSamplerProxy>"; // To make it well formed xml
+		
+		try {
+
+			Document doc = XmlUtil.buildXml(xml);
+
+			XPathFactory xPathfactory = XPathFactory.newInstance();
+			XPath xpath = xPathfactory.newXPath();
+			/*XPathExpression expr = xpath.compile("//elementProp[@elementType=\"Header\"]");
+
+			NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+
+			Node headerManagerNode = nl.item(0);
+
+			expr = xpath.compile("//collectionProp[@name=\"HeaderManager.headers\"]");
+
+			NodeList headerNodes = (NodeList) expr.evaluate(headerManagerNode, XPathConstants.NODESET);
+
+			Map<String, String> attrMap = new LinkedHashMap<>();
+
+			Node collectionPropNode = headerNodes.item(0);*/
+
+			for (String key : values.keySet()) {
+				
+				XPathExpression stringPropExpr = xpath.compile("//elementProp[@elementType=\"Header\" and @name=\""+key+"\"]//stringProp[@name=\"Header.value\"]");
+				
+				NodeList nl = (NodeList) stringPropExpr.evaluate(doc, XPathConstants.NODESET);
+				
+				Node stringPropNode = nl.item(0);
+				
+				if(Util.isNotNull(stringPropNode)) {
+					stringPropNode.setNodeValue(values.get(key));
+				}
+				
+				/*// Make new elementProp
+				Node elementPropNode = doc.createElement("elementProp");
+
+				Attr elementPropNodeNameAttr = doc.createAttribute("name");
+
+				elementPropNodeNameAttr.setNodeValue(key);
+
+				elementPropNode.getAttributes().setNamedItem(elementPropNodeNameAttr);
+
+				Attr elementPropNodeElementTypeAttr = doc.createAttribute("elementType");
+
+				elementPropNodeElementTypeAttr.setNodeValue("Header");
+
+				elementPropNode.getAttributes().setNamedItem(elementPropNodeElementTypeAttr);
+
+				attrMap = new LinkedHashMap<>();
+
+				attrMap.put("name", "Header.name");
+
+				Node stringPropHeaderNameNode = createTextNodeWithAttributes(doc, "stringProp", key, attrMap);
+
+				elementPropNode.appendChild(stringPropHeaderNameNode);
+
+				attrMap = new LinkedHashMap<>();
+
+				attrMap.put("name", "Header.value");
+
+				Node stringPropHeaderValueNode = createTextNodeWithAttributes(doc, "stringProp", values.get(key),
+						attrMap);
+
+				elementPropNode.appendChild(stringPropHeaderValueNode);
+
+				collectionPropNode.appendChild(elementPropNode);*/
 			}
 			
 //			appendExtractors(regexExtractors, doc);
