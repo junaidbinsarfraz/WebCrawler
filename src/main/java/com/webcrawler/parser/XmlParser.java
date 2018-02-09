@@ -296,7 +296,7 @@ public class XmlParser {
 				Node stringPropNode = nl.item(0);
 				
 				if(Util.isNotNull(stringPropNode)) {
-					stringPropNode.setNodeValue(values.get(key));
+					stringPropNode.setTextContent(values.get(key));
 				}
 				
 				/*// Make new elementProp
