@@ -845,7 +845,7 @@ public class CrawlerController extends AbstractController {
 						
 						RequestResponseTbl requestResponseTblLastest = (RequestResponseTbl) getRequestResponseTblHome().findByExample(requestResponseTbl).get(0);
 						
-						Map<String, String> headers = new LinkedHashMap(CorrelationUtil.extractHeaders(responseHeaders.toString(), DataUtil.getIgnoreHeaderKeys()));
+						Map<String, String> headers = new LinkedHashMap(CorrelationUtil.extractHeaders(requestHeaders.toString(), DataUtil.getIgnoreHeaderKeys()));
 						
 						jmeterTransControllerTbl.setRequestResponseTbl(requestResponseTblLastest);
 						jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(transformedSamplerProxy, headers));
