@@ -74,66 +74,66 @@ public class CorrelationController extends AbstractController {
 			return;
 		}
 		
-		Integer percentageValue = Constants.PERCENTAGE_VALUE;
-		
 		////////////////////////// Removal Starts
 		
-		for(RunIdentTbl runIdentTbl1 : runIdentTbls) {
-			runIdentTbl = runIdentTbl1;
-			
-			runIdentTbl.setPercent(percentageValue);
-			
-			getRunIdentTblHome().attachDirty(runIdentTbl);
-			
-			runIdentTbl = getRunIdentTblHome().findById(runIdentTbl.getId());
-			
-			// Start doing removals
-			RequestResponseTbl dummyRequestResponseTbl = new RequestResponseTbl();
-			
-			dummyRequestResponseTbl.setRunIdentTbl(runIdentTbl);
-			
-			// Get all parsed pages
-			List<RequestResponseTbl> requestResponseTbls = getRequestResponseTblHome().findByRunId(runIdentTbl.getId());
-			
-			// Then apply bout-force algorithm
-			for (Iterator<RequestResponseTbl> iterator = requestResponseTbls.iterator(); iterator.hasNext();) {
-				
-				RequestResponseTbl requestResponseTbl = iterator.next();
-				
-				inner: for (RequestResponseTbl innerRequestResponseTbl : requestResponseTbls) {
-					
-					if (Boolean.FALSE.equals(requestResponseTbl.getId().equals(innerRequestResponseTbl.getId()))
-							&& requestResponseTbl.getAuthenticated() != null && innerRequestResponseTbl.getAuthenticated() != null
-							&& requestResponseTbl.getAuthenticated() - innerRequestResponseTbl.getAuthenticated() == 0) { // Both should have same authenticated value
-	
-						/*Integer distance = CrawlUtil.levenshteinDistance(requestResponseTbl.getResponseBody(), innerRequestResponseTbl.getResponseBody());
-	
-						Double percentage = 100 - (((double) distance)
-								/ (Math.max(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length()))) * 100;*/
-						
-						if(requestResponseTbl.getToPageTitle().equalsIgnoreCase(innerRequestResponseTbl.getToPageTitle()) || 
-								requestResponseTbl.getToPageUrl().equalsIgnoreCase(innerRequestResponseTbl.getToPageUrl())) {
-						
-							Double percentage = 100 - (( (double)Math.max(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length())
-									- (double)Math.min(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length()))
-									/ ((requestResponseTbl.getResponseBody().length() + innerRequestResponseTbl.getResponseBody().length()) / 2)) * 100;
-		
-							if (percentage != null && percentage.intValue() > percentageValue) {
-		
-								// Remove from database
-								getRequestResponseTblHome().delete(requestResponseTbl);
-								iterator.remove();
-								break inner;
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		runIdentTbl.setCleansed(Boolean.FALSE.equals(Boolean.TRUE));
-		
-		getRunIdentTblHome().attachDirty(runIdentTbl);
+//		Integer percentageValue = Constants.PERCENTAGE_VALUE;
+//		
+//		for(RunIdentTbl runIdentTbl1 : runIdentTbls) {
+//			runIdentTbl = runIdentTbl1;
+//			
+//			runIdentTbl.setPercent(percentageValue);
+//			
+//			getRunIdentTblHome().attachDirty(runIdentTbl);
+//			
+//			runIdentTbl = getRunIdentTblHome().findById(runIdentTbl.getId());
+//			
+//			// Start doing removals
+//			RequestResponseTbl dummyRequestResponseTbl = new RequestResponseTbl();
+//			
+//			dummyRequestResponseTbl.setRunIdentTbl(runIdentTbl);
+//			
+//			// Get all parsed pages
+//			List<RequestResponseTbl> requestResponseTbls = getRequestResponseTblHome().findByRunId(runIdentTbl.getId());
+//			
+//			// Then apply bout-force algorithm
+//			for (Iterator<RequestResponseTbl> iterator = requestResponseTbls.iterator(); iterator.hasNext();) {
+//				
+//				RequestResponseTbl requestResponseTbl = iterator.next();
+//				
+//				inner: for (RequestResponseTbl innerRequestResponseTbl : requestResponseTbls) {
+//					
+//					if (Boolean.FALSE.equals(requestResponseTbl.getId().equals(innerRequestResponseTbl.getId()))
+//							&& requestResponseTbl.getAuthenticated() != null && innerRequestResponseTbl.getAuthenticated() != null
+//							&& requestResponseTbl.getAuthenticated() - innerRequestResponseTbl.getAuthenticated() == 0) { // Both should have same authenticated value
+//	
+//						/*Integer distance = CrawlUtil.levenshteinDistance(requestResponseTbl.getResponseBody(), innerRequestResponseTbl.getResponseBody());
+//	
+//						Double percentage = 100 - (((double) distance)
+//								/ (Math.max(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length()))) * 100;*/
+//						
+//						if(requestResponseTbl.getToPageTitle().equalsIgnoreCase(innerRequestResponseTbl.getToPageTitle()) || 
+//								requestResponseTbl.getToPageUrl().equalsIgnoreCase(innerRequestResponseTbl.getToPageUrl())) {
+//						
+//							Double percentage = 100 - (( (double)Math.max(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length())
+//									- (double)Math.min(requestResponseTbl.getResponseBody().length(), innerRequestResponseTbl.getResponseBody().length()))
+//									/ ((requestResponseTbl.getResponseBody().length() + innerRequestResponseTbl.getResponseBody().length()) / 2)) * 100;
+//		
+//							if (percentage != null && percentage.intValue() > percentageValue) {
+//		
+//								// Remove from database
+//								getRequestResponseTblHome().delete(requestResponseTbl);
+//								iterator.remove();
+//								break inner;
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+//		
+//		runIdentTbl.setCleansed(Boolean.FALSE.equals(Boolean.TRUE));
+//		
+//		getRunIdentTblHome().attachDirty(runIdentTbl);
 		
 		///////////////////////////// Removal Ends
 		
@@ -202,7 +202,7 @@ public class CorrelationController extends AbstractController {
 								}
 							}
 						} catch (Exception e) {
-							
+							System.err.println("Error : " + key);
 						}
 					}
 					
@@ -287,6 +287,7 @@ public class CorrelationController extends AbstractController {
 				
 				filteredHeaderCorrelations.put(headerCorrelation.getKey(), headerCorrelationTblTemp.getVariable());
 				
+				// TODO: Check filteredResponseHeaderCorrelations use w.r.t. previous iterations
 				if(responseHeaderCorrelations.containsKey(headerCorrelationTblTemp.getFoundHeaderName())) {
 					filteredResponseHeaderCorrelations.put(headerCorrelationTblTemp.getFoundHeaderName(), headerCorrelationTblTemp.getVariable());
 				}
@@ -307,19 +308,30 @@ public class CorrelationController extends AbstractController {
 					
 					List<Node> regexExtractors = new ArrayList<>();
 					
-					if((requestResponseTblTemp.getAuthenticated() == 1)) {
-						
-						Map<String, String> tempResponseHeaders = CorrelationUtil.extractHeaders(requestResponseTblTemp.getResponseHeader(), DataUtil.getIgnoreHeaderKeys());
-						Map<String, String> finalResponseHeaders = new HashMap<>();
-						
-						for(Map.Entry<String, String> responseHeader : filteredResponseHeaderCorrelations.entrySet()) {
-							if(tempResponseHeaders.containsKey(responseHeader.getKey())) {
-								finalResponseHeaders.put(responseHeader.getKey(), responseHeader.getValue());
-							}
+//					Map<String, String> tempResponseHeaders = CorrelationUtil.extractHeaders(requestResponseTblTemp.getResponseHeader(), DataUtil.getIgnoreHeaderKeys());
+//					Map<String, String> finalResponseHeaders = new HashMap<>();
+//					
+//					for(Map.Entry<String, String> responseHeader : filteredResponseHeaderCorrelations.entrySet()) {
+//						if(tempResponseHeaders.containsKey(responseHeader.getKey())) {
+//							finalResponseHeaders.put(responseHeader.getKey(), responseHeader.getValue());
+//						}
+//					}
+//					
+//					regexExtractors.addAll(XmlParser.createRegexExtractors(finalResponseHeaders, Boolean.TRUE));
+					
+					Map<String, String> tempRequestHeaders = CorrelationUtil.extractHeaders(requestResponseTblTemp.getRequestHeader(), DataUtil.getIgnoreHeaderKeys());
+					Map<String, String> finalRequestHeaders = new HashMap<>();
+					
+					for(Map.Entry<String, String> requestHeader : filteredHeaderCorrelations.entrySet()) {
+						if(tempRequestHeaders.containsKey(requestHeader.getKey())) {
+							finalRequestHeaders.put(requestHeader.getKey(), requestHeader.getValue());
 						}
-						
-						regexExtractors.addAll(XmlParser.createRegexExtractors(finalResponseHeaders, Boolean.TRUE));
-						
+					}
+					
+					regexExtractors.addAll(XmlParser.createRegexExtractors(finalRequestHeaders, Boolean.TRUE));
+					
+					if((requestResponseTblTemp.getAuthenticated() == 1)) {
+							
 						// update jmx value with header Correlation values
 						/*jmeterTransControllerTbl.setTransContSec(XmlParser.parseRequestHeaderXmlAndUpdateValues(jmeterTransControllerTbl.getTransContSec(), 
 								(Util.isNotNullAndEmpty(requestResponseTblTemp.getRequestHeader()) && Util.isNullOrEmpty(requestResponseTblTemp.getRequestParameters())) 
@@ -379,6 +391,10 @@ public class CorrelationController extends AbstractController {
 				}
 			}
 		}
+		
+		runIdentTbl.setCleansed(Boolean.FALSE.equals(Boolean.TRUE));
+		
+		getRunIdentTblHome().attachDirty(runIdentTbl);
 		
 		correlationBean.setCorrelationStatus("Completed");
 	}
