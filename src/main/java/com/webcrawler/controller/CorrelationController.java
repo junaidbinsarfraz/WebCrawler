@@ -310,27 +310,27 @@ public class CorrelationController extends AbstractController {
 					
 					List<Node> regexExtractors = new ArrayList<>();
 					
-//					Map<String, String> tempResponseHeaders = CorrelationUtil.extractHeaders(requestResponseTblTemp.getResponseHeader(), DataUtil.getIgnoreHeaderKeys());
-//					Map<String, String> finalResponseHeaders = new HashMap<>();
-//					
-//					for(Map.Entry<String, String> responseHeader : filteredResponseHeaderCorrelations.entrySet()) {
-//						if(tempResponseHeaders.containsKey(responseHeader.getKey())) {
-//							finalResponseHeaders.put(responseHeader.getKey(), responseHeader.getValue());
-//						}
-//					}
-//					
-//					regexExtractors.addAll(XmlParser.createRegexExtractors(finalResponseHeaders, Boolean.TRUE));
+					Map<String, String> tempResponseHeaders = CorrelationUtil.extractHeaders(requestResponseTblTemp.getResponseHeader(), DataUtil.getIgnoreHeaderKeys());
+					Map<String, String> finalResponseHeaders = new HashMap<>();
 					
-					Map<String, String> tempRequestHeaders = CorrelationUtil.extractHeaders(requestResponseTblTemp.getRequestHeader(), DataUtil.getIgnoreHeaderKeys());
-					Map<String, String> finalRequestHeaders = new HashMap<>();
-					
-					for(Map.Entry<String, String> requestHeader : filteredHeaderCorrelations.entrySet()) {
-						if(tempRequestHeaders.containsKey(requestHeader.getKey())) {
-							finalRequestHeaders.put(requestHeader.getKey(), requestHeader.getValue());
+					for(Map.Entry<String, String> responseHeader : filteredResponseHeaderCorrelations.entrySet()) {
+						if(tempResponseHeaders.containsKey(responseHeader.getKey())) {
+							finalResponseHeaders.put(responseHeader.getKey(), responseHeader.getValue());
 						}
 					}
 					
-					regexExtractors.addAll(XmlParser.createRegexExtractors(finalRequestHeaders, Boolean.TRUE));
+					regexExtractors.addAll(XmlParser.createRegexExtractors(finalResponseHeaders, Boolean.TRUE));
+					
+//					Map<String, String> tempRequestHeaders = CorrelationUtil.extractHeaders(requestResponseTblTemp.getRequestHeader(), DataUtil.getIgnoreHeaderKeys());
+//					Map<String, String> finalRequestHeaders = new HashMap<>();
+//					
+//					for(Map.Entry<String, String> requestHeader : filteredHeaderCorrelations.entrySet()) {
+//						if(tempRequestHeaders.containsKey(requestHeader.getKey())) {
+//							finalRequestHeaders.put(requestHeader.getKey(), requestHeader.getValue());
+//						}
+//					}
+//					
+//					regexExtractors.addAll(XmlParser.createRegexExtractors(finalRequestHeaders, Boolean.TRUE));
 					
 					if((requestResponseTblTemp.getAuthenticated() == 1)) {
 							
