@@ -21,6 +21,7 @@ public interface Constants {
 	String CORR_REGEX = "=(.+?),";
 	String REQUEST_PARAM_CORR_REGEX = "&quot;(.+?)&quot;";
 	String CORR_REGEX_EXTENDED_ARG_VALUE_INDICATOR = "value=";
+	String CORR_REGEX_EXTENDED_ARG_NAME_INDICATOR = "name=";
 	
 	String UNCATEGORIZE_TO_PAGE_CATEGORY_TEXT = "Uncategorized";
 	

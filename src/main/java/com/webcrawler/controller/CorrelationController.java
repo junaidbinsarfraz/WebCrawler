@@ -179,6 +179,8 @@ public class CorrelationController extends AbstractController {
 							
 							if(Util.isNotNullAndEmpty(hiddenInput)) {
 								
+								responseBody = responseBody.replaceAll("\'", "\"");
+								
 								Integer hiddenInputIndex = responseBody.indexOf(hiddenInput);
 								
 								while(hiddenInputIndex == -1) {
